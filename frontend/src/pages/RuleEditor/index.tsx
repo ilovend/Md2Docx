@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Plus, ChevronRight, ChevronDown, Code2, FileText, Loader2 } from 'lucide-react';
+import Editor from '@monaco-editor/react';
 import { presetApi, type PresetDetail } from '@/services/api';
 import { useRuleStore } from '@/stores';
 
@@ -267,57 +268,48 @@ export default function RuleEditor() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-hidden">
             {isLoading && (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
               </div>
             )}
             {!isLoading && activeTab === 'editor' && (
-              <div className="h-full font-mono text-sm">
-                <pre className="p-6 leading-relaxed text-gray-300">
-                  {yamlContent.split('\n').map((line, i) => (
-                    <div key={i} className="flex">
-                      <span className="inline-block w-12 pr-4 text-right text-gray-600 select-none">
-                        {i + 1}
-                      </span>
-                      <span
-                        className={
-                          line.startsWith('#')
-                            ? 'text-gray-500 italic'
-                            : line.includes(':')
-                              ? ''
-                              : ''
-                        }
-                      >
-                        {line.split(':').map((part, idx, arr) => {
-                          if (idx === 0 && arr.length > 1) {
-                            return (
-                              <span key={idx} className="text-blue-400">
-                                {part}:
-                              </span>
-                            );
-                          }
-                          return (
-                            <span
-                              key={idx}
-                              className={
-                                part.trim().startsWith('"') ? 'text-green-400' : 'text-orange-300'
-                              }
-                            >
-                              {part}
-                            </span>
-                          );
-                        })}
-                      </span>
-                    </div>
-                  ))}
-                </pre>
+              <Editor
+                height="100%"
+                defaultLanguage="yaml"
+                theme="vs-dark"
+                value={yamlContent}
+                onChange={(value) => setYamlContent(value || '')}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: 'on',
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                  tabSize: 2,
+                  renderWhitespace: 'selection',
+                  fontFamily: 'Consolas, Monaco, monospace',
+                }}
+              />
+            )}
+            {!isLoading && activeTab === 'properties' && selectedRule && (
+              <div className="p-6">
+                <h3 className="text-lg font-medium text-white mb-4">
+                  {selectedRule.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                </h3>
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-400">
+                    {t('rules.noSchemaErrors')}
+                  </div>
+                </div>
               </div>
             )}
-
-            {activeTab === 'properties' && (
-              <div className="p-6 text-center text-gray-400">属性表单界面将在此显示...</div>
+            {!isLoading && activeTab === 'properties' && !selectedRule && (
+              <div className="p-6 text-center text-gray-400">
+                请选择一个规则查看属性
+              </div>
             )}
           </div>
 
