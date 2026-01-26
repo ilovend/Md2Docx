@@ -5,6 +5,7 @@ from fastapi import UploadFile
 from backend.core.config import settings
 from backend.engine.parser import RuleParser
 from backend.core.markdown_converter import convert_markdown_to_docx
+from backend.core.latex_converter import convert_latex_in_document
 from docx import Document
 from docx.shared import Pt, Twips, RGBColor
 from docx.oxml.ns import qn, nsmap
@@ -98,6 +99,11 @@ class DocumentProcessor:
             if image_rule and image_rule.get('enabled'):
                 params = image_rule.get('parameters', {})
                 fixes.extend(self._apply_image_center(doc, params))
+            
+            # LaTeX to OMML Rule
+            latex_rule = rules.get('latex_to_omml', {})
+            if latex_rule and latex_rule.get('enabled'):
+                fixes.extend(convert_latex_in_document(doc))
 
         # Save Output
         output_filename = f"{document_id}_fixed.docx"

@@ -57,6 +57,8 @@ presets:
           h3_size: 14
       image_center:
         enabled: true
+      latex_to_omml:
+        enabled: true
   bid:
     description: 专业竞标文档格式
     name: 竞标书标准
