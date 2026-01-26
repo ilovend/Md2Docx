@@ -18,6 +18,8 @@
   },
   "nav": {
     "workspace": "My Files",
+    "comparison": "Comparison",
+    "batch": "Batch Processing",
     "rules": "Rule Engine",
     "history": "Task History",
     "settings": "Settings"

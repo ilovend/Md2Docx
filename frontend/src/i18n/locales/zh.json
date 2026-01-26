@@ -18,6 +18,8 @@
   },
   "nav": {
     "workspace": "我的文件",
+    "comparison": "对比预览",
+    "batch": "批量处理",
     "rules": "规则引擎",
     "history": "任务历史",
     "settings": "设置"

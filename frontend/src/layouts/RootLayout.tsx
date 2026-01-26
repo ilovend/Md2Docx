@@ -1,10 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, Settings, History, Wrench } from 'lucide-react';
+import { FolderOpen, Settings, History, Wrench, GitCompare, Layers } from 'lucide-react';
 import { useAppStore } from '@/stores';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const navItemsConfig = [
   { path: '/workspace', labelKey: 'nav.workspace', icon: FolderOpen, view: 'workspace' as const },
+  { path: '/comparison', labelKey: 'nav.comparison', icon: GitCompare, view: 'comparison' as const },
+  { path: '/batch', labelKey: 'nav.batch', icon: Layers, view: 'batch' as const },
   { path: '/rules', labelKey: 'nav.rules', icon: Wrench, view: 'rules' as const },
   { path: '/history', labelKey: 'nav.history', icon: History, view: 'history' as const },
   { path: '/settings', labelKey: 'nav.settings', icon: Settings, view: 'settings' as const },
@@ -54,15 +57,20 @@ export default function RootLayout() {
           })}
         </nav>
 
+        {/* Language Switcher */}
+        <div className="border-t border-[#2a2d3e] p-4">
+          <LanguageSwitcher />
+        </div>
+
         {/* User Profile */}
         <div className="border-t border-[#2a2d3e] p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm">
               王
             </div>
-            <div className="flex-1">
-              <div className="text-sm">王明</div>
-              <div className="text-xs text-gray-400">专业版</div>
+            <div>
+              <div className="text-sm text-white">王小明</div>
+              <div className="text-xs text-gray-400">个人版</div>
             </div>
           </div>
         </div>
