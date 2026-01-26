@@ -137,6 +137,45 @@ export const healthApi = {
 };
 
 // Rules Import/Export API
+// Batch Processing Types
+export interface BatchItem {
+    document_id: string;
+    preset?: string;
+}
+
+export interface BatchItemResult {
+    document_id: string;
+    status: string;
+    total_fixes: number;
+    error?: string;
+}
+
+export interface BatchResponse {
+    batch_id: string;
+    status: string;
+    total: number;
+    completed: number;
+    failed: number;
+    results: BatchItemResult[];
+}
+
+// Batch Processing API
+export const batchApi = {
+    start: async (items: BatchItem[]): Promise<BatchResponse> => {
+        const response = await axios.post<BatchResponse>(`${API_BASE}/batch/start`, { items });
+        return response.data;
+    },
+
+    getStatus: async (batchId: string): Promise<BatchResponse> => {
+        const response = await axios.get<BatchResponse>(`${API_BASE}/batch/${batchId}`);
+        return response.data;
+    },
+
+    getDownloadUrl: (batchId: string): string => {
+        return `${API_BASE}/batch/${batchId}/download`;
+    },
+};
+
 export const rulesApi = {
     exportAll: (): string => {
         return `${API_BASE}/rules/export`;

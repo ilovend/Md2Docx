@@ -189,3 +189,118 @@ async def import_rules(request: ImportRulesRequest):
         }
     except yaml.YAMLError as e:
         raise HTTPException(400, f"YAML parse error: {str(e)}")
+
+
+# ============== Batch Processing API ==============
+
+class BatchItem(BaseModel):
+    document_id: str
+    preset: str = "academic"
+
+class BatchRequest(BaseModel):
+    items: List[BatchItem]
+
+class BatchItemResult(BaseModel):
+    document_id: str
+    status: str
+    total_fixes: int = 0
+    error: Optional[str] = None
+
+class BatchResponse(BaseModel):
+    batch_id: str
+    status: str
+    total: int
+    completed: int
+    failed: int
+    results: List[BatchItemResult]
+
+# In-memory batch job storage (use Redis/DB in production)
+batch_jobs = {}
+
+@router.post("/batch/start", response_model=BatchResponse)
+async def start_batch_processing(request: BatchRequest):
+    """Start a new batch processing job."""
+    import uuid
+    import time
+    
+    batch_id = f"batch_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+    
+    results = []
+    completed = 0
+    failed = 0
+    
+    for item in request.items:
+        try:
+            result = processor.process(item.document_id, item.preset)
+            results.append(BatchItemResult(
+                document_id=item.document_id,
+                status="completed",
+                total_fixes=result.get("total_fixes", 0)
+            ))
+            completed += 1
+        except FileNotFoundError:
+            results.append(BatchItemResult(
+                document_id=item.document_id,
+                status="error",
+                error="Document not found"
+            ))
+            failed += 1
+        except Exception as e:
+            results.append(BatchItemResult(
+                document_id=item.document_id,
+                status="error",
+                error=str(e)
+            ))
+            failed += 1
+    
+    batch_result = BatchResponse(
+        batch_id=batch_id,
+        status="completed" if failed == 0 else "partial",
+        total=len(request.items),
+        completed=completed,
+        failed=failed,
+        results=results
+    )
+    
+    # Store for later retrieval
+    batch_jobs[batch_id] = batch_result.model_dump()
+    
+    return batch_result
+
+@router.get("/batch/{batch_id}", response_model=BatchResponse)
+async def get_batch_status(batch_id: str):
+    """Get the status of a batch processing job."""
+    if batch_id not in batch_jobs:
+        raise HTTPException(404, "Batch job not found")
+    
+    return batch_jobs[batch_id]
+
+@router.get("/batch/{batch_id}/download")
+async def download_batch_results(batch_id: str):
+    """Download all processed documents from a batch as a zip file."""
+    import zipfile
+    import io
+    from fastapi.responses import StreamingResponse
+    
+    if batch_id not in batch_jobs:
+        raise HTTPException(404, "Batch job not found")
+    
+    job = batch_jobs[batch_id]
+    
+    # Create zip file in memory
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for result in job["results"]:
+            if result["status"] == "completed":
+                doc_id = result["document_id"]
+                output_path = settings.OUTPUT_DIR / f"{doc_id}_fixed.docx"
+                if output_path.exists():
+                    zip_file.write(output_path, f"{doc_id}_fixed.docx")
+    
+    zip_buffer.seek(0)
+    
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename={batch_id}.zip"}
+    )
