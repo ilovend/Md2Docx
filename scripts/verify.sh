@@ -165,8 +165,8 @@ else
 fi
 
 # 检查前端格式 (如果安装了 prettier)
-if command -v npx &> /dev/null && [ -f "Access Project Link/package.json" ]; then
-    cd "Access Project Link"
+if command -v npx &> /dev/null && [ -f "frontend/package.json" ]; then
+    cd "frontend"
     if npx prettier --check "src/**/*.{ts,tsx}" 2>/dev/null; then
         echo -e "  ${GREEN}✓${NC} 前端代码格式正确"
     else

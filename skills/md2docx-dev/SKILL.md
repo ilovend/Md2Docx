@@ -33,7 +33,7 @@ description: "Md2Docx开发技能：包含项目开发环境配置、前后端�
 
 **前端环境**：
 ```bash
-cd "Access Project Link"
+cd frontend
 npm install
 npm run dev
 # 访问 http://localhost:5173
@@ -62,9 +62,8 @@ python main.py
 
 ```
 md2docx/
-├── Access Project Link/     # 前端React原型
-│   ├── src/app/components/ # 核心组件
-│   │   ├── Workspace.tsx   # 主工作台
+├── frontend/                # 前端项目 (Vite + React)
+│   ├── src/components/ui/   # UI组件库主工作台
 │   │   ├── RuleEditor.tsx  # 规则编辑
 │   │   ├── ComparisonPreview.tsx # 对比预览
 │   │   └── BatchProcessing.tsx   # 批量处理
@@ -93,7 +92,7 @@ black .
 ruff check .
 
 # TypeScript/React
-cd "Access Project Link"
+cd frontend
 npx prettier --write .
 npx eslint .
 ```

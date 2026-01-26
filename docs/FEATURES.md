@@ -31,7 +31,7 @@
 | 后端状态监控 | 📋 | P0 | 显示连接状态和延迟 |
 | 一键修复按钮 | 📋 | P0 | 启动文档处理流程 |
 
-**界面原型**：[Workspace.tsx](file:///e:/ilovendProject/Md2Docx/Access%20Project%20Link/src/app/components/Workspace.tsx)
+**界面原型**：[Workspace.tsx](file:///e:/ilovendProject/Md2Docx/frontend/src/pages/Workspace/index.tsx)
 
 ---
 
@@ -52,7 +52,7 @@
 | 新建规则 | 📋 | P1 | 创建自定义规则 |
 | 删除规则 | 📋 | P2 | 删除自定义规则 |
 
-**界面原型**：[RuleEditor.tsx](file:///e:/ilovendProject/Md2Docx/Access%20Project%20Link/src/app/components/RuleEditor.tsx)
+**界面原型**：[RuleEditor.tsx](file:///e:/ilovendProject/Md2Docx/frontend/src/pages/RuleEditor/index.tsx)
 
 ---
 
@@ -72,7 +72,7 @@
 | 确认并下载 | 📋 | P0 | 确认修复并下载文档 |
 | 文件重命名 | 📋 | P2 | 自定义输出文件名 |
 
-**界面原型**：[ComparisonPreview.tsx](file:///e:/ilovendProject/Md2Docx/Access%20Project%20Link/src/app/components/ComparisonPreview.tsx)
+**界面原型**：[ComparisonPreview.tsx](file:///e:/ilovendProject/Md2Docx/frontend/src/pages/ComparisonPreview/index.tsx)
 
 ---
 
@@ -94,7 +94,7 @@
 | 优先级调整 | 📋 | P2 | 拖拽调整处理顺序 |
 | 并行控制 | 📋 | P2 | 设置并行处理数量 |
 
-**界面原型**：[BatchProcessing.tsx](file:///e:/ilovendProject/Md2Docx/Access%20Project%20Link/src/app/components/BatchProcessing.tsx)
+**界面原型**：[BatchProcessing.tsx](file:///e:/ilovendProject/Md2Docx/frontend/src/pages/BatchProcessing/index.tsx)
 
 ---
 

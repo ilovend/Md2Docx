@@ -1,0 +1,135 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "download": "下载",
+    "export": "导出",
+    "import": "导入",
+    "search": "搜索",
+    "filter": "筛选",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "pending": "等待中",
+    "processing": "处理中",
+    "completed": "已完成",
+    "failed": "失败"
+  },
+  "nav": {
+    "workspace": "我的文件",
+    "rules": "规则引擎",
+    "history": "任务历史",
+    "settings": "设置"
+  },
+  "workspace": {
+    "title": "修复工作台",
+    "subtitle": "上传您的 Markdown 或 Word 文档以修复格式问题。",
+    "dropzone": {
+      "title": "拖放文件到这里",
+      "description": "支持 .md、.docx 和 .txt 文件。可拖放文件夹递归扫描。",
+      "selectFiles": "选择文件"
+    },
+    "config": {
+      "title": "处理配置",
+      "preset": "格式预设",
+      "strictMode": "严格模式",
+      "verboseLogs": "详细日志"
+    },
+    "startRepair": "开始修复",
+    "processing": "处理中...",
+    "filesSelected": "已选择 {{count}} 个文件",
+    "backend": {
+      "connected": "已连接",
+      "disconnected": "未连接",
+      "latency": "延迟"
+    }
+  },
+  "history": {
+    "title": "任务历史",
+    "subtitle": "查看和管理已处理的文档记录",
+    "searchPlaceholder": "搜索文档...",
+    "dateRange": "日期范围",
+    "totalRecords": "共 {{count}} 条记录",
+    "table": {
+      "fileName": "文件名称",
+      "processedTime": "处理时间",
+      "fileSize": "文件大小",
+      "preset": "使用预设",
+      "fixes": "修复数量",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "noRecords": "暂无历史记录",
+    "noRecordsHint": "处理文档后，记录将显示在这里",
+    "retention": "历史记录保留 30 天",
+    "stats": {
+      "completed": "已完成",
+      "failed": "失败"
+    }
+  },
+  "comparison": {
+    "title": "对比预览",
+    "original": "原始 Markdown 源文件",
+    "repaired": "修复后的 Word 预览",
+    "viewMode": "视图模式",
+    "sideBySide": "并排对比",
+    "overlay": "叠加",
+    "exportDocx": "导出为 .docx",
+    "fixSummary": "修复摘要",
+    "viewFullLog": "查看完整日志",
+    "ready": "对比就绪",
+    "waiting": "等待数据",
+    "rulesApplied": "已应用 {{count}} 条规则",
+    "generatedIn": "生成耗时 {{ms}}ms"
+  },
+  "rules": {
+    "title": "规则编辑器",
+    "addNewRule": "添加新规则",
+    "searchRules": "搜索规则...",
+    "activeRules": "{{active}} 条激活规则，{{disabled}} 条禁用",
+    "editor": "编辑器",
+    "properties": "属性表单",
+    "syntaxValid": "语法有效",
+    "noSchemaErrors": "YAML 验证通过，未检测到架构错误。",
+    "saveChanges": "保存更改",
+    "testWorkbench": "测试工作台",
+    "run": "运行",
+    "input": "输入（Markdown）",
+    "outputPreview": "输出预览（Word 模拟）",
+    "engineReady": "引擎就绪"
+  },
+  "batch": {
+    "title": "批量处理",
+    "subtitle": "配置规则并一次性修复多个文档。",
+    "clearAll": "清空全部",
+    "addFiles": "添加文件",
+    "globalSettings": "全局设置",
+    "applyPresetToAll": "应用预设到全部",
+    "apply": "应用",
+    "table": {
+      "fileName": "文件名",
+      "size": "大小",
+      "rulePreset": "规则预设",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "processing": "正在处理 {{current}}/{{total}} 个文件...",
+    "autoExport": "文件将在完成后自动导出到默认文件夹。",
+    "pause": "暂停",
+    "startBatch": "开始批量修复",
+    "exportSettings": {
+      "title": "导出设置",
+      "namingTemplate": "命名模板",
+      "namingHint": "使用 {date}、{preset}、{original_name} 占位符。",
+      "outputDestination": "输出目录",
+      "overwriteFiles": "覆盖文件",
+      "overwriteHint": "替换已存在的文件",
+      "preview": "预览"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "comingSoon": "设置页面即将推出..."
+  }
+}

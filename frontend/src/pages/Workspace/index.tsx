@@ -1,0 +1,282 @@
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Upload, Wrench, Loader2 } from 'lucide-react';
+import { useFileStore, useRuleStore, useAppStore } from '@/stores';
+import { documentApi, healthApi } from '@/services/api';
+
+export default function Workspace() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { selectedFiles, addFiles } = useFileStore();
+  const { selectedPresetId, selectPreset, presets, loadPresets, isLoadingPresets } = useRuleStore();
+  const { backendConnected, backendLatency } = useAppStore();
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [strictMode, setStrictMode] = useState(false);
+  const [verboseLogs, setVerboseLogs] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processResult, setProcessResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { setBackendStatus } = useAppStore();
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+
+      // 只处理文件，不处理目录（简化）
+      if (e.dataTransfer.files) {
+        const files = Array.from(e.dataTransfer.files);
+        addFiles(files);
+      }
+    },
+    [addFiles]
+  );
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        const files = Array.from(e.target.files);
+        addFiles(files);
+      }
+    },
+    [addFiles]
+  );
+
+  const handleStartRepair = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsProcessing(true);
+    setError(null);
+    setProcessResult(null);
+
+    try {
+      // 上传第一个文件（简化演示）
+      const file = selectedFiles[0];
+      console.log('Uploading file:', file.name);
+      
+      const uploadRes = await documentApi.upload(file);
+      console.log('Upload response:', uploadRes);
+
+      // 处理文档
+      console.log('Processing with preset:', selectedPresetId);
+      const processRes = await documentApi.process({
+        document_id: uploadRes.document_id,
+        preset: selectedPresetId,
+      });
+      console.log('Process response:', processRes);
+
+      setProcessResult(processRes);
+      
+      // 如果成功，跳转到对比预览
+      if (processRes.status === 'completed') {
+        // 存储结果供对比页面使用
+        sessionStorage.setItem('processResult', JSON.stringify(processRes));
+        sessionStorage.setItem('documentId', uploadRes.document_id);
+        navigate('/comparison');
+      }
+    } catch (err: any) {
+      console.error('Processing error:', err);
+      setError(err.message || '处理失败，请检查后端服务是否运行');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  useEffect(() => {
+    // 检查后端健康状态
+    const checkBackend = async () => {
+      try {
+        const start = Date.now();
+        await healthApi.check();
+        const latency = Date.now() - start;
+        setBackendStatus(true, latency);
+      } catch (err) {
+        console.error('Backend health check failed:', err);
+        setBackendStatus(false, 0);
+      }
+    };
+
+    checkBackend();
+    // 每 10 秒检查一次
+    const interval = setInterval(checkBackend, 10000);
+    return () => clearInterval(interval);
+  }, [setBackendStatus]);
+
+  // 加载预设列表
+  useEffect(() => {
+    if (backendConnected && presets.length === 0) {
+      loadPresets();
+    }
+  }, [backendConnected, presets.length, loadPresets]);
+
+  return (
+    <div className="flex flex-col h-full gap-6 p-6">
+      {/* Header */}
+      <header className="border-b border-[#2a2d3e] px-8 py-6">
+        <h1 className="mb-1 text-2xl text-white">{t('workspace.title')}</h1>
+        <p className="text-sm text-gray-400">{t('workspace.subtitle')}</p>
+      </header>
+
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-8">
+        {/* Drop Zone */}
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`mb-8 rounded-lg border-2 border-dashed p-16 transition-colors ${isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-gray-600 bg-[#1f2333]'
+            }`}
+        >
+          <div className="text-center">
+            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20">
+              <Upload className="h-8 w-8 text-blue-400" />
+            </div>
+            <h3 className="mb-2 text-lg text-white">{t('workspace.dropzone.title')}</h3>
+            <p className="mb-6 text-sm text-gray-400">
+              {t('workspace.dropzone.description')}
+            </p>
+            <label className="inline-block">
+              <input
+                type="file"
+                multiple
+                accept=".md,.docx,.txt"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <span className="inline-block cursor-pointer rounded-lg bg-blue-500 px-6 py-2.5 text-white transition-colors hover:bg-blue-600">
+                {t('workspace.dropzone.selectFiles')}
+              </span>
+            </label>
+            {selectedFiles.length > 0 && (
+              <div className="mt-4 text-sm text-green-400">
+                {t('workspace.filesSelected', { count: selectedFiles.length })}
+                <div className="mt-2 text-xs text-gray-400">
+                  {selectedFiles.map((f, i) => (
+                    <div key={i}>{f.name} ({(f.size / 1024).toFixed(1)} KB)</div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {error && (
+              <div className="mt-4 text-sm text-red-400">
+                错误: {error}
+              </div>
+            )}
+            {processResult && (
+              <div className="mt-4 text-sm text-blue-400">
+                处理完成: {processResult.total_fixes} 个修复，耗时 {processResult.duration_ms}ms
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Process Configuration */}
+        <div className="rounded-lg border border-[#2a2d3e] bg-[#1f2333] p-6">
+          <div className="mb-6 flex items-center gap-2">
+            <Wrench className="h-5 w-5 text-blue-400" />
+            <h3 className="text-white">{t('workspace.config.title')}</h3>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8">
+            {/* Formatting Preset */}
+            <div>
+              <label className="mb-2 block text-sm text-gray-400">{t('workspace.config.preset')}</label>
+              <select
+                value={selectedPresetId}
+                onChange={(e) => selectPreset(e.target.value)}
+                className="w-full rounded-lg border border-[#2a2d3e] bg-[#151822] px-4 py-2.5 text-white focus:border-blue-500 focus:outline-none"
+              >
+                {presets.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Options */}
+            <div>
+              <label className="mb-3 block text-sm text-gray-400">选项</label>
+              <div className="space-y-3">
+                <label className="flex cursor-pointer items-center gap-3">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={strictMode}
+                      onChange={(e) => setStrictMode(e.target.checked)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                    <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                  </div>
+                  <span className="text-sm text-gray-300">{t('workspace.config.strictMode')}</span>
+                </label>
+
+                <label className="flex cursor-pointer items-center gap-3">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={verboseLogs}
+                      onChange={(e) => setVerboseLogs(e.target.checked)}
+                      className="peer sr-only"
+                    />
+                    <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                    <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                  </div>
+                  <span className="text-sm text-gray-300">{t('workspace.config.verboseLogs')}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Start Button */}
+        <div className="mt-8 flex justify-end">
+          <button
+            onClick={handleStartRepair}
+            disabled={selectedFiles.length === 0 || isProcessing || !backendConnected}
+            className="flex items-center gap-2 rounded-lg bg-blue-500 px-8 py-3 text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-600"
+          >
+            {isProcessing ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Wrench className="h-5 w-5" />
+            )}
+            {isProcessing ? t('workspace.processing') : t('workspace.startRepair')}
+          </button>
+        </div>
+      </div>
+
+      {/* Status Bar */}
+      <footer className="flex items-center justify-between border-t border-[#2a2d3e] px-8 py-3 text-xs">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div
+              className={`h-2 w-2 rounded-full ${backendConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            ></div>
+            <span className="text-gray-400">
+              {t('workspace.backend.connected').split('/')[0]}: {backendConnected ? t('workspace.backend.connected') : t('workspace.backend.disconnected')}
+            </span>
+          </div>
+          <span className="text-gray-400">{t('workspace.backend.latency')}: {backendLatency}ms</span>
+        </div>
+        <div className="flex items-center gap-4 text-gray-400">
+          <span>内存：124MB</span>
+          <span>v1.0.2</span>
+        </div>
+      </footer>
+    </div>
+  );
+}

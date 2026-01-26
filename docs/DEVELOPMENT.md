@@ -47,7 +47,7 @@ cd md2docx
 
 ```bash
 # 进入前端目录
-cd "Access Project Link"
+cd frontend
 
 # 安装依赖
 npm install
@@ -129,7 +129,7 @@ uvicorn main:app --reload --host 127.0.0.1 --port 8000
 
 **终端2 - 前端服务**：
 ```bash
-cd "Access Project Link"
+cd frontend
 npm run dev
 ```
 
@@ -149,7 +149,7 @@ mypy .
 
 **TypeScript/React代码**：
 ```bash
-cd "Access Project Link"
+cd frontend
 
 # 格式化
 npx prettier --write .
@@ -315,7 +315,7 @@ def test_upload_invalid_type():
 ### 5.2 前端测试
 
 ```bash
-cd "Access Project Link"
+cd frontend
 
 # 运行测试（如果配置了vitest）
 npm run test
@@ -331,7 +331,7 @@ npm run test:watch
 ### 6.1 前端构建
 
 ```bash
-cd "Access Project Link"
+cd frontend
 
 # 生产构建
 npm run build
@@ -372,8 +372,13 @@ npm run electron:build
 
 ```
 md2docx/
-├── Access Project Link/     # 前端原型
-│   ├── src/                 # 源代码
+├── frontend/                # Vite + React + TypeScript 前端项目
+│   ├── src/
+│   │   ├── components/      # UI 组件和业务组件
+│   │   ├── pages/           # 页面组件
+│   │   ├── stores/          # Zustand 状态
+│   │   ├── services/        # API 服务
+│   │   └── layouts/         # 布局组件
 │   ├── dist/                # 构建输出
 │   └── package.json
 │
@@ -409,7 +414,7 @@ md2docx/
 
 确保已安装依赖：
 ```bash
-cd "Access Project Link"
+cd frontend
 npm install
 ```
 

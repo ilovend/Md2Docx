@@ -21,7 +21,7 @@
 ## 2. 项目结构
 
 ```
-Access Project Link/
+frontend/
 ├── src/
 │   ├── app/
 │   │   ├── App.tsx                    # 应用入口
@@ -340,7 +340,7 @@ export default {
 ### 启动开发服务器
 
 ```bash
-cd "Access Project Link"
+cd frontend
 npm install
 npm run dev
 ```

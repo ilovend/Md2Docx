@@ -1,0 +1,135 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "download": "Download",
+    "export": "Export",
+    "import": "Import",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "pending": "Pending",
+    "processing": "Processing",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "nav": {
+    "workspace": "My Files",
+    "rules": "Rule Engine",
+    "history": "Task History",
+    "settings": "Settings"
+  },
+  "workspace": {
+    "title": "Repair Workspace",
+    "subtitle": "Upload your Markdown or Word documents to fix formatting issues.",
+    "dropzone": {
+      "title": "Drop files here",
+      "description": "Supports .md, .docx and .txt files. Drag folders for recursive scanning.",
+      "selectFiles": "Select Files"
+    },
+    "config": {
+      "title": "Process Configuration",
+      "preset": "Format Preset",
+      "strictMode": "Strict Mode",
+      "verboseLogs": "Verbose Logs"
+    },
+    "startRepair": "Start Repair",
+    "processing": "Processing...",
+    "filesSelected": "{{count}} files selected",
+    "backend": {
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "latency": "Latency"
+    }
+  },
+  "history": {
+    "title": "Task History",
+    "subtitle": "View and manage processed document records",
+    "searchPlaceholder": "Search documents...",
+    "dateRange": "Date Range",
+    "totalRecords": "{{count}} records",
+    "table": {
+      "fileName": "File Name",
+      "processedTime": "Processed Time",
+      "fileSize": "File Size",
+      "preset": "Preset Used",
+      "fixes": "Fixes",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "noRecords": "No history records",
+    "noRecordsHint": "Records will appear here after processing documents",
+    "retention": "History retained for 30 days",
+    "stats": {
+      "completed": "Completed",
+      "failed": "Failed"
+    }
+  },
+  "comparison": {
+    "title": "Comparison Preview",
+    "original": "Original Markdown Source",
+    "repaired": "Repaired Word Preview",
+    "viewMode": "View Mode",
+    "sideBySide": "Side by Side",
+    "overlay": "Overlay",
+    "exportDocx": "Export as .docx",
+    "fixSummary": "Fix Summary",
+    "viewFullLog": "View Full Log",
+    "ready": "Comparison Ready",
+    "waiting": "Waiting for Data",
+    "rulesApplied": "{{count}} rules applied",
+    "generatedIn": "Generated in {{ms}}ms"
+  },
+  "rules": {
+    "title": "Rule Editor",
+    "addNewRule": "Add New Rule",
+    "searchRules": "Search rules...",
+    "activeRules": "{{active}} active rules, {{disabled}} disabled",
+    "editor": "Editor",
+    "properties": "Properties",
+    "syntaxValid": "Syntax Valid",
+    "noSchemaErrors": "YAML validation passed, no schema errors detected.",
+    "saveChanges": "Save Changes",
+    "testWorkbench": "Test Workbench",
+    "run": "Run",
+    "input": "Input (Markdown)",
+    "outputPreview": "Output Preview (Word Simulation)",
+    "engineReady": "Engine Ready"
+  },
+  "batch": {
+    "title": "Batch Processing",
+    "subtitle": "Configure rules and repair multiple documents at once.",
+    "clearAll": "Clear All",
+    "addFiles": "Add Files",
+    "globalSettings": "Global Settings",
+    "applyPresetToAll": "Apply Preset to All",
+    "apply": "Apply",
+    "table": {
+      "fileName": "File Name",
+      "size": "Size",
+      "rulePreset": "Rule Preset",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "processing": "Processing {{current}} of {{total}} files...",
+    "autoExport": "Files will be automatically exported to your default folder upon completion.",
+    "pause": "Pause",
+    "startBatch": "Start Batch Repair",
+    "exportSettings": {
+      "title": "Export Settings",
+      "namingTemplate": "Naming Template",
+      "namingHint": "Use {date}, {preset}, {original_name} placeholders.",
+      "outputDestination": "Output Destination",
+      "overwriteFiles": "Overwrite Files",
+      "overwriteHint": "Replace existing files",
+      "preview": "Preview"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "comingSoon": "Settings page coming soon..."
+  }
+}

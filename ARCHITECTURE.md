@@ -24,7 +24,7 @@
 ```
 md2docx/
 │
-├── Access Project Link/          # Figma导出的React前端原型
+├── frontend/                     # React 前端应用
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── components/       # 业务组件
