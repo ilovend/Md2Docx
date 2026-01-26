@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.venv/
+.env/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.env
+secrets.toml
+.secrets
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.yarn
+.pnpm-store
+
+# Playwright/Cypress
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache
+
+# Prototype
+"Access Project Link/"

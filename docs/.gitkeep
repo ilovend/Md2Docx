@@ -1,0 +1,4 @@
+# .gitkeep
+This file is intentionally left blank.
+It is used to ensure that the 'docs' directory is tracked by Git, even if it's empty.
+You can remove this file once you add your own documents to this directory.
