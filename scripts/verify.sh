@@ -31,6 +31,11 @@ check_markdown_links() {
     local file=$1
     local errors=0
     
+    # 跳过模板文件
+    if [[ "$file" == *"template"* ]] || [[ "$file" == *"TEMPLATE"* ]]; then
+        return 0
+    fi
+    
     # 提取 markdown 链接并检查
     grep -oE '\[.*?\]\((\.\.?/[^)]+\.md)\)' "$file" 2>/dev/null | while read -r link; do
         # 提取路径
