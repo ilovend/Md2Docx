@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Upload, Wrench, Loader2 } from 'lucide-react';
 import { useFileStore, useRuleStore, useAppStore } from '@/stores';
-import { documentApi, healthApi } from '@/services/api';
+import { documentApi, healthApi, historyApi } from '@/services/api';
 
 export default function Workspace() {
   const { t } = useTranslation();
@@ -81,6 +81,22 @@ export default function Workspace() {
       
       // 如果成功，跳转到对比预览
       if (processRes.status === 'completed') {
+        // 添加历史记录
+        try {
+          await historyApi.add({
+            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            filename: file.name,
+            processed_time: new Date().toLocaleString('zh-CN'),
+            size: `${(file.size / 1024).toFixed(1)} KB`,
+            preset: selectedPresetId,
+            fixes: processRes.total_fixes,
+            status: 'completed',
+            document_id: uploadRes.document_id,
+          });
+        } catch (historyErr) {
+          console.error('Failed to add history:', historyErr);
+        }
+        
         // 存储结果供对比页面使用
         sessionStorage.setItem('processResult', JSON.stringify(processRes));
         sessionStorage.setItem('documentId', uploadRes.document_id);

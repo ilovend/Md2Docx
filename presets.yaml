@@ -45,6 +45,18 @@ presets:
           table_width_percent: 90
       title_bold:
         enabled: true
+      first_line_indent:
+        enabled: true
+        parameters:
+          indent_size: 2
+      heading_style:
+        enabled: true
+        parameters:
+          h1_size: 22
+          h2_size: 16
+          h3_size: 14
+      image_center:
+        enabled: true
   bid:
     description: 专业竞标文档格式
     name: 竞标书标准

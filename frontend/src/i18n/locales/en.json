@@ -72,18 +72,30 @@
   },
   "comparison": {
     "title": "Comparison Preview",
-    "original": "Original Markdown Source",
-    "repaired": "Repaired Word Preview",
+    "original": "Original",
+    "repaired": "Repaired",
     "viewMode": "View Mode",
     "sideBySide": "Side by Side",
     "overlay": "Overlay",
-    "exportDocx": "Export as .docx",
+    "exportDocx": "Export .docx",
     "fixSummary": "Fix Summary",
     "viewFullLog": "View Full Log",
-    "ready": "Comparison Ready",
-    "waiting": "Waiting for Data",
-    "rulesApplied": "{{count}} rules applied",
-    "generatedIn": "Generated in {{ms}}ms"
+    "ready": "Ready",
+    "waiting": "Waiting for document...",
+    "generatedIn": "Generated in {ms}ms",
+    "rulesApplied": "{count} rules applied",
+    "documentInfo": "Document Info",
+    "documentId": "Document ID",
+    "status": "Status",
+    "processingTime": "Processing Time",
+    "appliedRules": "Applied Rules",
+    "noData": "No processing result",
+    "noDataHint": "Please process a document first",
+    "backToWorkspace": "Back to Workspace",
+    "processComplete": "Processing Complete",
+    "fixesApplied": "{count} fixes applied successfully",
+    "fixDetails": "Fix Details",
+    "downloadFixed": "Download Fixed Document"
   },
   "rules": {
     "title": "Rule Editor",
@@ -132,6 +144,48 @@
   },
   "settings": {
     "title": "Settings",
-    "comingSoon": "Settings page coming soon..."
+    "subtitle": "Configure application preferences",
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "themeDesc": "Choose your preferred color scheme",
+      "themeDark": "Dark",
+      "themeLight": "Light",
+      "themeSystem": "System",
+      "language": "Language",
+      "languageDesc": "Choose interface language"
+    },
+    "processing": {
+      "title": "Processing",
+      "outputDir": "Output Directory",
+      "outputDirDesc": "Default folder for processed files",
+      "parallel": "Parallel Processing",
+      "parallelDesc": "Number of files to process simultaneously",
+      "autoSave": "Auto Save",
+      "autoSaveDesc": "Automatically save processed files"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "enable": "Enable Notifications",
+      "enableDesc": "Show notifications when processing completes"
+    },
+    "data": {
+      "title": "Data Management",
+      "keepHistory": "Keep History",
+      "keepHistoryDesc": "How long to keep processing history",
+      "days": "days",
+      "clearCache": "Clear Cache",
+      "clearCacheDesc": "Remove temporary files and cache",
+      "clearCacheBtn": "Clear Cache"
+    },
+    "about": {
+      "title": "About",
+      "version": "Version",
+      "license": "License",
+      "github": "GitHub"
+    },
+    "resetDefaults": "Reset to Defaults",
+    "saveChanges": "Save Changes",
+    "saved": "Settings saved!"
   }
 }

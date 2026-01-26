@@ -77,16 +77,51 @@ export const presetApi = {
     /**
      * 获取所有预设列表
      */
-    getAll: async (): Promise<PresetInfo[]> => {
+    getAll: async (): Promise<{ presets: PresetInfo[] }> => {
         const response = await axios.get<{ presets: PresetInfo[] }>(`${API_BASE}/presets`);
-        return response.data.presets;
+        return response.data;
     },
-
+    
     /**
      * 获取预设详情
      */
     getDetail: async (presetId: string): Promise<PresetDetail> => {
         const response = await axios.get<PresetDetail>(`${API_BASE}/presets/${presetId}`);
+        return response.data;
+    },
+};
+
+// History types
+export interface HistoryItem {
+    id: string;
+    filename: string;
+    processed_time: string;
+    size: string;
+    preset: string;
+    fixes: number;
+    status: 'completed' | 'error';
+    document_id?: string;
+}
+
+// History API
+export const historyApi = {
+    getAll: async (): Promise<{ history: HistoryItem[] }> => {
+        const response = await axios.get<{ history: HistoryItem[] }>(`${API_BASE}/history`);
+        return response.data;
+    },
+    
+    add: async (item: HistoryItem): Promise<{ success: boolean; id: string }> => {
+        const response = await axios.post<{ success: boolean; id: string }>(`${API_BASE}/history`, item);
+        return response.data;
+    },
+    
+    delete: async (itemId: string): Promise<{ success: boolean }> => {
+        const response = await axios.delete<{ success: boolean }>(`${API_BASE}/history/${itemId}`);
+        return response.data;
+    },
+    
+    clear: async (): Promise<{ success: boolean }> => {
+        const response = await axios.delete<{ success: boolean }>(`${API_BASE}/history`);
         return response.data;
     },
 };
@@ -97,6 +132,22 @@ export const healthApi = {
      */
     check: async (): Promise<{ status: string; version: string }> => {
         const response = await axios.get(`${BACKEND_BASE}/health`);
+        return response.data;
+    },
+};
+
+// Rules Import/Export API
+export const rulesApi = {
+    exportAll: (): string => {
+        return `${API_BASE}/rules/export`;
+    },
+    
+    exportPreset: (presetId: string): string => {
+        return `${API_BASE}/rules/export/${presetId}`;
+    },
+    
+    import: async (yamlContent: string): Promise<{ success: boolean; imported_count: number; message: string }> => {
+        const response = await axios.post(`${API_BASE}/rules/import`, { yaml_content: yamlContent });
         return response.data;
     },
 };

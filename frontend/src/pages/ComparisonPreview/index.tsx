@@ -176,37 +176,55 @@ export default function ComparisonPreview() {
           </div>
 
           <div className="flex-1 overflow-auto p-6">
-            <div className="max-w-3xl rounded-lg bg-[#151822] p-6 font-mono text-sm text-gray-300">
-              <div className="mb-4 text-blue-400"># Quarterly Financial Report</div>
-              <div className="mb-4">
-                <div className="mb-2">## Executive Summary</div>
-                <div className="text-gray-400">
-                  The Q3 performance has exceeded expectations with a ++15% increase++ in net
-                  revenue.
+            {processResult ? (
+              <div className="max-w-3xl rounded-lg bg-[#151822] p-6">
+                <div className="mb-6">
+                  <h3 className="text-lg text-white mb-4">{t('comparison.documentInfo')}</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t('comparison.documentId')}</span>
+                      <span className="text-white font-mono">{documentId}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t('comparison.status')}</span>
+                      <span className="text-green-400">{processResult.status}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">{t('comparison.processingTime')}</span>
+                      <span className="text-white">{processResult.duration_ms}ms</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="mb-4">
-                <div className="mb-2 border-l-2 border-gray-600 pl-3 text-gray-500 italic">
-                  &gt; Note: All figures are in USD.
-                </div>
-              </div>
-              <div className="mb-4">
-                <div className="mb-2">### Revenue Breakdown</div>
-                <div className="inline-block border border-gray-700">
-                  <div className="grid grid-cols-4 gap-0">
-                    <div className="border-r border-b border-gray-700 px-2 py-1">| Region</div>
-                    <div className="border-r border-b border-gray-700 px-2 py-1">| Q2 (M)</div>
-                    <div className="border-r border-b border-gray-700 px-2 py-1">| Q3 (M)</div>
-                    <div className="border-b border-gray-700 px-2 py-1">| Growth |</div>
-
-                    <div className="border-r border-gray-700 px-2 py-1">| North America</div>
-                    <div className="border-r border-gray-700 px-2 py-1">| 12.5</div>
-                    <div className="border-r border-gray-700 px-2 py-1">| 14.2</div>
-                    <div className="px-2 py-1">| +13.6% |</div>
+                
+                <div className="border-t border-[#2a2d3e] pt-4">
+                  <h3 className="text-lg text-white mb-4">{t('comparison.appliedRules')}</h3>
+                  <div className="space-y-2">
+                    {fixes.map((fix, index) => (
+                      <div key={fix.id} className="flex items-start gap-3 text-sm">
+                        <span className="text-gray-500">{index + 1}.</span>
+                        <div>
+                          <span className="text-blue-400">[{fix.rule_id}]</span>
+                          <span className="text-gray-300 ml-2">{fix.description}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <FileText className="h-16 w-16 mb-4 opacity-50" />
+                <p className="text-lg mb-2">{t('comparison.noData')}</p>
+                <p className="text-sm mb-4">{t('comparison.noDataHint')}</p>
+                <button
+                  onClick={handleBackToWorkspace}
+                  className="flex items-center gap-2 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  {t('comparison.backToWorkspace')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -224,72 +242,68 @@ export default function ComparisonPreview() {
           </div>
 
           <div className="flex-1 overflow-auto p-6">
-            <div
-              className="mx-auto max-w-3xl rounded-lg bg-white p-12 shadow-lg"
-              style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
-            >
-              <h1
-                className="mb-6 cursor-pointer border-l-4 border-blue-500 pl-4 text-2xl text-gray-900 transition-colors hover:bg-blue-50"
-                onClick={() => handleElementClick('header1')}
+            {processResult ? (
+              <div
+                className="mx-auto max-w-3xl rounded-lg bg-white p-12 shadow-lg"
+                style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
               >
-                Quarterly Financial Report
-              </h1>
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-4">
+                    <Check className="h-10 w-10 text-green-600" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    {t('comparison.processComplete')}
+                  </h1>
+                  <p className="text-gray-600">
+                    {t('comparison.fixesApplied', { count: processResult.total_fixes })}
+                  </p>
+                </div>
 
-              <h2 className="mb-3 text-xl text-gray-900">1. Executive Summary</h2>
-              <p className="mb-4 leading-relaxed text-gray-700">
-                The Q3 performance has exceeded expectations with a <strong>+15% increase</strong>{' '}
-                in net revenue.
-              </p>
+                <div className="border-t border-gray-200 pt-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    {t('comparison.fixDetails')}
+                  </h2>
+                  <div className="space-y-3">
+                    {fixes.map((fix) => (
+                      <div
+                        key={fix.id}
+                        className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">{fix.rule_id}</div>
+                          <div className="text-sm text-gray-600">{fix.description}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="mb-6 border-l-4 border-blue-400 bg-blue-50 p-4 text-gray-600 italic">
-                Note: All figures are in USD.
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={handleDownload}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    <Download className="h-5 w-5" />
+                    {t('comparison.downloadFixed')}
+                  </button>
+                </div>
               </div>
-
-              <h3 className="mb-3 text-lg text-gray-900">1.1 Revenue Breakdown</h3>
-
-              <div className="mb-6 cursor-pointer" onClick={() => handleElementClick('table1')}>
-                <table className="w-full border-collapse shadow-sm transition-shadow hover:shadow-md">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-400 px-4 py-2 text-left">Region</th>
-                      <th className="border border-gray-400 px-4 py-2 text-right">Q2 (M)</th>
-                      <th className="border border-gray-400 px-4 py-2 text-right">Q3 (M)</th>
-                      <th className="border border-gray-400 px-4 py-2 text-right">Growth</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-gray-400 px-4 py-2">North America</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">12.5</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">14.2</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right text-green-600">
-                        +13.6%
-                      </td>
-                    </tr>
-                    <tr className="bg-gray-50">
-                      <td className="border border-gray-400 px-4 py-2">Europe</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">8.2</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">9.1</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right text-green-600">
-                        +11.0%
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-400 px-4 py-2">Asia Pacific</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">5.4</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right">7.8</td>
-                      <td className="border border-gray-400 px-4 py-2 text-right text-green-600">
-                        +44.4%
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <FileText className="h-16 w-16 mb-4 opacity-50" />
+                <p className="text-lg mb-2">{t('comparison.noData')}</p>
+                <button
+                  onClick={handleBackToWorkspace}
+                  className="flex items-center gap-2 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  {t('comparison.backToWorkspace')}
+                </button>
               </div>
-
-              <div className="mt-8 border-t border-gray-300 pt-4 text-sm text-gray-500">
-                <p className="italic">Figure 1: Growth Chart</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

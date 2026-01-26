@@ -1,71 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, File, Download, Trash2, Search, Calendar, Filter } from 'lucide-react';
+import { FileText, File, Download, Trash2, Search, Calendar, Filter, Loader2 } from 'lucide-react';
+import { historyApi, documentApi, type HistoryItem } from '@/services/api';
 
-interface HistoryItem {
-  id: string;
-  name: string;
-  processedTime: string;
-  size: string;
-  preset: string;
-  fixes: number;
-  status: 'completed' | 'error';
-}
-
-const mockHistory: HistoryItem[] = [
-  {
-    id: '1',
-    name: '季度财务报告_Q3.docx',
-    processedTime: '2024-01-15 14:30',
-    size: '2.4 MB',
-    preset: '企业标准',
-    fixes: 12,
-    status: 'completed',
-  },
-  {
-    id: '2',
-    name: '产品规格说明书.docx',
-    processedTime: '2024-01-15 10:15',
-    size: '1.8 MB',
-    preset: '技术文档',
-    fixes: 8,
-    status: 'completed',
-  },
-  {
-    id: '3',
-    name: '会议纪要_20240114.docx',
-    processedTime: '2024-01-14 16:45',
-    size: '460 KB',
-    preset: '会议纪要',
-    fixes: 5,
-    status: 'completed',
-  },
-  {
-    id: '4',
-    name: '投标文件_项目A.docx',
-    processedTime: '2024-01-14 09:20',
-    size: '5.1 MB',
-    preset: '竞标书',
-    fixes: 0,
-    status: 'error',
-  },
-];
 
 export default function History() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [history] = useState<HistoryItem[]>(mockHistory);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredHistory = history.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    loadHistory();
+  }, []);
 
-  const handleDownload = (id: string) => {
-    console.log('Download:', id);
+  const loadHistory = async () => {
+    setIsLoading(true);
+    try {
+      const response = await historyApi.getAll();
+      setHistory(response.history.map(h => ({
+        ...h,
+        status: h.status as 'completed' | 'error'
+      })));
+    } catch (error) {
+      console.error('Failed to load history:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Delete:', id);
+  const filteredHistory = history.filter(item =>
+    item.filename.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleDownload = (item: HistoryItem) => {
+    if (item.document_id) {
+      const url = documentApi.getDownloadUrl(item.document_id);
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await historyApi.delete(id);
+      setHistory(prev => prev.filter(h => h.id !== id));
+    } catch (error) {
+      console.error('Failed to delete history:', error);
+    }
   };
 
   return (
@@ -140,17 +121,17 @@ export default function History() {
                   <td className="px-8 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded bg-blue-500/20">
-                        {item.name.endsWith('.md') ? (
+                        {item.filename.endsWith('.md') ? (
                           <FileText className="h-4 w-4 text-blue-400" />
                         ) : (
                           <File className="h-4 w-4 text-purple-400" />
                         )}
                       </div>
-                      <span className="text-sm text-white">{item.name}</span>
+                      <span className="text-sm text-white">{item.filename}</span>
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <span className="text-sm text-gray-400">{item.processedTime}</span>
+                    <span className="text-sm text-gray-400">{item.processed_time}</span>
                   </td>
                   <td className="px-4 py-4">
                     <span className="text-sm text-gray-400">{item.size}</span>
@@ -179,7 +160,7 @@ export default function History() {
                   <td className="px-8 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleDownload(item.id)}
+                        onClick={() => handleDownload(item)}
                         className="p-1.5 text-gray-400 transition-colors hover:text-blue-400"
                         title={t('common.download')}
                       >

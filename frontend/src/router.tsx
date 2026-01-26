@@ -7,6 +7,7 @@ import RuleEditor from './pages/RuleEditor';
 import ComparisonPreview from './pages/ComparisonPreview';
 import BatchProcessing from './pages/BatchProcessing';
 import History from './pages/History';
+import Settings from './pages/Settings';
 
 export const router = createBrowserRouter([
   {
@@ -39,11 +40,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'settings',
-        element: (
-          <div className="flex size-full items-center justify-center text-gray-400">
-            设置页面即将推出...
-          </div>
-        ),
+        element: <Settings />,
       },
     ],
   },

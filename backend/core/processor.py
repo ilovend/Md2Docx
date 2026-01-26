@@ -71,6 +71,24 @@ class DocumentProcessor:
             if color_rule and color_rule.get('enabled'):
                 params = color_rule.get('parameters', {})
                 fixes.extend(self._apply_font_color(doc, params))
+            
+            # First Line Indent Rule
+            indent_rule = rules.get('first_line_indent', {})
+            if indent_rule and indent_rule.get('enabled'):
+                params = indent_rule.get('parameters', {})
+                fixes.extend(self._apply_first_line_indent(doc, params))
+            
+            # Heading Style Rule
+            heading_rule = rules.get('heading_style', {})
+            if heading_rule and heading_rule.get('enabled'):
+                params = heading_rule.get('parameters', {})
+                fixes.extend(self._apply_heading_style(doc, params))
+            
+            # Image Center Rule
+            image_rule = rules.get('image_center', {})
+            if image_rule and image_rule.get('enabled'):
+                params = image_rule.get('parameters', {})
+                fixes.extend(self._apply_image_center(doc, params))
 
         # Save Output
         output_filename = f"{document_id}_fixed.docx"
@@ -242,5 +260,95 @@ class DocumentProcessor:
                 "rule_id": "font_color",
                 "description": f"Applied text color #{text_color} to {count} runs"
             })
+        
+        return fixes
+
+    def _apply_first_line_indent(self, doc, params):
+        """
+        First Line Indent Rule: Applies first line indentation to paragraphs.
+        """
+        fixes = []
+        indent_size = params.get('indent_size', 2)  # 字符数
+        indent_pt = Pt(indent_size * 12)  # 转换为磅值
+        
+        count = 0
+        heading_styles = ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title']
+        
+        for para in doc.paragraphs:
+            # 跳过标题
+            if para.style and para.style.name in heading_styles:
+                continue
+            # 跳过空段落
+            if not para.text.strip():
+                continue
+            
+            pf = para.paragraph_format
+            if pf.first_line_indent != indent_pt:
+                pf.first_line_indent = indent_pt
+                count += 1
+        
+        if count > 0:
+            fixes.append({
+                "id": "fix_first_line_indent",
+                "rule_id": "first_line_indent",
+                "description": f"Applied {indent_size} character first line indent to {count} paragraphs"
+            })
+        
+        return fixes
+
+    def _apply_heading_style(self, doc, params):
+        """
+        Heading Style Rule: Normalizes heading styles.
+        """
+        fixes = []
+        h1_size = params.get('h1_size', 22)
+        h2_size = params.get('h2_size', 16)
+        h3_size = params.get('h3_size', 14)
+        
+        size_map = {
+            'Heading 1': h1_size,
+            'Heading 2': h2_size,
+            'Heading 3': h3_size,
+            'Title': h1_size + 4,
+        }
+        
+        for i, para in enumerate(doc.paragraphs):
+            if para.style and para.style.name in size_map:
+                target_size = size_map[para.style.name]
+                for run in para.runs:
+                    if run.font.size != Pt(target_size):
+                        run.font.size = Pt(target_size)
+                        run.bold = True
+                        fixes.append({
+                            "id": f"fix_heading_{i}",
+                            "rule_id": "heading_style",
+                            "description": f"Applied {target_size}pt to {para.style.name}"
+                        })
+                        break
+        
+        return fixes
+
+    def _apply_image_center(self, doc, params):
+        """
+        Image Center Rule: Centers all images in the document.
+        """
+        from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+        fixes = []
+        
+        for i, para in enumerate(doc.paragraphs):
+            # 检查段落是否包含图片 (通过检查是否有 drawing 元素)
+            has_image = False
+            for run in para.runs:
+                if run._element.xpath('.//a:blip'):
+                    has_image = True
+                    break
+            
+            if has_image:
+                para.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                fixes.append({
+                    "id": f"fix_image_center_{i}",
+                    "rule_id": "image_center",
+                    "description": f"Centered image in paragraph {i+1}"
+                })
         
         return fixes

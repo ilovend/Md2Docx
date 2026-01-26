@@ -1,11 +1,39 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
+import json
 from backend.api.schemas import ProcessRequest, ProcessResponse
 from backend.core.processor import DocumentProcessor
 from backend.core.config import settings
 
 router = APIRouter()
 processor = DocumentProcessor()
+
+# 历史记录存储
+HISTORY_FILE = settings.BASE_DIR / "history.json"
+
+class HistoryItem(BaseModel):
+    id: str
+    filename: str
+    processed_time: str
+    size: str
+    preset: str
+    fixes: int
+    status: str
+    document_id: Optional[str] = None
+
+def load_history() -> List[dict]:
+    if HISTORY_FILE.exists():
+        try:
+            return json.loads(HISTORY_FILE.read_text(encoding='utf-8'))
+        except:
+            return []
+    return []
+
+def save_history(history: List[dict]):
+    HISTORY_FILE.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding='utf-8')
 
 @router.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
@@ -57,11 +85,6 @@ async def get_preset_detail(preset_id: str):
 
 @router.get("/download/{document_id}")
 async def download_document(document_id: str):
-    # Try finding the fixed version first
-    # In processor we saved as {doc_id}_fixed.docx
-    # But route param might be just doc_id or filename
-    
-    # We expect document_id to be the one returned by upload/process, which is the filename on disk
     fixed_filename = f"{document_id}_fixed.docx"
     file_path = settings.OUTPUT_DIR / fixed_filename
     
@@ -73,3 +96,96 @@ async def download_document(document_id: str):
         filename=fixed_filename,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+# ===== History API =====
+
+@router.get("/history")
+async def get_history():
+    """Get processing history"""
+    history = load_history()
+    return {"history": history}
+
+@router.post("/history")
+async def add_history(item: HistoryItem):
+    """Add item to history"""
+    history = load_history()
+    history.insert(0, item.model_dump())  # 最新的在前面
+    # 限制历史记录数量
+    if len(history) > 100:
+        history = history[:100]
+    save_history(history)
+    return {"success": True, "id": item.id}
+
+@router.delete("/history/{item_id}")
+async def delete_history(item_id: str):
+    """Delete history item"""
+    history = load_history()
+    history = [h for h in history if h.get("id") != item_id]
+    save_history(history)
+    return {"success": True}
+
+@router.delete("/history")
+async def clear_history():
+    """Clear all history"""
+    save_history([])
+    return {"success": True}
+
+# ===== Rules Import/Export API =====
+
+import yaml
+from fastapi.responses import Response
+
+@router.get("/rules/export")
+async def export_rules():
+    """Export all presets as YAML"""
+    presets = processor.rule_parser.load_presets()
+    yaml_content = yaml.dump({'presets': presets}, allow_unicode=True, default_flow_style=False, sort_keys=False)
+    return Response(
+        content=yaml_content,
+        media_type="application/x-yaml",
+        headers={"Content-Disposition": "attachment; filename=presets.yaml"}
+    )
+
+@router.get("/rules/export/{preset_id}")
+async def export_preset(preset_id: str):
+    """Export a single preset as YAML"""
+    preset = processor.rule_parser.get_preset(preset_id)
+    if not preset:
+        raise HTTPException(404, "Preset not found")
+    
+    yaml_content = yaml.dump({preset_id: preset}, allow_unicode=True, default_flow_style=False, sort_keys=False)
+    return Response(
+        content=yaml_content,
+        media_type="application/x-yaml",
+        headers={"Content-Disposition": f"attachment; filename={preset_id}.yaml"}
+    )
+
+class ImportRulesRequest(BaseModel):
+    yaml_content: str
+
+@router.post("/rules/import")
+async def import_rules(request: ImportRulesRequest):
+    """Import presets from YAML content"""
+    try:
+        data = yaml.safe_load(request.yaml_content)
+        if not data:
+            raise HTTPException(400, "Invalid YAML content")
+        
+        # Validate structure
+        if 'presets' in data:
+            presets = data['presets']
+        else:
+            presets = data
+        
+        imported_count = 0
+        for preset_id, preset_data in presets.items():
+            if isinstance(preset_data, dict) and 'rules' in preset_data:
+                imported_count += 1
+        
+        return {
+            "success": True,
+            "imported_count": imported_count,
+            "message": f"Imported {imported_count} presets"
+        }
+    except yaml.YAMLError as e:
+        raise HTTPException(400, f"YAML parse error: {str(e)}")

@@ -23,52 +23,66 @@
 ```
 frontend/
 ├── src/
-│   ├── app/
-│   │   ├── App.tsx                    # 应用入口
-│   │   └── components/
-│   │       ├── Workspace.tsx          # 主工作台
-│   │       ├── RuleEditor.tsx         # 规则编辑器
-│   │       ├── ComparisonPreview.tsx  # 对比预览
-│   │       ├── BatchProcessing.tsx    # 批量处理
-│   │       ├── figma/                 # Figma特定组件
-│   │       └── ui/                    # 基础UI组件 (48个)
-│   ├── styles/
-│   │   ├── index.css                  # 全局样式入口
-│   │   └── ...
-│   └── main.tsx                       # React入口
+│   ├── App.tsx                        # 应用入口
+│   ├── main.tsx                       # React入口
+│   ├── router.tsx                     # 路由配置
+│   ├── pages/                         # 页面组件
+│   │   ├── Workspace/index.tsx        # 主工作台
+│   │   ├── RuleEditor/index.tsx       # 规则编辑器
+│   │   ├── ComparisonPreview/index.tsx # 对比预览
+│   │   ├── BatchProcessing/index.tsx  # 批量处理
+│   │   ├── History/index.tsx          # 历史记录
+│   │   └── Settings/index.tsx         # 设置页面
+│   ├── layouts/
+│   │   └── RootLayout.tsx             # 根布局（侧边栏+内容）
+│   ├── components/                    # 基础UI组件 (48个)
+│   ├── stores/                        # Zustand状态管理
+│   │   ├── fileStore.ts               # 文件状态
+│   │   ├── ruleStore.ts               # 规则状态
+│   │   └── appStore.ts                # 应用状态
+│   ├── services/                      # API服务
+│   │   ├── api.ts                     # HTTP API
+│   │   └── websocket.ts               # WebSocket服务
+│   ├── i18n/                          # 国际化
+│   │   ├── index.ts                   # i18n配置
+│   │   └── locales/                   # 语言文件
+│   └── styles/                        # 样式文件
 ├── index.html
 ├── package.json
 ├── vite.config.ts
-└── postcss.config.mjs
+└── tailwind.config.js
 ```
 
 ---
 
 ## 3. 核心组件
 
-### 3.1 应用入口 (App.tsx)
+### 3.1 应用架构
 
-应用采用单页面应用架构，通过状态控制视图切换：
+应用采用 React Router 进行路由管理，支持以下页面：
 
-```tsx
-type View = 'workspace' | 'rules' | 'history' | 'settings' | 'comparison' | 'batch';
-```
+| 路由 | 页面组件 | 说明 |
+|:---|:---|:---|
+| `/workspace` | Workspace | 主工作台 |
+| `/rules` | RuleEditor | 规则编辑器 |
+| `/comparison` | ComparisonPreview | 对比预览 |
+| `/batch` | BatchProcessing | 批量处理 |
+| `/history` | History | 历史记录 |
+| `/settings` | Settings | 设置页面 |
 
 **布局结构**：
-- 左侧固定侧边栏（200px）
-- 右侧主内容区域
+- RootLayout 提供统一的侧边栏导航
+- 左侧固定侧边栏（200px）包含导航菜单和语言切换器
+- 右侧主内容区域通过 `<Outlet />` 渲染子页面
 
-**侧边栏导航项**：
-| 图标 | 名称 | 对应视图 |
-|:---|:---|:---|
-| FolderOpen | 我的文件 | workspace |
-| Wrench | 规则引擎 | rules |
-| History | 任务历史 | history |
-| Settings | 设置 | settings |
+**状态管理**：使用 Zustand 进行状态管理
+- `fileStore`: 文件上传状态
+- `ruleStore`: 规则和预设管理
+- `appStore`: 应用全局状态（后端连接、主题等）
 
 ### 3.2 主工作台 (Workspace)
 
-**文件路径**：`components/Workspace.tsx`
+**文件路径**：`pages/Workspace/index.tsx`
 
 **功能**：
 - 文件拖拽上传区域
@@ -100,7 +114,7 @@ const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
 ### 3.3 规则编辑器 (RuleEditor)
 
-**文件路径**：`components/RuleEditor.tsx`
+**文件路径**：`pages/RuleEditor/index.tsx`
 
 **布局**：左右分栏
 - 左侧：规则树状导航
@@ -122,7 +136,7 @@ const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
 ### 3.4 对比预览 (ComparisonPreview)
 
-**文件路径**：`components/ComparisonPreview.tsx`
+**文件路径**：`pages/ComparisonPreview/index.tsx`
 
 **布局**：左右对比分栏
 - 左侧：原始内容展示

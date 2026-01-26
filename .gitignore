@@ -48,3 +48,23 @@ playwright/.cache
 
 # Prototype
 "Access Project Link/"
+
+# Backend temp files
+backend/uploads/*
+backend/outputs/*
+!backend/uploads/.gitkeep
+!backend/outputs/.gitkeep
+history.json
+
+# Test files
+test_*.docx
+test_*.json
+*.test.docx
+
+# Cache
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Logs
+*.log

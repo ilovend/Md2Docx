@@ -71,19 +71,31 @@
     }
   },
   "comparison": {
-    "title": "对比预览",
-    "original": "原始 Markdown 源文件",
-    "repaired": "修复后的 Word 预览",
-    "viewMode": "视图模式",
-    "sideBySide": "并排对比",
-    "overlay": "叠加",
-    "exportDocx": "导出为 .docx",
-    "fixSummary": "修复摘要",
-    "viewFullLog": "查看完整日志",
-    "ready": "对比就绪",
-    "waiting": "等待数据",
-    "rulesApplied": "已应用 {{count}} 条规则",
-    "generatedIn": "生成耗时 {{ms}}ms"
+    "title": "\u5bf9\u6bd4\u9884\u89c8",
+    "original": "\u539f\u59cb\u6587\u6863",
+    "repaired": "\u4fee\u590d\u540e",
+    "viewMode": "\u89c6\u56fe\u6a21\u5f0f",
+    "sideBySide": "\u5e76\u6392\u5bf9\u6bd4",
+    "overlay": "\u53e0\u52a0\u5bf9\u6bd4",
+    "exportDocx": "\u5bfc\u51fa .docx",
+    "fixSummary": "\u4fee\u590d\u6458\u8981",
+    "viewFullLog": "\u67e5\u770b\u5b8c\u6574\u65e5\u5fd7",
+    "ready": "\u5c31\u7eea",
+    "waiting": "\u7b49\u5f85\u6587\u6863...",
+    "generatedIn": "\u751f\u6210\u8017\u65f6 {ms}ms",
+    "rulesApplied": "\u5df2\u5e94\u7528 {count} \u6761\u89c4\u5219",
+    "documentInfo": "\u6587\u6863\u4fe1\u606f",
+    "documentId": "\u6587\u6863 ID",
+    "status": "\u72b6\u6001",
+    "processingTime": "\u5904\u7406\u65f6\u95f4",
+    "appliedRules": "\u5df2\u5e94\u7528\u89c4\u5219",
+    "noData": "\u6682\u65e0\u5904\u7406\u7ed3\u679c",
+    "noDataHint": "\u8bf7\u5148\u5904\u7406\u4e00\u4e2a\u6587\u6863",
+    "backToWorkspace": "\u8fd4\u56de\u5de5\u4f5c\u53f0",
+    "processComplete": "\u5904\u7406\u5b8c\u6210",
+    "fixesApplied": "\u5df2\u6210\u529f\u5e94\u7528 {count} \u9879\u4fee\u590d",
+    "fixDetails": "\u4fee\u590d\u8be6\u60c5",
+    "downloadFixed": "\u4e0b\u8f7d\u4fee\u590d\u540e\u7684\u6587\u6863"
   },
   "rules": {
     "title": "规则编辑器",
@@ -131,7 +143,49 @@
     }
   },
   "settings": {
-    "title": "设置",
-    "comingSoon": "设置页面即将推出..."
+    "title": "\u8bbe\u7f6e",
+    "subtitle": "\u914d\u7f6e\u5e94\u7528\u7a0b\u5e8f\u9996\u9009\u9879",
+    "appearance": {
+      "title": "\u5916\u89c2",
+      "theme": "\u4e3b\u9898",
+      "themeDesc": "\u9009\u62e9\u60a8\u559c\u6b22\u7684\u914d\u8272\u65b9\u6848",
+      "themeDark": "\u6df1\u8272",
+      "themeLight": "\u6d45\u8272",
+      "themeSystem": "\u8ddf\u968f\u7cfb\u7edf",
+      "language": "\u8bed\u8a00",
+      "languageDesc": "\u9009\u62e9\u754c\u9762\u8bed\u8a00"
+    },
+    "processing": {
+      "title": "\u5904\u7406",
+      "outputDir": "\u8f93\u51fa\u76ee\u5f55",
+      "outputDirDesc": "\u5904\u7406\u540e\u6587\u4ef6\u7684\u9ed8\u8ba4\u4fdd\u5b58\u4f4d\u7f6e",
+      "parallel": "\u5e76\u884c\u5904\u7406",
+      "parallelDesc": "\u540c\u65f6\u5904\u7406\u7684\u6587\u4ef6\u6570\u91cf",
+      "autoSave": "\u81ea\u52a8\u4fdd\u5b58",
+      "autoSaveDesc": "\u81ea\u52a8\u4fdd\u5b58\u5904\u7406\u540e\u7684\u6587\u4ef6"
+    },
+    "notifications": {
+      "title": "\u901a\u77e5",
+      "enable": "\u542f\u7528\u901a\u77e5",
+      "enableDesc": "\u5904\u7406\u5b8c\u6210\u65f6\u663e\u793a\u901a\u77e5"
+    },
+    "data": {
+      "title": "\u6570\u636e\u7ba1\u7406",
+      "keepHistory": "\u4fdd\u7559\u5386\u53f2",
+      "keepHistoryDesc": "\u5904\u7406\u5386\u53f2\u7684\u4fdd\u7559\u65f6\u95f4",
+      "days": "\u5929",
+      "clearCache": "\u6e05\u9664\u7f13\u5b58",
+      "clearCacheDesc": "\u5220\u9664\u4e34\u65f6\u6587\u4ef6\u548c\u7f13\u5b58",
+      "clearCacheBtn": "\u6e05\u9664\u7f13\u5b58"
+    },
+    "about": {
+      "title": "\u5173\u4e8e",
+      "version": "\u7248\u672c",
+      "license": "\u8bb8\u53ef\u8bc1",
+      "github": "GitHub"
+    },
+    "resetDefaults": "\u6062\u590d\u9ed8\u8ba4",
+    "saveChanges": "\u4fdd\u5b58\u66f4\u6539",
+    "saved": "\u8bbe\u7f6e\u5df2\u4fdd\u5b58\uff01"
   }
 }

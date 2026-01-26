@@ -56,12 +56,13 @@ export const useRuleStore = create<RuleState>((set) => ({
   loadPresets: async () => {
     set({ isLoadingPresets: true });
     try {
-      const presets = await presetApi.getAll();
+      const response = await presetApi.getAll();
+      const presets = response.presets;
       set({ presets, isLoadingPresets: false });
       // 如果当前选中的预设不在列表中，选择第一个
       if (presets.length > 0) {
         set((state) => ({
-          selectedPresetId: presets.find(p => p.id === state.selectedPresetId)
+          selectedPresetId: presets.find((p: PresetInfo) => p.id === state.selectedPresetId)
             ? state.selectedPresetId
             : presets[0].id
         }));

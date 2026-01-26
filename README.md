@@ -75,7 +75,17 @@ npm run dev
 
 **启动后端服务**：
 ```sh
-python main.py
+python -m uvicorn backend.main:app --reload
+```
+
+### 运行测试
+
+```sh
+# 运行完整自动化测试套件
+python scripts/run_tests.py
+
+# 仅运行后端测试
+python -m pytest backend/tests/test_api.py -v
 ```
 
 ## 📚 文档
