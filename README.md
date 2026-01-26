@@ -79,6 +79,8 @@ python main.py
 
 ## 📚 文档
 
+> 📌 **文档真源入口**：[docs/index.md](./docs/index.md) - 所有文档的唯一索引
+
 - [**设计文档**](./DESIGN_DOC.md) - 了解项目目标、技术选型和高阶架构
 - [**架构文档**](./ARCHITECTURE.md) - 深入了解系统技术实现细节
 - [**前端架构**](./docs/FRONTEND.md) - 前端界面组件和状态管理

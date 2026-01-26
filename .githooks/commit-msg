@@ -1,0 +1,65 @@
+#!/bin/bash
+# ============================================================================
+# commit-msg hook
+# 检查提交信息格式
+# ============================================================================
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+echo "检查提交信息格式..."
+
+# 提交信息格式正则
+# 格式: type(scope): subject
+PATTERN="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,50}"
+
+# 允许 merge 提交
+MERGE_PATTERN="^Merge"
+
+if echo "$COMMIT_MSG" | grep -qE "$MERGE_PATTERN"; then
+    echo "✓ Merge 提交，跳过格式检查"
+    exit 0
+fi
+
+if ! echo "$COMMIT_MSG" | grep -qE "$PATTERN"; then
+    echo "❌ 提交信息格式不正确"
+    echo ""
+    echo "正确格式: <type>(<scope>): <subject>"
+    echo ""
+    echo "Type 类型:"
+    echo "  feat     - 新功能"
+    echo "  fix      - Bug 修复"
+    echo "  docs     - 文档变更"
+    echo "  style    - 代码格式 (不影响代码运行)"
+    echo "  refactor - 重构 (不是新功能也不是修复)"
+    echo "  test     - 测试相关"
+    echo "  chore    - 构建/工具变更"
+    echo "  perf     - 性能优化"
+    echo "  ci       - CI 配置"
+    echo "  build    - 构建系统"
+    echo "  revert   - 回滚提交"
+    echo ""
+    echo "示例:"
+    echo "  feat(rules): 添加表格边框修复规则"
+    echo "  fix(api): 修复上传接口超时问题"
+    echo "  docs: 更新 API 文档"
+    echo ""
+    echo "您的提交信息:"
+    echo "  $COMMIT_MSG"
+    echo ""
+    exit 1
+fi
+
+# 检查 subject 首字母是否小写（英文）或是中文
+SUBJECT=$(echo "$COMMIT_MSG" | sed 's/^[^:]*: //')
+FIRST_CHAR=$(echo "$SUBJECT" | cut -c1)
+
+# 如果是英文，检查首字母不应该大写
+if echo "$FIRST_CHAR" | grep -qE "[A-Z]"; then
+    echo "⚠️  警告：提交信息主题首字母建议使用小写"
+    echo "  当前: $SUBJECT"
+    # 这里只是警告，不阻止提交
+fi
+
+echo "✓ 提交信息格式正确"
+exit 0

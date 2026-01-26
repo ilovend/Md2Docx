@@ -1,0 +1,199 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: 验证检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Python Dependencies
+        run: |
+          pip install black ruff
+      
+      - name: Run Verify Script
+        run: |
+          chmod +x scripts/verify.sh
+          ./scripts/verify.sh
+  
+  docs-check:
+    name: 文档检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Check docs/index.md exists
+        run: |
+          if [ ! -f "docs/index.md" ]; then
+            echo "❌ docs/index.md 不存在"
+            exit 1
+          fi
+          echo "✓ docs/index.md 存在"
+      
+      - name: Check document links
+        run: |
+          echo "检查文档链接..."
+          ERRORS=0
+          
+          # 检查 docs 目录下所有 md 文件中的相对链接
+          for file in $(find docs -name "*.md" -type f); do
+            # 提取相对链接
+            links=$(grep -oE '\[.*?\]\((\.\.?/[^)]+)\)' "$file" 2>/dev/null | grep -oE '\((\.\.?/[^)]+)\)' | tr -d '()' || true)
+            
+            for link in $links; do
+              # 跳过外部链接和锚点
+              if [[ "$link" == http* ]] || [[ "$link" == "#"* ]]; then
+                continue
+              fi
+              
+              # 计算完整路径
+              dir=$(dirname "$file")
+              full_path="$dir/$link"
+              
+              # 移除 .md 后的锚点
+              full_path=$(echo "$full_path" | sed 's/#.*//')
+              
+              if [ ! -f "$full_path" ] && [ ! -d "$full_path" ]; then
+                echo "❌ 死链: $file -> $link"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+          done
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "发现 $ERRORS 个死链"
+            exit 1
+          fi
+          
+          echo "✓ 所有文档链接有效"
+      
+      - name: Check ADR numbering
+        run: |
+          echo "检查 ADR 编号..."
+          ADR_DIR="docs/decisions/adr"
+          
+          if [ ! -d "$ADR_DIR" ]; then
+            echo "⚠️ ADR 目录不存在，跳过检查"
+            exit 0
+          fi
+          
+          # 提取所有 ADR 编号
+          numbers=$(ls "$ADR_DIR"/*.md 2>/dev/null | xargs -I{} basename {} | grep -oE '^[0-9]+' | sort)
+          
+          # 检查重复
+          duplicates=$(echo "$numbers" | uniq -d)
+          
+          if [ -n "$duplicates" ]; then
+            echo "❌ 发现重复的 ADR 编号: $duplicates"
+            exit 1
+          fi
+          
+          echo "✓ ADR 编号无重复"
+      
+      - name: Check Prompt template fields
+        run: |
+          echo "检查 Prompt 模板字段..."
+          PROMPT_DIR="docs/prompts"
+          ERRORS=0
+          
+          if [ ! -d "$PROMPT_DIR" ]; then
+            echo "⚠️ Prompt 目录不存在，跳过检查"
+            exit 0
+          fi
+          
+          for file in "$PROMPT_DIR"/*.md; do
+            [ -f "$file" ] || continue
+            
+            # 跳过模板文件
+            if [[ "$file" == *"template"* ]]; then
+              continue
+            fi
+            
+            # 检查必要字段
+            if ! grep -q "## 目标" "$file"; then
+              echo "❌ $file: 缺少 '## 目标' 字段"
+              ERRORS=$((ERRORS + 1))
+            fi
+            
+            if ! grep -q "## 验收标准" "$file"; then
+              echo "❌ $file: 缺少 '## 验收标准' 字段"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo "发现 $ERRORS 个字段缺失"
+            exit 1
+          fi
+          
+          echo "✓ Prompt 模板字段检查通过"
+
+  python-lint:
+    name: Python 代码检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install Dependencies
+        run: |
+          pip install black ruff
+      
+      - name: Check Black formatting
+        run: |
+          black --check --diff . || echo "代码格式不符合 Black 规范"
+      
+      - name: Run Ruff
+        run: |
+          ruff check . || echo "存在 Ruff 警告"
+
+  frontend-lint:
+    name: 前端代码检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Dependencies
+        working-directory: ./Access Project Link
+        run: npm ci
+      
+      - name: Type Check
+        working-directory: ./Access Project Link
+        run: npx tsc --noEmit || echo "存在类型错误"
+      
+      - name: Build
+        working-directory: ./Access Project Link
+        run: npm run build
