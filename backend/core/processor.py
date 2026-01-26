@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import UploadFile
 from backend.core.config import settings
 from backend.engine.parser import RuleParser
+from backend.core.markdown_converter import convert_markdown_to_docx
 from docx import Document
 from docx.shared import Pt, Twips, RGBColor
 from docx.oxml.ns import qn, nsmap
@@ -31,6 +32,14 @@ class DocumentProcessor:
         
         if not input_path.exists():
             raise FileNotFoundError("Document not found")
+
+        # Check if Markdown file - convert to Word first
+        md_stats = None
+        if document_id.lower().endswith('.md'):
+            # Convert Markdown to Word
+            temp_docx_path = settings.UPLOAD_DIR / f"{document_id}_converted.docx"
+            md_stats = convert_markdown_to_docx(input_path, temp_docx_path)
+            input_path = temp_docx_path
 
         # Load Doc
         doc = Document(input_path)
@@ -97,13 +106,25 @@ class DocumentProcessor:
 
         duration = int((time.time() - start_time) * 1000)
         
-        return {
+        result = {
             "document_id": document_id,
             "status": "completed",
             "total_fixes": len(fixes),
             "fixes": fixes,
             "duration_ms": duration
         }
+        
+        # Add Markdown conversion stats if applicable
+        if md_stats:
+            result["markdown_conversion"] = md_stats
+            fixes.insert(0, {
+                "id": "fix_md_convert",
+                "rule_id": "markdown_conversion",
+                "description": f"Converted Markdown: {md_stats.get('headings', 0)} headings, {md_stats.get('paragraphs', 0)} paragraphs, {md_stats.get('tables', 0)} tables"
+            })
+            result["total_fixes"] = len(fixes)
+        
+        return result
 
     def _apply_font_standard(self, doc, params):
         """
