@@ -55,7 +55,9 @@ async def process_document(request: ProcessRequest):
     import traceback
 
     try:
-        result = processor.process(request.document_id, request.preset)
+        result = processor.process(
+            request.document_id, request.preset, request.preset_config
+        )
         return result
     except FileNotFoundError:
         raise HTTPException(404, "Document not found")
@@ -147,6 +149,178 @@ async def clear_history():
     """Clear all history"""
     save_history([])
     return {"success": True}
+
+
+# ===== Rules Management API =====
+
+
+class RuleBase(BaseModel):
+    name: str
+    description: str = ""
+    enabled: bool = True
+    parameters: dict = {}
+
+
+class RuleCreate(RuleBase):
+    pass
+
+
+class RuleUpdate(RuleBase):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    enabled: Optional[bool] = None
+    parameters: Optional[dict] = None
+
+
+@router.get("/rules")
+async def get_rules():
+    """Get all available rules"""
+    # For now, we'll return a list of rule types with default configurations
+    # In a real implementation, this would load from a rules database or config
+    rule_types = [
+        {
+            "id": "font_standard",
+            "name": "字体标准",
+            "description": "统一文档字体",
+            "enabled": True,
+            "parameters": {
+                "western_font": "Arial",
+                "chinese_font": "SimSun",
+                "font_size_body": 12,
+            },
+        },
+        {
+            "id": "table_border",
+            "name": "表格边框",
+            "description": "统一表格边框样式",
+            "enabled": True,
+            "parameters": {
+                "border_size": 4,
+                "border_color": "000000",
+                "add_table_header_format": True,
+                "table_header_bg_color": "E3E3E3",
+            },
+        },
+        {
+            "id": "table_cell_spacing",
+            "name": "单元格间距",
+            "description": "调整表格单元格间距",
+            "enabled": True,
+            "parameters": {
+                "cell_margin_top": 50,
+                "cell_margin_left": 50,
+                "cell_margin_bottom": 50,
+                "cell_margin_right": 50,
+            },
+        },
+        {
+            "id": "paragraph_spacing",
+            "name": "段落间距",
+            "description": "设置段落间距",
+            "enabled": True,
+            "parameters": {"line_spacing": 1.5, "space_before": 0, "space_after": 6},
+        },
+        {
+            "id": "title_bold",
+            "name": "标题加粗",
+            "description": "使所有标题加粗",
+            "enabled": True,
+            "parameters": {},
+        },
+        {
+            "id": "font_color",
+            "name": "字体颜色",
+            "description": "设置文本颜色",
+            "enabled": True,
+            "parameters": {"text_color": "000000"},
+        },
+        {
+            "id": "first_line_indent",
+            "name": "首行缩进",
+            "description": "设置中文首行缩进",
+            "enabled": True,
+            "parameters": {"indent_size": 2},
+        },
+        {
+            "id": "heading_style",
+            "name": "标题样式",
+            "description": "统一标题样式",
+            "enabled": True,
+            "parameters": {"h1_size": 22, "h2_size": 16, "h3_size": 14},
+        },
+        {
+            "id": "image_center",
+            "name": "图片居中",
+            "description": "居中对齐图片",
+            "enabled": True,
+            "parameters": {},
+        },
+        {
+            "id": "latex_to_omml",
+            "name": "LaTeX转换",
+            "description": "将LaTeX转换为Word公式",
+            "enabled": True,
+            "parameters": {},
+        },
+    ]
+    return {"rules": rule_types}
+
+
+@router.get("/rules/{rule_id}")
+async def get_rule_detail(rule_id: str):
+    """Get detailed rule configuration"""
+    # Get all rules
+    rules = (await get_rules())["rules"]
+    # Find the specific rule
+    rule = next((r for r in rules if r["id"] == rule_id), None)
+    if not rule:
+        raise HTTPException(404, "Rule not found")
+    return rule
+
+
+@router.post("/rules")
+async def create_rule(rule: RuleCreate):
+    """Create a new rule"""
+    # In a real implementation, this would save to a rules database or config
+    # For now, we'll just return the created rule with a generated ID
+    import uuid
+
+    new_rule = {
+        "id": f"custom_{uuid.uuid4().hex[:8]}",
+        "name": rule.name,
+        "description": rule.description,
+        "enabled": rule.enabled,
+        "parameters": rule.parameters,
+    }
+    return {"success": True, "rule": new_rule}
+
+
+@router.put("/rules/{rule_id}")
+async def update_rule(rule_id: str, rule: RuleUpdate):
+    """Update an existing rule"""
+    # Get the existing rule
+    existing_rule = await get_rule_detail(rule_id)
+    # Update the rule with provided data
+    updated_rule = existing_rule.copy()
+    if rule.name is not None:
+        updated_rule["name"] = rule.name
+    if rule.description is not None:
+        updated_rule["description"] = rule.description
+    if rule.enabled is not None:
+        updated_rule["enabled"] = rule.enabled
+    if rule.parameters is not None:
+        updated_rule["parameters"] = rule.parameters
+    # In a real implementation, this would save to a rules database or config
+    return {"success": True, "rule": updated_rule}
+
+
+@router.delete("/rules/{rule_id}")
+async def delete_rule(rule_id: str):
+    """Delete a rule"""
+    # Check if the rule exists
+    await get_rule_detail(rule_id)
+    # In a real implementation, this would delete from a rules database or config
+    return {"success": True, "message": f"Rule {rule_id} deleted successfully"}
 
 
 # ===== Rules Import/Export API =====

@@ -30,7 +30,8 @@
     "dropzone": {
       "title": "拖放文件到这里",
       "description": "支持 .md、.docx 和 .txt 文件。可拖放文件夹递归扫描。",
-      "selectFiles": "选择文件"
+      "selectFiles": "选择文件",
+      "fileSelectionHint": "提示：按住Ctrl键可选择多个文件，或直接拖放文件/文件夹到上方区域"
     },
     "config": {
       "title": "处理配置",

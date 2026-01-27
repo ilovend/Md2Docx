@@ -30,7 +30,8 @@
     "dropzone": {
       "title": "Drop files here",
       "description": "Supports .md, .docx and .txt files. Drag folders for recursive scanning.",
-      "selectFiles": "Select Files"
+      "selectFiles": "Select Files",
+      "fileSelectionHint": "Tip: Hold Ctrl to select multiple files, or drag files/folders to the area above"
     },
     "config": {
       "title": "Process Configuration",

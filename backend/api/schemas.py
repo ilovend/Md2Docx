@@ -6,6 +6,7 @@ class ProcessRequest(BaseModel):
     document_id: str
     preset: str = "default"
     options: Dict[str, Any] = {}
+    preset_config: Optional[Dict[str, Any]] = None
 
 
 class FixItem(BaseModel):

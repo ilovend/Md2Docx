@@ -120,15 +120,31 @@ export default function Workspace() {
   );
 
   const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
         const files = Array.from(e.target.files);
-        // 过滤出支持的文件类型
-        const supportedFiles = files.filter((file) => {
-          const supportedTypes = ['.md', '.docx', '.txt'];
-          const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-          return supportedTypes.includes(fileExtension);
-        });
+        const supportedFiles: File[] = [];
+
+        // 处理文件和文件夹
+        for (const file of files) {
+          // 检查是否是文件夹（通过webkitRelativePath判断）
+          if (file.webkitRelativePath) {
+            // 这是文件夹中的文件，直接添加
+            const supportedTypes = ['.md', '.docx', '.txt'];
+            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+            if (supportedTypes.includes(fileExtension)) {
+              supportedFiles.push(file);
+            }
+          } else {
+            // 单个文件
+            const supportedTypes = ['.md', '.docx', '.txt'];
+            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+            if (supportedTypes.includes(fileExtension)) {
+              supportedFiles.push(file);
+            }
+          }
+        }
+
         if (supportedFiles.length > 0) {
           addFiles(supportedFiles);
         }
@@ -145,45 +161,104 @@ export default function Workspace() {
     setProcessResult(null);
 
     try {
-      // 上传第一个文件（简化演示）
-      const file = selectedFiles[0];
-      console.log('Uploading file:', file.name);
+      if (selectedFiles.length === 1) {
+        // 单个文件处理
+        const file = selectedFiles[0];
+        console.log('Uploading file:', file.name);
 
-      const uploadRes = await documentApi.upload(file);
-      console.log('Upload response:', uploadRes);
+        const uploadRes = await documentApi.upload(file);
+        console.log('Upload response:', uploadRes);
 
-      // 处理文档
-      console.log('Processing with preset:', selectedPresetId);
-      const processRes = await documentApi.process({
-        document_id: uploadRes.document_id,
-        preset: selectedPresetId,
-      });
-      console.log('Process response:', processRes);
+        // 处理文档
+        console.log('Processing with preset:', selectedPresetId);
+        const processRes = await documentApi.process({
+          document_id: uploadRes.document_id,
+          preset: selectedPresetId,
+        });
+        console.log('Process response:', processRes);
 
-      setProcessResult(processRes);
+        setProcessResult(processRes);
 
-      // 如果成功，跳转到对比预览
-      if (processRes.status === 'completed') {
-        // 添加历史记录
-        try {
-          await historyApi.add({
-            id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            filename: file.name,
-            processed_time: new Date().toLocaleString('zh-CN'),
-            size: `${(file.size / 1024).toFixed(1)} KB`,
-            preset: selectedPresetId,
-            fixes: processRes.total_fixes,
-            status: 'completed',
-            document_id: uploadRes.document_id,
-          });
-        } catch (historyErr) {
-          console.error('Failed to add history:', historyErr);
+        // 如果成功，跳转到对比预览
+        if (processRes.status === 'completed') {
+          // 添加历史记录
+          try {
+            await historyApi.add({
+              id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              filename: file.name,
+              processed_time: new Date().toLocaleString('zh-CN'),
+              size: `${(file.size / 1024).toFixed(1)} KB`,
+              preset: selectedPresetId,
+              fixes: processRes.total_fixes,
+              status: 'completed',
+              document_id: uploadRes.document_id,
+            });
+          } catch (historyErr) {
+            console.error('Failed to add history:', historyErr);
+          }
+
+          // 存储结果供对比页面使用
+          sessionStorage.setItem('processResult', JSON.stringify(processRes));
+          sessionStorage.setItem('documentId', uploadRes.document_id);
+          navigate('/comparison');
+        }
+      } else {
+        // 批量文件处理
+        console.log('Processing multiple files:', selectedFiles.length);
+
+        const batchItems = selectedFiles.map((file) => ({
+          document_id: file.name,
+          preset: selectedPresetId,
+        }));
+
+        // 这里应该使用batch API，但为了简化，我们先逐个处理
+        let processedCount = 0;
+        let totalFixes = 0;
+
+        for (const file of selectedFiles) {
+          try {
+            console.log('Uploading file:', file.name);
+            const uploadRes = await documentApi.upload(file);
+
+            console.log('Processing file:', file.name);
+            const processRes = await documentApi.process({
+              document_id: uploadRes.document_id,
+              preset: selectedPresetId,
+            });
+
+            processedCount++;
+            totalFixes += processRes.total_fixes;
+
+            // 添加历史记录
+            try {
+              await historyApi.add({
+                id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                filename: file.name,
+                processed_time: new Date().toLocaleString('zh-CN'),
+                size: `${(file.size / 1024).toFixed(1)} KB`,
+                preset: selectedPresetId,
+                fixes: processRes.total_fixes,
+                status: 'completed',
+                document_id: uploadRes.document_id,
+              });
+            } catch (historyErr) {
+              console.error('Failed to add history:', historyErr);
+            }
+          } catch (fileErr) {
+            console.error('Error processing file', file.name, ':', fileErr);
+          }
         }
 
-        // 存储结果供对比页面使用
-        sessionStorage.setItem('processResult', JSON.stringify(processRes));
-        sessionStorage.setItem('documentId', uploadRes.document_id);
-        navigate('/comparison');
+        // 显示批量处理结果
+        setProcessResult({
+          status: 'completed',
+          total_fixes: totalFixes,
+          processed_files: processedCount,
+          duration_ms: 0,
+        });
+
+        // 提示用户处理完成
+        alert(`批量处理完成：成功处理 ${processedCount} 个文件，共 ${totalFixes} 个修复`);
       }
     } catch (err: any) {
       console.error('Processing error:', err);
@@ -252,15 +327,14 @@ export default function Workspace() {
                 accept=".md,.docx,.txt"
                 onChange={handleFileSelect}
                 className="hidden"
-                // @ts-ignore - directory属性在TypeScript类型定义中不存在，但浏览器支持
-                directory
-                // @ts-ignore - webkitdirectory属性在TypeScript类型定义中不存在，但浏览器支持
-                webkitdirectory
               />
               <span className="inline-block cursor-pointer rounded-lg bg-blue-500 px-6 py-2.5 text-white transition-colors hover:bg-blue-600">
                 {t('workspace.dropzone.selectFiles')}
               </span>
             </label>
+            <p className="mt-2 text-xs text-gray-400">
+              {t('workspace.dropzone.fileSelectionHint')}
+            </p>
             {selectedFiles.length > 0 && (
               <div className="mt-4 text-sm text-green-400">
                 {t('workspace.filesSelected', { count: selectedFiles.length })}

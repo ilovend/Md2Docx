@@ -73,7 +73,6 @@ export default function ComparisonPreview() {
   const fixes = processResult?.fixes || [];
 
   // Manual adjustment states
-  const [headerStyle, setHeaderStyle] = useState('Preserve Original');
   const [bottomMargin, setBottomMargin] = useState(24);
   const [showBorders, setShowBorders] = useState(true);
   const [zebraStriping, setZebraStriping] = useState(true);
@@ -253,15 +252,32 @@ export default function ComparisonPreview() {
                 <div
                   key={fix.id}
                   className="cursor-pointer rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-3 transition-colors hover:border-blue-500"
+                  onClick={() => {
+                    // 模拟点击查看详情功能
+                    setSelectedElement(fix.id);
+                    setShowAdjustment(true);
+                  }}
                 >
                   <div className="mb-1 flex items-start gap-2">
-                    <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-green-500/20">
+                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-green-500/20">
                       <Check className="h-3 w-3 text-green-400" />
                     </div>
                     <div className="flex-1">
                       <div className="mb-1 text-sm text-white">{fix.rule_id}</div>
                       <div className="text-xs text-gray-400">{fix.description}</div>
                     </div>
+                  </div>
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      className="text-xs text-blue-400 hover:text-blue-300"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedElement(fix.id);
+                        setShowAdjustment(true);
+                      }}
+                    >
+                      查看详情
+                    </button>
                   </div>
                 </div>
               ))
@@ -293,92 +309,187 @@ export default function ComparisonPreview() {
           </div>
 
           <div className="flex-1 space-y-6 overflow-auto p-6">
-            {selectedElement === 'table1' && (
+            {selectedElement && (
               <>
                 <div className="mb-4 rounded border border-blue-500/30 bg-blue-500/10 p-3">
-                  <div className="mb-1 text-sm text-blue-400">激活规则：表格格式化</div>
+                  <div className="mb-1 text-sm text-blue-400">
+                    激活规则：{selectedElement.split('_')[0]}
+                  </div>
                   <div className="text-xs text-gray-400">
-                    检测到 Markdown 表格。已自动应用"标准财务网格"样式和交替行。
+                    检测到规则应用。您可以在此调整规则参数。
                   </div>
                 </div>
 
-                <div>
-                  <label className="mb-2 block text-sm text-gray-400">
-                    标题样式转换
-                    <span className="ml-2 text-xs text-gray-500">可选</span>
-                  </label>
-                  <select
-                    value={headerStyle}
-                    onChange={(e) => setHeaderStyle(e.target.value)}
-                    className="w-full rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-                  >
-                    <option>保留原始</option>
-                    <option>标题 1/2</option>
-                    <option>标题 + 副标题</option>
-                  </select>
-                </div>
+                {/* 表格相关规则调整选项 */}
+                {selectedElement.includes('table') && (
+                  <div>
+                    <label className="mb-2 block text-sm text-gray-400">
+                      表格设置
+                      <span className="ml-2 text-xs text-gray-500">可选</span>
+                    </label>
+                    <div className="space-y-3">
+                      <label className="flex cursor-pointer items-center justify-between">
+                        <span className="text-sm text-gray-300">显示边框</span>
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={showBorders}
+                            onChange={(e) => setShowBorders(e.target.checked)}
+                            className="peer sr-only"
+                          />
+                          <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                          <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                        </div>
+                      </label>
 
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <label className="text-sm text-gray-400">底部边距</label>
-                    <span className="text-sm text-blue-400">{bottomMargin}px</span>
+                      <label className="flex cursor-pointer items-center justify-between">
+                        <span className="text-sm text-gray-300">斑马纹</span>
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={zebraStriping}
+                            onChange={(e) => setZebraStriping(e.target.checked)}
+                            className="peer sr-only"
+                          />
+                          <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                          <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                        </div>
+                      </label>
+
+                      <label className="flex cursor-pointer items-center justify-between">
+                        <span className="text-sm text-gray-300">标题高亮</span>
+                        <div className="relative">
+                          <input
+                            type="checkbox"
+                            checked={headerHighlight}
+                            onChange={(e) => setHeaderHighlight(e.target.checked)}
+                            className="peer sr-only"
+                          />
+                          <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                          <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                        </div>
+                      </label>
+                    </div>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="48"
-                    value={bottomMargin}
-                    onChange={(e) => setBottomMargin(Number(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
+                )}
 
-                <div>
-                  <label className="mb-3 block text-sm text-gray-400">表格设置</label>
-                  <div className="space-y-3">
-                    <label className="flex cursor-pointer items-center justify-between">
-                      <span className="text-sm text-gray-300">显示边框</span>
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={showBorders}
-                          onChange={(e) => setShowBorders(e.target.checked)}
-                          className="peer sr-only"
-                        />
-                        <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
-                        <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
-                      </div>
+                {/* 字体相关规则调整选项 */}
+                {selectedElement.includes('font') && (
+                  <div>
+                    <label className="mb-2 block text-sm text-gray-400">
+                      字体设置
+                      <span className="ml-2 text-xs text-gray-500">可选</span>
                     </label>
-
-                    <label className="flex cursor-pointer items-center justify-between">
-                      <span className="text-sm text-gray-300">斑马纹</span>
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={zebraStriping}
-                          onChange={(e) => setZebraStriping(e.target.checked)}
-                          className="peer sr-only"
-                        />
-                        <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
-                        <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="mb-2 block text-sm text-gray-400">西方字体</label>
+                        <select className="w-full rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none">
+                          <option>Arial</option>
+                          <option>Times New Roman</option>
+                          <option>Calibri</option>
+                          <option>Helvetica</option>
+                        </select>
                       </div>
-                    </label>
-
-                    <label className="flex cursor-pointer items-center justify-between">
-                      <span className="text-sm text-gray-300">标题高亮</span>
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={headerHighlight}
-                          onChange={(e) => setHeaderHighlight(e.target.checked)}
-                          className="peer sr-only"
-                        />
-                        <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
-                        <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                      <div>
+                        <label className="mb-2 block text-sm text-gray-400">中文字体</label>
+                        <select className="w-full rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none">
+                          <option>SimSun</option>
+                          <option>SimHei</option>
+                          <option>KaiTi</option>
+                          <option>Microsoft YaHei</option>
+                        </select>
                       </div>
-                    </label>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* 段落相关规则调整选项 */}
+                {selectedElement.includes('paragraph') && (
+                  <div>
+                    <label className="mb-2 block text-sm text-gray-400">
+                      段落设置
+                      <span className="ml-2 text-xs text-gray-500">可选</span>
+                    </label>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="mb-2 flex items-center justify-between">
+                          <label className="text-sm text-gray-400">行间距</label>
+                          <span className="text-sm text-blue-400">{bottomMargin / 8}x</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="8"
+                          max="32"
+                          value={bottomMargin}
+                          onChange={(e) => setBottomMargin(Number(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 公式相关规则调整选项 */}
+                {selectedElement.includes('formula') && (
+                  <div>
+                    <label className="mb-2 block text-sm text-gray-400">
+                      公式设置
+                      <span className="ml-2 text-xs text-gray-500">可选</span>
+                    </label>
+                    <div className="space-y-3">
+                      <label className="flex cursor-pointer items-center justify-between">
+                        <span className="text-sm text-gray-300">公式编号</span>
+                        <div className="relative">
+                          <input type="checkbox" checked={true} className="peer sr-only" />
+                          <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                          <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                        </div>
+                      </label>
+                      <label className="flex cursor-pointer items-center justify-between">
+                        <span className="text-sm text-gray-300">显示公式居中</span>
+                        <div className="relative">
+                          <input type="checkbox" checked={true} className="peer sr-only" />
+                          <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                          <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* 图片相关规则调整选项 */}
+                {selectedElement.includes('image') && (
+                  <div>
+                    <label className="mb-2 block text-sm text-gray-400">
+                      图片设置
+                      <span className="ml-2 text-xs text-gray-500">可选</span>
+                    </label>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="mb-2 flex items-center justify-between">
+                          <label className="text-sm text-gray-400">图片最大宽度</label>
+                          <span className="text-sm text-blue-400">{bottomMargin / 4}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="25"
+                          max="100"
+                          value={bottomMargin}
+                          onChange={(e) => setBottomMargin(Number(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+                      <label className="flex cursor-pointer items-center justify-between">
+                        <span className="text-sm text-gray-300">图片居中</span>
+                        <div className="relative">
+                          <input type="checkbox" checked={true} className="peer sr-only" />
+                          <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                          <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>

@@ -7,8 +7,6 @@ import re
 from pathlib import Path
 from docx import Document
 from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.enum.style import WD_STYLE_TYPE
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
@@ -188,7 +186,7 @@ class MarkdownConverter:
                 para.add_run(remaining)
                 break
 
-    def _add_code_block(self, code: str, language: str = ""):
+    def _add_code_block(self, code: str, language: str = None):
         """Add code block with monospace font."""
         para = self.doc.add_paragraph()
         para.paragraph_format.left_indent = Inches(0.5)

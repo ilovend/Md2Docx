@@ -33,6 +33,10 @@ export default function RuleEditor() {
   const [presetDetail, setPresetDetail] = useState<PresetDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [yamlContent, setYamlContent] = useState('');
+  const [yamlValidation, setYamlValidation] = useState({
+    valid: true,
+    error: '',
+  });
 
   // Test Workbench States
   const [testContent, setTestContent] = useState(
@@ -40,6 +44,22 @@ export default function RuleEditor() {
   );
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
+
+  // Validate YAML content in real-time
+  useEffect(() => {
+    try {
+      yaml.load(yamlContent);
+      setYamlValidation({
+        valid: true,
+        error: '',
+      });
+    } catch (error) {
+      setYamlValidation({
+        valid: false,
+        error: (error as any).message,
+      });
+    }
+  }, [yamlContent]);
 
   // 加载预设列表
   useEffect(() => {
@@ -59,19 +79,93 @@ export default function RuleEditor() {
 
         // 转换规则为分类显示
         const ruleEntries = Object.entries(detail.rules || {});
-        const newCategories: RuleCategory[] = [
-          {
-            id: 'all',
-            name: '所有规则',
-            icon: '📋',
-            expanded: true,
-            rules: ruleEntries.map(([id, config]: [string, any]) => ({
-              id,
-              name: id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-              active: config?.enabled ?? true,
-            })),
+
+        // 规则分类映射
+        const ruleCategories: {
+          [key: string]: {
+            name: string;
+            icon: string;
+            rules: { id: string; name: string; active: boolean }[];
+          };
+        } = {
+          table: {
+            name: '表格规则',
+            icon: '📊',
+            rules: [],
           },
-        ];
+          formula: {
+            name: '公式规则',
+            icon: '∑',
+            rules: [],
+          },
+          paragraph: {
+            name: '排版规则',
+            icon: '📝',
+            rules: [],
+          },
+          image: {
+            name: '图表规则',
+            icon: '🖼️',
+            rules: [],
+          },
+          font: {
+            name: '字体规则',
+            icon: '🔤',
+            rules: [],
+          },
+          heading: {
+            name: '标题规则',
+            icon: '📑',
+            rules: [],
+          },
+          other: {
+            name: '其他规则',
+            icon: '⚙️',
+            rules: [],
+          },
+        };
+
+        // 规则分类映射
+        const ruleToCategory: { [key: string]: string } = {
+          table_border: 'table',
+          table_cell_spacing: 'table',
+          table_column_width: 'table',
+          formula_numbering: 'formula',
+          inline_formula_style: 'formula',
+          display_formula_center: 'formula',
+          latex_to_omml: 'formula',
+          paragraph_spacing: 'paragraph',
+          first_line_indent: 'paragraph',
+          image_center: 'image',
+          image_resize: 'image',
+          image_caption: 'image',
+          font_standard: 'font',
+          font_color: 'font',
+          font_replacement: 'font',
+          title_bold: 'heading',
+          heading_style: 'heading',
+        };
+
+        // 分配规则到分类
+        ruleEntries.forEach(([id, config]: [string, any]) => {
+          const categoryId = ruleToCategory[id] || 'other';
+          ruleCategories[categoryId].rules.push({
+            id,
+            name: id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+            active: config?.enabled ?? true,
+          });
+        });
+
+        // 转换为分类数组
+        const newCategories: RuleCategory[] = Object.entries(ruleCategories)
+          .map(([id, category]) => ({
+            id,
+            name: category.name,
+            icon: category.icon,
+            expanded: true,
+            rules: category.rules,
+          }))
+          .filter((category) => category.rules.length > 0); // 只显示有规则的分类
         setCategories(newCategories);
 
         // 生成 YAML 内容
@@ -413,12 +507,22 @@ export default function RuleEditor() {
           <div className="flex items-center justify-between border-t border-[#2a2d3e] bg-[#151822] px-6 py-2 text-xs">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                <span className="text-green-400">{t('rules.syntaxValid')}</span>
+                <div
+                  className={`h-2 w-2 rounded-full ${yamlValidation.valid ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
+                <span className={yamlValidation.valid ? 'text-green-400' : 'text-red-400'}>
+                  {yamlValidation.valid ? t('rules.syntaxValid') : '语法错误'}
+                </span>
               </div>
-              <span className="text-gray-500">YAML 验证通过，未检测到架构错误。</span>
+              <span className={yamlValidation.valid ? 'text-gray-500' : 'text-red-400'}>
+                {yamlValidation.valid
+                  ? 'YAML 验证通过，未检测到架构错误。'
+                  : `YAML 语法错误: ${yamlValidation.error}`}
+              </span>
             </div>
-            <div className="text-gray-500">行 12，列 34 • UTF-8 • YAML</div>
+            <div className="text-gray-500">
+              行 {yamlContent.split('\n').length}，列 1 • UTF-8 • YAML
+            </div>
           </div>
         </div>
 
@@ -443,7 +547,7 @@ export default function RuleEditor() {
           </div>
 
           <div className="flex-1 overflow-auto p-4 flex flex-col gap-4">
-            <div className="flex-1 flex flex-col min-h-[200px]">
+            <div className="flex-1 flex flex-col min-h-50">
               <div className="mb-2 text-xs text-gray-400">{t('rules.input')} (Markdown)</div>
               <textarea
                 value={testContent}
@@ -453,7 +557,7 @@ export default function RuleEditor() {
               />
             </div>
 
-            <div className="flex-1 flex flex-col min-h-[200px]">
+            <div className="flex-1 flex flex-col min-h-50">
               <div className="mb-2 text-xs text-gray-400">{t('rules.outputPreview')}</div>
               <div className="flex-1 rounded border border-[#2a2d3e] bg-white text-black p-3 overflow-auto">
                 {testResult ? (
