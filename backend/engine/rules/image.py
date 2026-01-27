@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.shared import Pt
 from backend.engine.base import BaseRule
 from backend.engine.registry import registry
 

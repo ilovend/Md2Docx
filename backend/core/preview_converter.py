@@ -2,7 +2,6 @@ import html
 import logging
 import traceback
 from docx import Document
-from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.text.paragraph import CT_P
 from docx.text.paragraph import Paragraph
@@ -47,7 +46,8 @@ class DocxPreviewConverter:
                             table_map[idx].append({"rule": rule_id, "desc": desc})
 
             # Simple styles
-            html_parts.append("""
+            html_parts.append(
+                """
             <style>
                 .docx-preview { font-family: 'Calibri', 'Arial', sans-serif; padding: 20px; line-height: 1.5; color: #000; background: #fff; }
                 .docx-preview p { margin-bottom: 10pt; }
@@ -56,9 +56,9 @@ class DocxPreviewConverter:
                 .docx-preview h1 { font-size: 24pt; font-weight: bold; }
                 .docx-preview h2 { font-size: 18pt; font-weight: bold; }
                 .docx-preview h3 { font-size: 14pt; font-weight: bold; }
-                .highlight-fix { 
-                    background-color: rgba(34, 197, 94, 0.1); 
-                    border-left: 3px solid #22c55e; 
+                .highlight-fix {
+                    background-color: rgba(34, 197, 94, 0.1);
+                    border-left: 3px solid #22c55e;
                     padding-left: 8px;
                     position: relative;
                 }
@@ -77,7 +77,8 @@ class DocxPreviewConverter:
                     pointer-events: none;
                 }
             </style>
-            """)
+            """
+            )
 
             # Process paragraphs and tables in order
             parent = doc._body

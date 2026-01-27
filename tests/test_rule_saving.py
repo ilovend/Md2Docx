@@ -1,7 +1,5 @@
-import pytest
 from pathlib import Path
 import tempfile
-import yaml
 from backend.engine.parser import RuleParser
 
 
@@ -27,7 +25,7 @@ def test_rule_saving():
                 "rules": {"test_rule": {"enabled": True}},
             }
         }
-        assert parser.save_presets(initial_data) == True
+        assert parser.save_presets(initial_data)
 
         # Verify file content
         loaded = parser.load_presets()
@@ -38,12 +36,12 @@ def test_rule_saving():
             "name": "Updated Preset",
             "rules": {"test_rule": {"enabled": False}},
         }
-        assert parser.update_preset("test_preset", update_data) == True
+        assert parser.update_preset("test_preset", update_data)
 
         # Verify update
         loaded_v2 = parser.load_presets()
         assert loaded_v2["test_preset"]["name"] == "Updated Preset"
-        assert loaded_v2["test_preset"]["rules"]["test_rule"]["enabled"] == False
+        assert not loaded_v2["test_preset"]["rules"]["test_rule"]["enabled"]
 
         # 3. Test creating new preset via update
         new_data = {"name": "New Preset", "rules": {}}

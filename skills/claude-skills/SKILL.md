@@ -6,6 +6,7 @@ description: "Claude Skills meta-skill: extract domain material (docs/APIs/code/
 # Claude Skills Meta-Skill
 
 Turn scattered domain material into a Skill that is reusable, maintainable, and reliably activatable:
+
 - `SKILL.md` as the entrypoint (triggers, constraints, patterns, examples)
 - `references/` for long-form evidence and navigation
 - optional `scripts/` and `assets/` for scaffolding and templates
@@ -13,6 +14,7 @@ Turn scattered domain material into a Skill that is reusable, maintainable, and 
 ## When to Use This Skill
 
 Trigger this meta-skill when you need to:
+
 - Create a new Skill from scratch from docs/specs/repos
 - Refactor an existing Skill (too long, unclear, inconsistent, misfires)
 - Design reliable activation (frontmatter + triggers + boundaries)
@@ -23,6 +25,7 @@ Trigger this meta-skill when you need to:
 ## Not For / Boundaries
 
 This meta-skill is NOT:
+
 - A domain Skill by itself (it builds domain Skills)
 - A license to invent external facts (if the material does not prove it, say so and add a verification path)
 - A substitute for required inputs (if inputs are missing, ask 1-3 questions before proceeding)
@@ -32,6 +35,7 @@ This meta-skill is NOT:
 ### Deliverables (What You Must Produce)
 
 Your output MUST include:
+
 1. A concrete directory layout (typically `skills/<skill-name>/`)
 2. An actionable `SKILL.md` with decidable triggers, boundaries, and reproducible examples
 3. Long-form docs moved to `references/` with a `references/index.md`
@@ -60,12 +64,13 @@ description: "What it does + when to use (activation triggers)."
 ```
 
 Frontmatter rules:
+
 - `name` MUST match `^[a-z][a-z0-9-]*$` and SHOULD match the directory name
 - `description` MUST be decidable (not "helps with X") and include concrete trigger keywords
 
 ### Minimal `SKILL.md` Skeleton (Copy/Paste)
 
-```markdown
+````markdown
 ---
 name: my-skill
 description: "[Domain] capability: includes [capability 1], [capability 2]. Use when [decidable triggers]."
@@ -78,6 +83,7 @@ One sentence that states the boundary and the deliverable.
 ## When to Use This Skill
 
 Trigger when any of these applies:
+
 - [Trigger 1: concrete task/keyword]
 - [Trigger 2]
 - [Trigger 3]
@@ -92,13 +98,16 @@ Trigger when any of these applies:
 ### Common Patterns
 
 **Pattern 1:** one-line explanation
+
 ```text
 [command/snippet you can paste and run]
 ```
+````
 
 ## Examples
 
 ### Example 1
+
 - Input:
 - Steps:
 - Expected output / acceptance:
@@ -117,7 +126,8 @@ Trigger when any of these applies:
 - Sources: docs/repos/specs (do not invent)
 - Last updated: YYYY-MM-DD
 - Known limits: what is explicitly out of scope
-```
+
+````
 
 ### Authoring Rules (Non-negotiable)
 
@@ -168,7 +178,7 @@ Validate locally:
 
 # From skills/claude-skills/ (strict validation)
 ./scripts/validate-skill.sh ../<skill-name> --strict
-```
+````
 
 ### Tools & Templates
 
@@ -186,6 +196,7 @@ Generate a new Skill skeleton:
 ```
 
 Templates:
+
 - `assets/template-minimal.md`
 - `assets/template-complete.md`
 
@@ -224,6 +235,7 @@ Templates:
 ## References
 
 Local docs:
+
 - `references/index.md`
 - `references/skill-spec.md`
 - `references/quality-checklist.md`
@@ -231,6 +243,7 @@ Local docs:
 - `references/README.md` (upstream official reference)
 
 External (official):
+
 - https://support.claude.com/en/articles/12512176-what-are-skills
 - https://support.claude.com/en/articles/12512180-using-skills-in-claude
 - https://support.claude.com/en/articles/12512198-creating-custom-skills

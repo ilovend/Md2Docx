@@ -10,6 +10,7 @@ description: "Md2Docx开发技能：包含项目开发环境配置、前后端�
 ## When to Use This Skill
 
 触发此技能当你需要：
+
 - 配置开发环境并启动项目
 - 理解项目代码结构
 - 调试前后端问题
@@ -19,11 +20,13 @@ description: "Md2Docx开发技能：包含项目开发环境配置、前后端�
 ## Not For / Boundaries
 
 此技能不包括：
+
 - 生产环境部署配置
 - Electron打包发布流程
 - 用户功能使用指南
 
 必需输入：
+
 - 已安装Node.js 18+和Python 3.10+
 - 已克隆项目仓库
 
@@ -32,6 +35,7 @@ description: "Md2Docx开发技能：包含项目开发环境配置、前后端�
 ### 环境配置命令
 
 **前端环境**：
+
 ```bash
 cd frontend
 npm install
@@ -40,6 +44,7 @@ npm run dev
 ```
 
 **后端环境**：
+
 ```bash
 # 创建虚拟环境
 python -m venv venv
@@ -75,17 +80,18 @@ md2docx/
 
 ### 核心组件职责
 
-| 组件 | 职责 | 关键状态 |
-|:---|:---|:---|
-| `App.tsx` | 路由管理 | `currentView` |
-| `Workspace` | 文件上传 | `selectedFiles`, `preset` |
-| `RuleEditor` | 规则配置 | `rules`, `selectedRule` |
+| 组件                | 职责     | 关键状态                   |
+| :------------------ | :------- | :------------------------- |
+| `App.tsx`           | 路由管理 | `currentView`              |
+| `Workspace`         | 文件上传 | `selectedFiles`, `preset`  |
+| `RuleEditor`        | 规则配置 | `rules`, `selectedRule`    |
 | `ComparisonPreview` | 对比预览 | `fixes`, `selectedElement` |
-| `BatchProcessing` | 批量处理 | `files`, `processing` |
+| `BatchProcessing`   | 批量处理 | `files`, `processing`      |
 
 ### 常用开发命令
 
 **代码格式化**：
+
 ```bash
 # Python
 black .
@@ -98,6 +104,7 @@ npx eslint .
 ```
 
 **Git提交规范**：
+
 ```bash
 git commit -m "feat: 添加表格边框规则"
 git commit -m "fix: 修复公式编号错位"
@@ -107,12 +114,14 @@ git commit -m "docs: 更新API文档"
 ### API调试
 
 **测试上传**：
+
 ```bash
 curl -X POST "http://localhost:8000/api/upload" \
   -F "file=@test.md"
 ```
 
 **测试处理**：
+
 ```bash
 curl -X POST "http://localhost:8000/api/process" \
   -H "Content-Type: application/json" \
@@ -138,12 +147,12 @@ curl -X POST "http://localhost:8000/api/process" \
 
 ### 常见问题速查
 
-| 问题 | 解决方案 |
-|:---|:---|
-| `ENOENT` | `npm install` |
+| 问题                  | 解决方案                                     |
+| :-------------------- | :------------------------------------------- |
+| `ENOENT`              | `npm install`                                |
 | `ModuleNotFoundError` | 激活venv后 `pip install -r requirements.txt` |
-| CORS错误 | 检查后端CORS配置允许`localhost:5173` |
-| 文件上传失败 | 检查文件类型白名单和大小限制 |
+| CORS错误              | 检查后端CORS配置允许`localhost:5173`         |
+| 文件上传失败          | 检查文件类型白名单和大小限制                 |
 
 ## Examples
 

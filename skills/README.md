@@ -4,12 +4,12 @@
 
 ## 技能列表
 
-| 技能 | 说明 | 使用场景 |
-|:---|:---|:---|
-| [claude-skills](./claude-skills/) | Claude Skills元技能 | 创建新技能、重构现有技能 |
-| [md2docx-rules](./md2docx-rules/) | 规则配置技能 | 编写YAML规则、调试规则匹配 |
-| [md2docx-dev](./md2docx-dev/) | 开发技能 | 环境配置、日常开发、调试 |
-| [article_scraper](./article_scraper/) | 文章抓取技能 | 网页内容提取 |
+| 技能                                  | 说明                | 使用场景                   |
+| :------------------------------------ | :------------------ | :------------------------- |
+| [claude-skills](./claude-skills/)     | Claude Skills元技能 | 创建新技能、重构现有技能   |
+| [md2docx-rules](./md2docx-rules/)     | 规则配置技能        | 编写YAML规则、调试规则匹配 |
+| [md2docx-dev](./md2docx-dev/)         | 开发技能            | 环境配置、日常开发、调试   |
+| [article_scraper](./article_scraper/) | 文章抓取技能        | 网页内容提取               |
 
 ## 技能结构
 

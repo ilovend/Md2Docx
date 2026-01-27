@@ -21,20 +21,20 @@ Md2Docx 是一个桌面应用程序，专门用于解决从Markdown等格式通�
 
 ## 🖥️ 界面预览
 
-| 主工作台 | 规则编辑器 | 对比预览 |
-|:---:|:---:|:---:|
+|   主工作台   |  规则编辑器  |   对比预览   |
+| :----------: | :----------: | :----------: |
 | 文件拖拽上传 | YAML规则配置 | 修改高亮对比 |
 | 预设快速选择 | 规则实时测试 | 修复摘要统计 |
 
 ## 🛠️ 技术栈
 
-| 组件 | 技术选型 |
-|:---|:---|
+| 组件         | 技术选型                      |
+| :----------- | :---------------------------- |
 | **前端界面** | Electron + React + TypeScript |
-| **后端服务** | Python + FastAPI |
-| **文档处理** | python-docx |
-| **规则引擎** | 自定义YAML规则架构 |
-| **UI组件** | Radix UI + Tailwind CSS |
+| **后端服务** | Python + FastAPI              |
+| **文档处理** | python-docx                   |
+| **规则引擎** | 自定义YAML规则架构            |
+| **UI组件**   | Radix UI + Tailwind CSS       |
 
 ## 🚀 快速上手
 
@@ -49,17 +49,19 @@ Md2Docx 是一个桌面应用程序，专门用于解决从Markdown等格式通�
 ### 安装
 
 1. 克隆本仓库
+
    ```sh
    git clone https://github.com/ilovend/md2docx.git
    cd md2docx
    ```
 
 2. 安装前端依赖
-   ```sh
+
+   ````sh
    ```sh
    cd frontend
    npm install
-   ```
+   ````
 
 3. 安装后端依赖
    ```sh
@@ -69,12 +71,14 @@ Md2Docx 是一个桌面应用程序，专门用于解决从Markdown等格式通�
 ### 运行开发环境
 
 **启动前端开发环境**：
+
 ```sh
 cd frontend
 npm run dev
 ```
 
 **启动后端服务**：
+
 ```sh
 python -m uvicorn backend.main:app --reload
 ```

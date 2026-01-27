@@ -42,7 +42,7 @@ def load_history() -> List[dict]:
     if HISTORY_FILE.exists():
         try:
             return json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
-        except:
+        except Exception:
             return []
     return []
 
@@ -388,7 +388,7 @@ async def test_rule(request: RuleTestRequest):
             conv_path = settings.UPLOAD_DIR / f"{temp_id}_converted.docx"
             if conv_path.exists():
                 os.remove(conv_path)
-        except:
+        except Exception:
             pass
 
 

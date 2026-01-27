@@ -6,7 +6,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -35,7 +35,7 @@ presets:
         enabled: true
         parameters:
           add_table_header_format: true
-          border_color: '000000'
+          border_color: "000000"
           border_size: 4
           table_header_bg_color: E3E3E3
       table_width:
@@ -66,7 +66,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -95,7 +95,7 @@ presets:
         enabled: true
         parameters:
           add_table_header_format: true
-          border_color: '000000'
+          border_color: "000000"
           border_size: 4
           table_header_bg_color: E3E3E3
       table_width:
@@ -112,7 +112,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -132,7 +132,7 @@ presets:
         enabled: true
         parameters:
           add_table_header_format: true
-          border_color: '000000'
+          border_color: "000000"
           border_size: 4
           table_header_bg_color: E3E3E3
       table_width:
@@ -149,7 +149,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -178,7 +178,7 @@ presets:
         enabled: true
         parameters:
           add_table_header_format: true
-          border_color: '000000'
+          border_color: "000000"
           border_size: 4
           table_header_bg_color: E3E3E3
       table_width:
@@ -227,7 +227,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -261,7 +261,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       list_numbering:
         enabled: true
       paragraph_spacing:
@@ -277,7 +277,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -306,7 +306,7 @@ presets:
         enabled: true
         parameters:
           add_table_header_format: true
-          border_color: '000000'
+          border_color: "000000"
           border_size: 4
           table_header_bg_color: E3E3E3
       table_width:
@@ -323,7 +323,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -352,7 +352,7 @@ presets:
         enabled: true
         parameters:
           add_table_header_format: true
-          border_color: '000000'
+          border_color: "000000"
           border_size: 4
           table_header_bg_color: D9E1F2
       table_width:
@@ -369,7 +369,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -403,7 +403,7 @@ presets:
       font_color:
         enabled: true
         parameters:
-          text_color: '000000'
+          text_color: "000000"
       font_standard:
         enabled: true
         parameters:
@@ -432,7 +432,7 @@ presets:
         enabled: true
         parameters:
           add_table_header_format: true
-          border_color: '000000'
+          border_color: "000000"
           border_size: 4
           table_header_bg_color: F0F0F0
       table_width:
@@ -453,7 +453,7 @@ presets:
 rule_defaults:
   font_color:
     enabled: true
-    text_color: '000000'
+    text_color: "000000"
   font_standard:
     chinese_font: 宋体
     enabled: true
@@ -480,7 +480,7 @@ rule_defaults:
     space_before: 0
   table_border:
     add_table_header_format: true
-    border_color: '000000'
+    border_color: "000000"
     border_size: 4
     enabled: true
     table_header_bg_color: E3E3E3

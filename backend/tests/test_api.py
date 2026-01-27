@@ -5,7 +5,6 @@ Run with: pytest backend/tests/test_api.py -v
 
 import pytest
 import requests
-import os
 from pathlib import Path
 
 BASE_URL = "http://127.0.0.1:8000"
@@ -84,7 +83,7 @@ class TestHistory:
         response = requests.post(f"{API_URL}/history", json=item)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
 
     def test_delete_history(self):
         # Add then delete
@@ -188,9 +187,8 @@ class TestWebSocket:
                 "ws://127.0.0.1:8000/ws/progress", timeout=5
             )
             ws.close()
-            connected = True
-        except:
-            connected = False
+        except Exception:
+            pass
 
         # May fail if websocket library not installed, that's ok
         assert True

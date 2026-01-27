@@ -8,13 +8,13 @@
 
 规则引擎是Md2Docx的核心，负责定义和执行文档修复逻辑。设计遵循以下原则：
 
-| 原则 | 说明 |
-|:---|:---|
-| **声明式配置** | 规则使用YAML定义，无需编写代码 |
+| 原则           | 说明                               |
+| :------------- | :--------------------------------- |
+| **声明式配置** | 规则使用YAML定义，无需编写代码     |
 | **优先级控制** | 规则按优先级顺序执行，支持冲突解决 |
-| **可组合性** | 规则可以组合成预设，满足不同场景 |
-| **可测试性** | 每条规则可独立测试，确保效果正确 |
-| **可扩展性** | 支持自定义规则类型和操作 |
+| **可组合性**   | 规则可以组合成预设，满足不同场景   |
+| **可测试性**   | 每条规则可独立测试，确保效果正确   |
+| **可扩展性**   | 支持自定义规则类型和操作           |
 
 ---
 
@@ -24,47 +24,47 @@
 
 修复表格结构和样式问题：
 
-| 规则ID | 功能 | 说明 |
-|:---|:---|:---|
-| `table_border_fix` | 边框修复 | 统一表格边框样式 |
-| `table_header_style` | 表头样式 | 设置表头背景色和字体 |
-| `table_cell_padding` | 单元格间距 | 调整单元格内边距 |
-| `table_width_auto` | 宽度自适应 | 根据内容自动调整列宽 |
-| `table_alignment` | 表格对齐 | 设置表格居中或左对齐 |
+| 规则ID               | 功能       | 说明                 |
+| :------------------- | :--------- | :------------------- |
+| `table_border_fix`   | 边框修复   | 统一表格边框样式     |
+| `table_header_style` | 表头样式   | 设置表头背景色和字体 |
+| `table_cell_padding` | 单元格间距 | 调整单元格内边距     |
+| `table_width_auto`   | 宽度自适应 | 根据内容自动调整列宽 |
+| `table_alignment`    | 表格对齐   | 设置表格居中或左对齐 |
 
 ### 2.2 公式规则 (Formula Rules)
 
 处理数学公式转换问题：
 
-| 规则ID | 功能 | 说明 |
-|:---|:---|:---|
-| `latex_to_omml` | LaTeX转OMML | 将LaTeX公式转为Word公式 |
-| `formula_numbering` | 公式编号 | 添加或修复公式编号 |
-| `inline_formula_style` | 行内公式样式 | 调整行内公式字体大小 |
-| `display_formula_align` | 显示公式对齐 | 居中显示公式 |
+| 规则ID                  | 功能         | 说明                    |
+| :---------------------- | :----------- | :---------------------- |
+| `latex_to_omml`         | LaTeX转OMML  | 将LaTeX公式转为Word公式 |
+| `formula_numbering`     | 公式编号     | 添加或修复公式编号      |
+| `inline_formula_style`  | 行内公式样式 | 调整行内公式字体大小    |
+| `display_formula_align` | 显示公式对齐 | 居中显示公式            |
 
 ### 2.3 排版规则 (Typography Rules)
 
 统一文档排版风格：
 
-| 规则ID | 功能 | 说明 |
-|:---|:---|:---|
+| 规则ID              | 功能       | 说明             |
+| :------------------ | :--------- | :--------------- |
 | `heading_normalize` | 标题规范化 | 统一标题样式层级 |
-| `paragraph_spacing` | 段落间距 | 设置段前段后间距 |
-| `line_height` | 行高设置 | 调整行间距 |
-| `first_line_indent` | 首行缩进 | 设置段落首行缩进 |
-| `font_normalize` | 字体统一 | 替换非标准字体 |
+| `paragraph_spacing` | 段落间距   | 设置段前段后间距 |
+| `line_height`       | 行高设置   | 调整行间距       |
+| `first_line_indent` | 首行缩进   | 设置段落首行缩进 |
+| `font_normalize`    | 字体统一   | 替换非标准字体   |
 
 ### 2.4 图表规则 (Image Rules)
 
 优化图片和图表显示：
 
-| 规则ID | 功能 | 说明 |
-|:---|:---|:---|
-| `image_resize` | 图片尺寸 | 调整图片最大宽度 |
-| `image_caption` | 图片标题 | 添加"图X"标题 |
-| `image_alignment` | 图片对齐 | 居中对齐图片 |
-| `mermaid_render` | Mermaid渲染 | 将Mermaid代码转为图片 |
+| 规则ID            | 功能        | 说明                  |
+| :---------------- | :---------- | :-------------------- |
+| `image_resize`    | 图片尺寸    | 调整图片最大宽度      |
+| `image_caption`   | 图片标题    | 添加"图X"标题         |
+| `image_alignment` | 图片对齐    | 居中对齐图片          |
+| `mermaid_render`  | Mermaid渲染 | 将Mermaid代码转为图片 |
 
 ---
 
@@ -83,7 +83,7 @@ author: Md2Docx Team
 
 # 规则配置
 enabled: true
-priority: 10  # 数字越小，优先级越高
+priority: 10 # 数字越小，优先级越高
 
 # 选择器 - 定义规则作用的元素
 selector:
@@ -99,7 +99,7 @@ actions:
     params:
       border: "1px solid #000000"
       border_style: single
-      border_width: 4  # 1/8磅
+      border_width: 4 # 1/8磅
       border_color: "000000"
 
 # 验证 - 定义成功条件
@@ -114,7 +114,7 @@ validation:
 
 ```yaml
 selector:
-  type: table  # table, paragraph, image, heading, list
+  type: table # table, paragraph, image, heading, list
 ```
 
 #### 样式选择器
@@ -136,7 +136,7 @@ selector:
   conditions:
     - field: content
       operator: contains
-      value: "$$"  # 包含LaTeX公式标记
+      value: "$$" # 包含LaTeX公式标记
 ```
 
 #### 复合选择器
@@ -150,7 +150,7 @@ selector:
       value: 1
     - field: style.border
       operator: is_null
-  match_all: true  # 所有条件都满足 (AND)
+  match_all: true # 所有条件都满足 (AND)
 ```
 
 ### 3.3 操作类型
@@ -173,7 +173,7 @@ actions:
 actions:
   - type: add_content
     params:
-      position: after  # before, after, replace
+      position: after # before, after, replace
       content: "图 {index}"
       style: "Caption"
 ```
@@ -184,8 +184,8 @@ actions:
 actions:
   - type: replace_content
     params:
-      pattern: "\\$\\$(.+?)\\$\\$"  # 正则表达式
-      replacement: "{omml:$1}"  # 转换为OMML
+      pattern: "\\$\\$(.+?)\\$\\$" # 正则表达式
+      replacement: "{omml:$1}" # 转换为OMML
 ```
 
 #### 自定义函数
@@ -201,19 +201,19 @@ actions:
 
 ### 3.4 条件运算符
 
-| 运算符 | 说明 | 示例 |
-|:---|:---|:---|
-| `equals` | 等于 | `value: "Heading 1"` |
-| `not_equals` | 不等于 | `value: "Normal"` |
-| `contains` | 包含 | `value: "$$"` |
-| `not_contains` | 不包含 | `value: "TODO"` |
-| `starts_with` | 开头是 | `value: "##"` |
-| `ends_with` | 结尾是 | `value: ".md"` |
-| `matches` | 正则匹配 | `value: "^\\d+\\."` |
-| `greater_than` | 大于 | `value: 10` |
-| `less_than` | 小于 | `value: 100` |
-| `is_null` | 为空 | (无需value) |
-| `is_not_null` | 非空 | (无需value) |
+| 运算符         | 说明     | 示例                 |
+| :------------- | :------- | :------------------- |
+| `equals`       | 等于     | `value: "Heading 1"` |
+| `not_equals`   | 不等于   | `value: "Normal"`    |
+| `contains`     | 包含     | `value: "$$"`        |
+| `not_contains` | 不包含   | `value: "TODO"`      |
+| `starts_with`  | 开头是   | `value: "##"`        |
+| `ends_with`    | 结尾是   | `value: ".md"`       |
+| `matches`      | 正则匹配 | `value: "^\\d+\\."`  |
+| `greater_than` | 大于     | `value: 10`          |
+| `less_than`    | 小于     | `value: 100`         |
+| `is_null`      | 为空     | (无需value)          |
+| `is_not_null`  | 非空     | (无需value)          |
 
 ---
 
@@ -236,7 +236,7 @@ rules:
     overrides:
       params:
         border_width: 4
-        
+
   - id: heading_normalize
     enabled: true
     overrides:
@@ -244,7 +244,7 @@ rules:
         h1_size: 22
         h2_size: 16
         h3_size: 14
-        
+
   - id: paragraph_spacing
     enabled: true
     overrides:
@@ -252,7 +252,7 @@ rules:
         before: 0
         after: 12
         line_spacing: 1.5
-        
+
   - id: font_normalize
     enabled: true
     overrides:
@@ -276,19 +276,19 @@ rules:
         h1_size: 14
         h1_bold: true
         h1_centered: true
-        
+
   - id: formula_numbering
     enabled: true
     overrides:
       params:
         format: "({chapter}.{number})"
         position: right
-        
+
   - id: paragraph_spacing
     overrides:
       params:
         line_spacing: 2.0
-        first_indent: 0.5  # 英寸
+        first_indent: 0.5 # 英寸
 ```
 
 ---
@@ -301,17 +301,17 @@ flowchart TD
     B --> C[加载预设]
     C --> D[解析规则]
     D --> E{遍历元素}
-    
+
     E --> F[匹配规则]
     F --> G{有匹配?}
-    
+
     G -->|是| H[按优先级排序]
     H --> I[执行操作]
     I --> J[记录修复]
     J --> E
-    
+
     G -->|否| E
-    
+
     E -->|完成| K[验证结果]
     K --> L[生成报告]
     L --> M[保存文档]
@@ -324,7 +324,7 @@ class RuleParser:
     def parse(self, yaml_content: str) -> Rule:
         """解析YAML配置为Rule对象"""
         data = yaml.safe_load(yaml_content)
-        
+
         return Rule(
             id=data['id'],
             name=data['name'],
@@ -344,14 +344,14 @@ class RuleMatcher:
     def match(self, element: Element, rules: List[Rule]) -> List[Rule]:
         """找出适用于元素的所有规则"""
         matched = []
-        
+
         for rule in rules:
             if not rule.enabled:
                 continue
-            
+
             if self._selector_matches(rule.selector, element):
                 matched.append(rule)
-        
+
         # 按优先级排序
         return sorted(matched, key=lambda r: r.priority)
 ```
@@ -368,16 +368,16 @@ class RuleExecutor:
     ) -> List[Fix]:
         """执行匹配的规则"""
         fixes = []
-        
+
         for rule in rules:
             before_state = self._capture_state(element)
-            
+
             for action in rule.actions:
                 handler = self._get_action_handler(action.type)
                 handler.execute(element, action.params, doc)
-            
+
             after_state = self._capture_state(element)
-            
+
             fixes.append(Fix(
                 rule_id=rule.id,
                 element_id=element.id,
@@ -385,7 +385,7 @@ class RuleExecutor:
                 after=after_state,
                 description=rule.name,
             ))
-        
+
         return fixes
 ```
 
@@ -412,9 +412,9 @@ priority: 999  # 最后执行
 rules:
   - id: table_border_fix
     overrides:
-      priority: 5  # 覆盖默认优先级
+      priority: 5 # 覆盖默认优先级
       params:
-        border_color: "333333"  # 覆盖默认参数
+        border_color: "333333" # 覆盖默认参数
 ```
 
 ### 6.3 互斥规则
@@ -440,7 +440,7 @@ from engine.executor import ActionHandler, register_action
 @register_action("render_mermaid")
 class MermaidRenderHandler(ActionHandler):
     """Mermaid图表渲染处理器"""
-    
+
     async def execute(
         self,
         element: Element,
@@ -460,7 +460,7 @@ from engine.matcher import SelectorHandler, register_selector
 @register_selector("has_track_changes")
 class TrackChangesSelector(SelectorHandler):
     """选择包含修订的元素"""
-    
+
     def matches(self, element: Element, conditions: Dict) -> bool:
         return element.has_revision_marks
 ```
@@ -482,15 +482,15 @@ def test_table_border_rule():
     # 加载规则
     parser = RuleParser()
     rule = parser.load("rules/tables/border_fix.yaml")
-    
+
     # 创建测试文档
     doc = create_test_doc_with_borderless_table()
     elements = DocumentParser(doc).parse()
-    
+
     # 执行匹配
     matcher = RuleMatcher()
     matched = matcher.match(elements[0], [rule])
-    
+
     assert len(matched) == 1
     assert matched[0].id == "table_border_fix"
 ```
@@ -591,5 +591,5 @@ rules:
           font_name: "宋体"
           font_size: 12
           line_spacing: 1.5
-          first_line_indent: 24  # 2字符
+          first_line_indent: 24 # 2字符
 ```

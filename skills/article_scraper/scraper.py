@@ -1,6 +1,5 @@
 # skills/article_scraper/scraper.py
 
-import asyncio
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
@@ -26,13 +25,15 @@ class ArticleScraper:
                 )
                 page = await context.new_page()
 
-                await page.add_init_script("""
+                await page.add_init_script(
+                    """
                     () => {
                         Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
                         Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
                         Object.defineProperty(navigator, 'languages', {get: () => ['zh-CN', 'zh', 'en']});
                     }
-                """)
+                """
+                )
 
                 await page.goto(url, wait_until="networkidle")
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")

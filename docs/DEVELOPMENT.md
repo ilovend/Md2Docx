@@ -8,13 +8,13 @@
 
 ### 1.1 软件要求
 
-| 软件 | 最低版本 | 推荐版本 | 说明 |
-|:---|:---|:---|:---|
-| Node.js | 18.0 | 20.x LTS | 前端运行时 |
-| Python | 3.10 | 3.11 | 后端运行时 |
-| pnpm | 8.0 | 最新 | 包管理器（可选npm） |
-| Git | 2.30 | 最新 | 版本控制 |
-| VS Code | - | 最新 | 推荐IDE |
+| 软件    | 最低版本 | 推荐版本 | 说明                |
+| :------ | :------- | :------- | :------------------ |
+| Node.js | 18.0     | 20.x LTS | 前端运行时          |
+| Python  | 3.10     | 3.11     | 后端运行时          |
+| pnpm    | 8.0      | 最新     | 包管理器（可选npm） |
+| Git     | 2.30     | 最新     | 版本控制            |
+| VS Code | -        | 最新     | 推荐IDE             |
 
 ### 1.2 推荐VS Code扩展
 
@@ -119,6 +119,7 @@ MAX_BATCH_SIZE=20
 ### 3.1 同时启动前后端
 
 **终端1 - 后端服务**：
+
 ```bash
 # 激活虚拟环境
 .\venv\Scripts\activate
@@ -128,6 +129,7 @@ uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 **终端2 - 前端服务**：
+
 ```bash
 cd frontend
 npm run dev
@@ -136,6 +138,7 @@ npm run dev
 ### 3.2 代码风格
 
 **Python代码**：
+
 ```bash
 # 格式化
 black .
@@ -148,6 +151,7 @@ mypy .
 ```
 
 **TypeScript/React代码**：
+
 ```bash
 cd frontend
 
@@ -162,15 +166,15 @@ npx eslint .
 
 使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
 
-| 类型 | 说明 | 示例 |
-|:---|:---|:---|
-| `feat` | 新功能 | `feat: 添加表格边框修复规则` |
-| `fix` | 修复Bug | `fix: 修复公式编号错位问题` |
-| `docs` | 文档更新 | `docs: 更新API接口文档` |
-| `style` | 代码风格 | `style: 格式化Python代码` |
-| `refactor` | 重构 | `refactor: 优化规则匹配逻辑` |
-| `test` | 测试相关 | `test: 添加表格规则单元测试` |
-| `chore` | 构建/工具 | `chore: 更新依赖版本` |
+| 类型       | 说明      | 示例                         |
+| :--------- | :-------- | :--------------------------- |
+| `feat`     | 新功能    | `feat: 添加表格边框修复规则` |
+| `fix`      | 修复Bug   | `fix: 修复公式编号错位问题`  |
+| `docs`     | 文档更新  | `docs: 更新API接口文档`      |
+| `style`    | 代码风格  | `style: 格式化Python代码`    |
+| `refactor` | 重构      | `refactor: 优化规则匹配逻辑` |
+| `test`     | 测试相关  | `test: 添加表格规则单元测试` |
+| `chore`    | 构建/工具 | `chore: 更新依赖版本`        |
 
 ---
 
@@ -179,6 +183,7 @@ npx eslint .
 ### 4.1 后端调试
 
 **VS Code launch.json**：
+
 ```json
 {
   "version": "0.2.0",
@@ -197,6 +202,7 @@ npx eslint .
 ```
 
 **打印调试**：
+
 ```python
 from utils.logger import logger
 
@@ -209,26 +215,28 @@ logger.error(f"处理失败: {error}", exc_info=True)
 ### 4.2 前端调试
 
 **React DevTools**：
+
 - 安装浏览器扩展
 - 查看组件树和状态
 
 **网络请求调试**：
+
 ```typescript
 // 添加请求拦截器
 api.interceptors.request.use((config) => {
-  console.log('Request:', config.method, config.url, config.data);
+  console.log("Request:", config.method, config.url, config.data);
   return config;
 });
 
 api.interceptors.response.use(
   (response) => {
-    console.log('Response:', response.status, response.data);
+    console.log("Response:", response.status, response.data);
     return response;
   },
   (error) => {
-    console.error('Error:', error.response?.status, error.response?.data);
+    console.error("Error:", error.response?.status, error.response?.data);
     throw error;
-  }
+  },
 );
 ```
 
@@ -237,6 +245,7 @@ api.interceptors.response.use(
 使用FastAPI内置的Swagger UI：http://localhost:8000/docs
 
 或使用curl/httpie：
+
 ```bash
 # 上传文件
 curl -X POST "http://localhost:8000/api/upload" \
@@ -270,6 +279,7 @@ open htmlcov/index.html
 ```
 
 **测试文件结构**：
+
 ```
 tests/
 ├── conftest.py           # pytest配置和fixtures
@@ -283,6 +293,7 @@ tests/
 ```
 
 **编写测试示例**：
+
 ```python
 import pytest
 from fastapi.testclient import TestClient
@@ -297,7 +308,7 @@ def test_upload_markdown():
             "/api/upload",
             files={"file": ("sample.md", f, "text/markdown")}
         )
-    
+
     assert response.status_code == 200
     assert "document_id" in response.json()
 
@@ -307,7 +318,7 @@ def test_upload_invalid_type():
         "/api/upload",
         files={"file": ("test.exe", b"content", "application/octet-stream")}
     )
-    
+
     assert response.status_code == 400
     assert response.json()["error"] == "invalid_file_type"
 ```
@@ -413,6 +424,7 @@ md2docx/
 ### Q: 前端启动报错 `ENOENT: no such file or directory`
 
 确保已安装依赖：
+
 ```bash
 cd frontend
 npm install
@@ -421,6 +433,7 @@ npm install
 ### Q: 后端启动报错 `ModuleNotFoundError`
 
 确保虚拟环境已激活且已安装依赖：
+
 ```bash
 .\venv\Scripts\activate
 pip install -r requirements.txt
@@ -429,6 +442,7 @@ pip install -r requirements.txt
 ### Q: CORS错误
 
 检查后端CORS配置是否允许前端域名：
+
 ```python
 app.add_middleware(
     CORSMiddleware,
@@ -442,6 +456,7 @@ app.add_middleware(
 ### Q: 文件上传失败
 
 检查文件大小限制和目录权限：
+
 ```python
 # 增加文件大小限制
 app = FastAPI(max_request_size=50 * 1024 * 1024)  # 50MB

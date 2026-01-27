@@ -1,5 +1,4 @@
 import yaml
-from pathlib import Path
 from backend.core.config import settings
 
 

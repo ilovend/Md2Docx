@@ -6,14 +6,14 @@
 
 ## 1. 技术栈
 
-| 技术 | 版本 | 用途 |
-|:---|:---|:---|
-| Python | 3.10+ | 运行时 |
-| FastAPI | 最新 | Web框架 |
-| uvicorn | 最新 | ASGI服务器 |
-| python-docx | 最新 | Word文档处理 |
-| Pydantic | v2 | 数据验证 |
-| PyYAML | 最新 | YAML解析 |
+| 技术        | 版本  | 用途         |
+| :---------- | :---- | :----------- |
+| Python      | 3.10+ | 运行时       |
+| FastAPI     | 最新  | Web框架      |
+| uvicorn     | 最新  | ASGI服务器   |
+| python-docx | 最新  | Word文档处理 |
+| Pydantic    | v2    | 数据验证     |
+| PyYAML      | 最新  | YAML解析     |
 
 ---
 
@@ -119,7 +119,7 @@ router = APIRouter()
 async def upload_document(file: UploadFile = File(...)):
     """
     上传文档文件
-    
+
     支持的格式：.md, .docx, .txt
     返回文档ID用于后续处理
     """
@@ -127,7 +127,7 @@ async def upload_document(file: UploadFile = File(...)):
     allowed_extensions = {'.md', '.docx', '.txt'}
     if not any(file.filename.endswith(ext) for ext in allowed_extensions):
         raise HTTPException(400, "不支持的文件格式")
-    
+
     # 保存文件并返回ID
     document_id = await save_uploaded_file(file)
     return {"document_id": document_id, "filename": file.filename}
@@ -136,7 +136,7 @@ async def upload_document(file: UploadFile = File(...)):
 async def process_document(request: ProcessRequest):
     """
     处理文档并返回预览数据
-    
+
     根据选择的预设应用规则，返回修复预览
     """
     processor = DocumentProcessor()
@@ -155,7 +155,7 @@ async def download_document(document_id: str):
     file_path = get_processed_file_path(document_id)
     if not file_path.exists():
         raise HTTPException(404, "文档不存在")
-    
+
     return FileResponse(
         path=file_path,
         filename=f"{document_id}_fixed.docx",
@@ -243,18 +243,18 @@ from typing import List, Dict, Any
 
 class DocumentParser:
     """Word文档解析器"""
-    
+
     def __init__(self, file_path: Path):
         self.doc = Document(file_path)
         self.elements = []
-    
+
     def parse(self) -> List[Dict[str, Any]]:
         """解析文档，提取所有元素"""
         self._parse_paragraphs()
         self._parse_tables()
         self._parse_images()
         return self.elements
-    
+
     def _parse_paragraphs(self):
         """解析段落"""
         for i, para in enumerate(self.doc.paragraphs):
@@ -268,7 +268,7 @@ class DocumentParser:
                     'alignment': str(para.alignment),
                 },
             })
-    
+
     def _parse_tables(self):
         """解析表格"""
         for i, table in enumerate(self.doc.tables):
@@ -276,7 +276,7 @@ class DocumentParser:
             for row in table.rows:
                 cells_data = [cell.text for cell in row.cells]
                 rows_data.append(cells_data)
-            
+
             self.elements.append({
                 'id': f'table_{i}',
                 'type': 'table',
@@ -285,7 +285,7 @@ class DocumentParser:
                 'data': rows_data,
                 'style': self._get_table_style(table),
             })
-    
+
     def _parse_images(self):
         """解析图片"""
         # 使用底层XML解析图片
@@ -303,11 +303,11 @@ from engine.executor import RuleExecutor
 
 class DocumentProcessor:
     """文档处理器 - 核心处理流程"""
-    
+
     def __init__(self):
         self.matcher = RuleMatcher()
         self.executor = RuleExecutor()
-    
+
     async def process(
         self,
         document_id: str,
@@ -316,7 +316,7 @@ class DocumentProcessor:
     ) -> Dict[str, Any]:
         """
         处理文档的主流程
-        
+
         1. 加载文档
         2. 解析元素
         3. 匹配规则
@@ -325,15 +325,15 @@ class DocumentProcessor:
         """
         import time
         start_time = time.time()
-        
+
         # 1. 加载文档
         file_path = self._get_document_path(document_id)
         parser = DocumentParser(file_path)
         elements = parser.parse()
-        
+
         # 2. 加载预设规则
         rules = self.matcher.load_preset(preset)
-        
+
         # 3. 匹配规则
         matches = []
         for element in elements:
@@ -343,7 +343,7 @@ class DocumentProcessor:
                     'element': element,
                     'rules': matched_rules,
                 })
-        
+
         # 4. 执行修复
         fixes = []
         for match in matches:
@@ -353,13 +353,13 @@ class DocumentProcessor:
                 doc=parser.doc,
             )
             fixes.extend(fix)
-        
+
         # 5. 保存修复后的文档
         output_path = self._get_output_path(document_id)
         parser.doc.save(output_path)
-        
+
         duration_ms = int((time.time() - start_time) * 1000)
-        
+
         return {
             'document_id': document_id,
             'status': 'completed',
@@ -392,21 +392,21 @@ async def start_batch_processing(
 ):
     """启动批量处理任务"""
     batch_id = generate_batch_id()
-    
+
     task_status[batch_id] = {
         'status': 'running',
         'total': len(document_ids),
         'completed': 0,
         'errors': [],
     }
-    
+
     background_tasks.add_task(
         process_batch,
         batch_id,
         document_ids,
         preset,
     )
-    
+
     return {'batch_id': batch_id}
 
 @router.get("/batch/{batch_id}/status")
@@ -423,7 +423,7 @@ async def process_batch(
 ):
     """批量处理后台任务"""
     processor = DocumentProcessor()
-    
+
     for doc_id in document_ids:
         try:
             await processor.process(doc_id, preset, {})
@@ -433,7 +433,7 @@ async def process_batch(
                 'document_id': doc_id,
                 'error': str(e),
             })
-    
+
     task_status[batch_id]['status'] = 'completed'
 ```
 
@@ -489,16 +489,16 @@ from pathlib import Path
 
 def setup_logging(log_level: str = "INFO"):
     """配置日志系统"""
-    
+
     # 日志格式
     formatter = logging.Formatter(
         "%(asctime)s | %(levelname)-8s | %(name)s:%(lineno)d | %(message)s"
     )
-    
+
     # 控制台处理器
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
-    
+
     # 文件处理器
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
@@ -507,13 +507,13 @@ def setup_logging(log_level: str = "INFO"):
         encoding="utf-8",
     )
     file_handler.setFormatter(formatter)
-    
+
     # 根日志器配置
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
     root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
-    
+
     # 第三方库日志级别
     logging.getLogger("uvicorn").setLevel(logging.WARNING)
     logging.getLogger("fastapi").setLevel(logging.WARNING)
@@ -534,21 +534,21 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     """应用配置"""
-    
+
     # 服务配置
     HOST: str = "127.0.0.1"
     PORT: int = 8000
     DEBUG: bool = True
-    
+
     # 文件存储
     UPLOAD_DIR: Path = Path("./uploads")
     OUTPUT_DIR: Path = Path("./outputs")
     RULES_DIR: Path = Path("./rules")
-    
+
     # 处理限制
     MAX_FILE_SIZE_MB: int = 50
     MAX_BATCH_SIZE: int = 20
-    
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -585,5 +585,6 @@ uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ### API文档
 
 启动后访问：
+
 - Swagger UI: http://127.0.0.1:8000/docs
 - ReDoc: http://127.0.0.1:8000/redoc

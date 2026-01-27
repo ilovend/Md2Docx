@@ -264,7 +264,9 @@ export default function RuleEditor() {
     } catch (error) {
       console.error('Test run failed', error);
       setTestResult(
-        `<div class="p-2 text-red-400 text-xs">Error: ${(error as any).message || 'Failed to run test'}</div>`,
+        `<div class="p-2 text-red-400 text-xs">Error: ${
+          (error as any).message || 'Failed to run test'
+        }</div>`,
       );
     } finally {
       setIsTesting(false);
@@ -476,7 +478,9 @@ export default function RuleEditor() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div
-                  className={`h-2 w-2 rounded-full ${yamlValidation.valid ? 'bg-green-500' : 'bg-red-500'}`}
+                  className={`h-2 w-2 rounded-full ${
+                    yamlValidation.valid ? 'bg-green-500' : 'bg-red-500'
+                  }`}
                 ></div>
                 <span className={yamlValidation.valid ? 'text-green-400' : 'text-red-400'}>
                   {yamlValidation.valid ? t('rules.syntaxValid') : '语法错误'}

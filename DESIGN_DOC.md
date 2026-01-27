@@ -1,7 +1,7 @@
 # 设计文档: Md2Docx - Word文档格式自动修复工具
 
-**状态**: 已批准  
-**作者**: Md2Docx Team  
+**状态**: 已批准
+**作者**: Md2Docx Team
 **最后更新**: 2026-01-26
 
 ---
@@ -23,6 +23,7 @@
 ### 项目愿景
 
 我们希望通过Md2Docx工具实现：
+
 - **一键修复**：自动检测并修复所有格式问题
 - **智能预览**：修复前后对比预览，用户可选择性应用
 - **批量处理**：支持多文件并行处理，提升效率
@@ -34,16 +35,16 @@
 
 ### 2.1 目标 (Goals)
 
-| 优先级 | 目标 | 验收标准 |
-|:---:|:---|:---|
-| P0 | 自动修复表格边框和样式问题 | 95%以上的表格格式问题可被自动修复 |
-| P0 | 支持拖拽上传Markdown/Word文件 | 支持.md, .docx, .txt格式 |
-| P0 | 提供修复前后对比预览 | 高亮显示所有修改点 |
-| P1 | 支持LaTeX公式转Word公式 | 正确处理行内和行间公式 |
-| P1 | 批量文件处理能力 | 支持10+文件并行处理 |
-| P1 | YAML规则配置编辑器 | 语法高亮、实时验证 |
-| P2 | Mermaid图表渲染 | 流程图、时序图、类图支持 |
-| P2 | 多预设配置管理 | 企业风格、学术论文、技术博客等 |
+| 优先级 | 目标                          | 验收标准                          |
+| :----: | :---------------------------- | :-------------------------------- |
+|   P0   | 自动修复表格边框和样式问题    | 95%以上的表格格式问题可被自动修复 |
+|   P0   | 支持拖拽上传Markdown/Word文件 | 支持.md, .docx, .txt格式          |
+|   P0   | 提供修复前后对比预览          | 高亮显示所有修改点                |
+|   P1   | 支持LaTeX公式转Word公式       | 正确处理行内和行间公式            |
+|   P1   | 批量文件处理能力              | 支持10+文件并行处理               |
+|   P1   | YAML规则配置编辑器            | 语法高亮、实时验证                |
+|   P2   | Mermaid图表渲染               | 流程图、时序图、类图支持          |
+|   P2   | 多预设配置管理                | 企业风格、学术论文、技术博客等    |
 
 ### 2.2 非目标 (Non-Goals)
 
@@ -58,24 +59,24 @@
 
 ### 3.1 核心技术栈
 
-| 组件类别 | 选择 | 理由 |
-|:---|:---|:---|
-| **桌面框架** | Electron | 跨平台支持，成熟的生态系统，便于Web技术复用 |
-| **前端UI** | React + TypeScript | 组件化开发，类型安全，Figma原型已使用React |
-| **UI组件库** | Radix UI + Tailwind CSS | 无障碍支持，高度可定制，Figma原型已采用 |
-| **后端框架** | Python + FastAPI | 异步支持，自动API文档，便于与python-docx集成 |
-| **文档处理** | python-docx | Python最成熟的Word文档处理库 |
-| **配置格式** | YAML | 人类可读，便于规则配置的版本管理 |
-| **进程通信** | Electron IPC + HTTP | 主进程与渲染进程用IPC，与Python后端用HTTP |
+| 组件类别     | 选择                    | 理由                                         |
+| :----------- | :---------------------- | :------------------------------------------- |
+| **桌面框架** | Electron                | 跨平台支持，成熟的生态系统，便于Web技术复用  |
+| **前端UI**   | React + TypeScript      | 组件化开发，类型安全，Figma原型已使用React   |
+| **UI组件库** | Radix UI + Tailwind CSS | 无障碍支持，高度可定制，Figma原型已采用      |
+| **后端框架** | Python + FastAPI        | 异步支持，自动API文档，便于与python-docx集成 |
+| **文档处理** | python-docx             | Python最成熟的Word文档处理库                 |
+| **配置格式** | YAML                    | 人类可读，便于规则配置的版本管理             |
+| **进程通信** | Electron IPC + HTTP     | 主进程与渲染进程用IPC，与Python后端用HTTP    |
 
 ### 3.2 备选方案对比
 
-| 场景 | 选择方案 | 备选方案 | 选择理由 |
-|:---|:---|:---|:---|
-| 桌面框架 | Electron | Tauri | Electron生态更成熟，开发效率更高 |
-| 前端框架 | React | Vue.js | Figma原型已使用React |
-| 后端语言 | Python | Node.js | python-docx是最成熟的Word处理库 |
-| 通信方式 | HTTP | gRPC | HTTP更简单，调试方便 |
+| 场景     | 选择方案 | 备选方案 | 选择理由                         |
+| :------- | :------- | :------- | :------------------------------- |
+| 桌面框架 | Electron | Tauri    | Electron生态更成熟，开发效率更高 |
+| 前端框架 | React    | Vue.js   | Figma原型已使用React             |
+| 后端语言 | Python   | Node.js  | python-docx是最成熟的Word处理库  |
+| 通信方式 | HTTP     | gRPC     | HTTP更简单，调试方便             |
 
 ---
 
@@ -90,7 +91,7 @@ graph TB
         Renderer["渲染进程<br/>React UI"]
         Main <-->|IPC| Renderer
     end
-    
+
     subgraph Backend["Python 后端"]
         API["FastAPI<br/>RESTful API"]
         Engine["规则引擎<br/>Rule Engine"]
@@ -98,28 +99,28 @@ graph TB
         API --> Engine
         Engine --> DocProcessor
     end
-    
+
     subgraph Storage["存储"]
         Config["YAML配置<br/>规则/预设"]
         Temp["临时文件<br/>处理中的文档"]
     end
-    
+
     Renderer <-->|HTTP| API
     Engine --> Config
     DocProcessor --> Temp
-    
+
     User["用户"] --> Renderer
 ```
 
 ### 4.2 核心模块说明
 
-| 模块 | 职责 | 关键技术 |
-|:---|:---|:---|
-| **Electron主进程** | 窗口管理、菜单、系统托盘、后端进程管理 | Electron API |
-| **React渲染进程** | 用户界面、状态管理、IPC通信 | React, Zustand/Redux |
-| **FastAPI服务** | RESTful API、文件上传下载、异步任务 | FastAPI, asyncio |
-| **规则引擎** | 规则解析、匹配、执行、优先级管理 | 自定义Python模块 |
-| **文档处理器** | Word文档解析、修改、保存 | python-docx |
+| 模块               | 职责                                   | 关键技术             |
+| :----------------- | :------------------------------------- | :------------------- |
+| **Electron主进程** | 窗口管理、菜单、系统托盘、后端进程管理 | Electron API         |
+| **React渲染进程**  | 用户界面、状态管理、IPC通信            | React, Zustand/Redux |
+| **FastAPI服务**    | RESTful API、文件上传下载、异步任务    | FastAPI, asyncio     |
+| **规则引擎**       | 规则解析、匹配、执行、优先级管理       | 自定义Python模块     |
+| **文档处理器**     | Word文档解析、修改、保存               | python-docx          |
 
 ### 4.3 数据流说明
 
@@ -130,7 +131,7 @@ sequenceDiagram
     participant A as FastAPI
     participant E as 规则引擎
     participant D as 文档处理器
-    
+
     U->>R: 拖拽上传文档
     R->>A: POST /api/upload
     A->>D: 解析文档

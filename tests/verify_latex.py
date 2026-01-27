@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -12,10 +11,10 @@ from backend.core.latex_converter import convert_latex_in_document
 def test_latex_conversion():
     # Create a test document
     doc = Document()
-    p1 = doc.add_paragraph("Hello World")
-    p2 = doc.add_paragraph("Here is an inline formula: $E=mc^2$ inside text.")
-    p3 = doc.add_paragraph("And here is a display formula:")
-    p4 = doc.add_paragraph("$$\\frac{a}{b} = c$$")
+    doc.add_paragraph("Hello World")
+    doc.add_paragraph("Here is an inline formula: $E=mc^2$ inside text.")
+    doc.add_paragraph("And here is a display formula:")
+    doc.add_paragraph("$$\\frac{a}{b} = c$$")
 
     # Run conversion
     print("Running conversion...")

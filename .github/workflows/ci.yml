@@ -10,78 +10,71 @@ jobs:
   verify:
     name: 验证检查
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      
+          python-version: "3.10"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: Install Python Dependencies
-        run: |
-          pip install black ruff
-      
+        run: pip install black ruff
+
       - name: Run Verify Script
-        run: |
-          chmod +x scripts/verify.sh
-          ./scripts/verify.sh
-  
+        run: python scripts/verify.py
 
-
-  python-lint:
-    name: Python 代码检查
+  lint:
+    name: 代码规范检查
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      
-      - name: Install Dependencies
-        run: |
-          pip install black ruff
-      
-      - name: Check Black formatting
-        run: |
-          black --check --diff . || echo "代码格式不符合 Black 规范"
-      
-      - name: Run Ruff
-        run: |
-          ruff check . || echo "存在 Ruff 警告"
+          python-version: "3.10"
 
-  frontend-lint:
-    name: 前端代码检查
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+
+  frontend-check:
+    name: 前端构建验证
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
       - name: Install Dependencies
         working-directory: ./frontend
         run: npm ci
-      
+
       - name: Type Check
         working-directory: ./frontend
-        run: npx tsc --noEmit || echo "存在类型错误"
-      
+        run: npx tsc --noEmit
+
       - name: Build
         working-directory: ./frontend
         run: npm run build

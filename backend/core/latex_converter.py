@@ -4,7 +4,6 @@ Converts LaTeX math expressions to Word OMML format.
 """
 
 import re
-from pathlib import Path
 from lxml import etree
 from docx import Document
 from docx.oxml.ns import qn
@@ -29,46 +28,46 @@ MATHML_TO_OMML_XSLT = """<?xml version="1.0" encoding="UTF-8"?>
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
     xmlns:mml="http://www.w3.org/1998/Math/MathML">
-    
+
     <xsl:output method="xml" indent="yes"/>
-    
+
     <xsl:template match="mml:math">
         <m:oMath>
             <xsl:apply-templates/>
         </m:oMath>
     </xsl:template>
-    
+
     <xsl:template match="mml:mrow">
         <xsl:apply-templates/>
     </xsl:template>
-    
+
     <xsl:template match="mml:mi|mml:mn|mml:mo|mml:mtext">
         <m:r>
             <m:t><xsl:value-of select="."/></m:t>
         </m:r>
     </xsl:template>
-    
+
     <xsl:template match="mml:mfrac">
         <m:f>
             <m:num><xsl:apply-templates select="*[1]"/></m:num>
             <m:den><xsl:apply-templates select="*[2]"/></m:den>
         </m:f>
     </xsl:template>
-    
+
     <xsl:template match="mml:msup">
         <m:sSup>
             <m:e><xsl:apply-templates select="*[1]"/></m:e>
             <m:sup><xsl:apply-templates select="*[2]"/></m:sup>
         </m:sSup>
     </xsl:template>
-    
+
     <xsl:template match="mml:msub">
         <m:sSub>
             <m:e><xsl:apply-templates select="*[1]"/></m:e>
             <m:sub><xsl:apply-templates select="*[2]"/></m:sub>
         </m:sSub>
     </xsl:template>
-    
+
     <xsl:template match="mml:msqrt">
         <m:rad>
             <m:radPr><m:degHide m:val="1"/></m:radPr>
@@ -76,7 +75,7 @@ MATHML_TO_OMML_XSLT = """<?xml version="1.0" encoding="UTF-8"?>
             <m:e><xsl:apply-templates/></m:e>
         </m:rad>
     </xsl:template>
-    
+
     <xsl:template match="mml:munderover|mml:msubsup">
         <m:sSubSup>
             <m:e><xsl:apply-templates select="*[1]"/></m:e>
@@ -84,7 +83,7 @@ MATHML_TO_OMML_XSLT = """<?xml version="1.0" encoding="UTF-8"?>
             <m:sup><xsl:apply-templates select="*[3]"/></m:sup>
         </m:sSubSup>
     </xsl:template>
-    
+
     <xsl:template match="*">
         <xsl:apply-templates/>
     </xsl:template>
@@ -234,7 +233,7 @@ class LaTeXConverter:
 
                 if match:
                     latex_expr = match.group(1).strip()
-                    full_match = match.group(0)
+                    match.group(0)
                     start, end = match.span()
 
                     # Try OMML conversion

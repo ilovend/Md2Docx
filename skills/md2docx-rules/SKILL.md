@@ -10,6 +10,7 @@ description: "Md2Docx规则配置技能：编写YAML格式的文档格式修复�
 ## When to Use This Skill
 
 触发此技能当你需要：
+
 - 创建新的文档格式修复规则
 - 调试规则匹配失败问题
 - 优化规则执行性能
@@ -19,11 +20,13 @@ description: "Md2Docx规则配置技能：编写YAML格式的文档格式修复�
 ## Not For / Boundaries
 
 此技能不包括：
+
 - python-docx的底层API使用（参见后端架构文档）
 - 前端规则编辑器UI开发（参见前端架构文档）
 - 规则引擎核心代码开发（参见规则引擎设计文档）
 
 必需输入：
+
 - 目标文档元素类型（表格/段落/图片等）
 - 期望的修复效果
 - 可选：示例文档片段
@@ -33,32 +36,34 @@ description: "Md2Docx规则配置技能：编写YAML格式的文档格式修复�
 ### 规则基础结构
 
 ```yaml
-id: rule_unique_id           # 规则唯一标识
-name: 规则显示名称            # 人类可读名称
-description: 规则功能描述     # 详细说明
-category: tables             # 分类: tables/formulas/typography/images
-version: 1.0.0               # 版本号
-enabled: true                # 是否启用
-priority: 10                 # 优先级(数字越小越先执行)
+id: rule_unique_id # 规则唯一标识
+name: 规则显示名称 # 人类可读名称
+description: 规则功能描述 # 详细说明
+category: tables # 分类: tables/formulas/typography/images
+version: 1.0.0 # 版本号
+enabled: true # 是否启用
+priority: 10 # 优先级(数字越小越先执行)
 
-selector:                    # 选择器定义
-  type: table                # 元素类型
-  conditions: []             # 匹配条件
+selector: # 选择器定义
+  type: table # 元素类型
+  conditions: [] # 匹配条件
 
-actions:                     # 修复操作
-  - type: set_style          # 操作类型
-    params: {}               # 操作参数
+actions: # 修复操作
+  - type: set_style # 操作类型
+    params: {} # 操作参数
 ```
 
 ### 选择器类型
 
 **按元素类型选择**：
+
 ```yaml
 selector:
-  type: table  # table, paragraph, image, heading, list
+  type: table # table, paragraph, image, heading, list
 ```
 
 **按样式选择**：
+
 ```yaml
 selector:
   type: paragraph
@@ -69,6 +74,7 @@ selector:
 ```
 
 **按内容选择**：
+
 ```yaml
 selector:
   type: paragraph
@@ -79,6 +85,7 @@ selector:
 ```
 
 **复合条件(AND)**：
+
 ```yaml
 selector:
   type: table
@@ -93,22 +100,23 @@ selector:
 
 ### 条件运算符
 
-| 运算符 | 说明 | 示例值 |
-|:---|:---|:---|
-| `equals` | 等于 | `"Heading 1"` |
-| `not_equals` | 不等于 | `"Normal"` |
-| `contains` | 包含 | `"$$"` |
-| `starts_with` | 开头是 | `"##"` |
-| `ends_with` | 结尾是 | `".md"` |
-| `matches` | 正则匹配 | `"^\\d+\\."` |
-| `greater_than` | 大于 | `10` |
-| `less_than` | 小于 | `100` |
-| `is_null` | 为空 | (无需value) |
-| `is_not_null` | 非空 | (无需value) |
+| 运算符         | 说明     | 示例值        |
+| :------------- | :------- | :------------ |
+| `equals`       | 等于     | `"Heading 1"` |
+| `not_equals`   | 不等于   | `"Normal"`    |
+| `contains`     | 包含     | `"$$"`        |
+| `starts_with`  | 开头是   | `"##"`        |
+| `ends_with`    | 结尾是   | `".md"`       |
+| `matches`      | 正则匹配 | `"^\\d+\\."`  |
+| `greater_than` | 大于     | `10`          |
+| `less_than`    | 小于     | `100`         |
+| `is_null`      | 为空     | (无需value)   |
+| `is_not_null`  | 非空     | (无需value)   |
 
 ### 操作类型
 
 **设置样式**：
+
 ```yaml
 actions:
   - type: set_style
@@ -121,16 +129,18 @@ actions:
 ```
 
 **添加内容**：
+
 ```yaml
 actions:
   - type: add_content
     params:
-      position: after  # before, after, replace
+      position: after # before, after, replace
       content: "图 {index}"
       style: "Caption"
 ```
 
 **替换内容**：
+
 ```yaml
 actions:
   - type: replace_content
@@ -200,7 +210,7 @@ rules:
     overrides:
       params:
         border_width: 4
-        
+
   - id: heading_1_style
     enabled: true
     overrides:

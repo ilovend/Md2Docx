@@ -11,8 +11,6 @@ Usage:
 
 import subprocess
 import sys
-import os
-import time
 import requests
 from pathlib import Path
 
@@ -57,7 +55,7 @@ def check_backend_running():
     try:
         response = requests.get("http://127.0.0.1:8000/health", timeout=5)
         return response.status_code == 200
-    except:
+    except Exception:
         return False
 
 
