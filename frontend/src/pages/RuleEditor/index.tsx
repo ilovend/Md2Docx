@@ -80,83 +80,48 @@ export default function RuleEditor() {
         // 转换规则为分类显示
         const ruleEntries = Object.entries(detail.rules || {});
 
-        // 规则分类映射
-        const ruleCategories: {
-          [key: string]: {
-            name: string;
-            icon: string;
-            rules: { id: string; name: string; active: boolean }[];
-          };
-        } = {
-          table: {
-            name: '表格规则',
-            icon: '📊',
-            rules: [],
-          },
-          formula: {
-            name: '公式规则',
-            icon: '∑',
-            rules: [],
-          },
-          paragraph: {
-            name: '排版规则',
-            icon: '📝',
-            rules: [],
-          },
-          image: {
-            name: '图表规则',
-            icon: '🖼️',
-            rules: [],
-          },
-          font: {
-            name: '字体规则',
-            icon: '🔤',
-            rules: [],
-          },
-          heading: {
-            name: '标题规则',
-            icon: '📑',
-            rules: [],
-          },
-          other: {
-            name: '其他规则',
-            icon: '⚙️',
-            rules: [],
-          },
+        // 获取规则元数据以获取正确的分类标识和名称
+        const { rules: rulesMetadata } = await rulesApi.getAll();
+        const metadataMap = new Map(rulesMetadata.map((r) => [r.id, r]));
+
+        // 预定义分类基本信息
+        const categoryMeta: Record<string, { name: string; icon: string }> = {
+          font: { name: '字体规则', icon: '🔤' },
+          table: { name: '表格规则', icon: '📊' },
+          paragraph: { name: '排版规则', icon: '📝' },
+          image: { name: '图表规则', icon: '🖼️' },
+          heading: { name: '标题规则', icon: '📑' },
+          formula: { name: '公式规则', icon: '∑' },
+          other: { name: '其他规则', icon: '⚙️' },
         };
 
-        // 规则分类映射
-        const ruleToCategory: { [key: string]: string } = {
-          table_border: 'table',
-          table_cell_spacing: 'table',
-          table_column_width: 'table',
-          formula_numbering: 'formula',
-          inline_formula_style: 'formula',
-          display_formula_center: 'formula',
-          latex_to_omml: 'formula',
-          paragraph_spacing: 'paragraph',
-          first_line_indent: 'paragraph',
-          image_center: 'image',
-          image_resize: 'image',
-          image_caption: 'image',
-          font_standard: 'font',
-          font_color: 'font',
-          font_replacement: 'font',
-          title_bold: 'heading',
-          heading_style: 'heading',
-        };
+        const ruleCategories: Record<
+          string,
+          { name: string; icon: string; rules: { id: string; name: string; active: boolean }[] }
+        > = {};
 
         // 分配规则到分类
         ruleEntries.forEach(([id, config]: [string, any]) => {
-          const categoryId = ruleToCategory[id] || 'other';
+          const meta = metadataMap.get(id);
+          const categoryId = meta?.category || 'other';
+          const categoryInfo = categoryMeta[categoryId] || categoryMeta.other;
+
+          if (!ruleCategories[categoryId]) {
+            ruleCategories[categoryId] = {
+              name: categoryInfo.name,
+              icon: categoryInfo.icon,
+              rules: [],
+            };
+          }
+
           ruleCategories[categoryId].rules.push({
             id,
-            name: id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+            name: meta?.name || id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
             active: config?.enabled ?? true,
           });
         });
 
-        // 转换为分类数组
+        // 转换为排序后的分类数组
         const newCategories: RuleCategory[] = Object.entries(ruleCategories)
           .map(([id, category]) => ({
             id,
@@ -165,7 +130,11 @@ export default function RuleEditor() {
             expanded: true,
             rules: category.rules,
           }))
-          .filter((category) => category.rules.length > 0); // 只显示有规则的分类
+          .sort((a, b) => {
+            // 可选：按照 categoryMeta 的顺序排序
+            const order = Object.keys(categoryMeta);
+            return order.indexOf(a.id) - order.indexOf(b.id);
+          });
         setCategories(newCategories);
 
         // 生成 YAML 内容

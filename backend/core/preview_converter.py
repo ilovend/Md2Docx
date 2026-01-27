@@ -1,7 +1,16 @@
+import html
+import logging
+import traceback
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-import html
+from docx.oxml.text.paragraph import CT_P
+from docx.text.paragraph import Paragraph
+from docx.oxml.table import CT_Tbl
+from docx.table import Table
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 class DocxPreviewConverter:
@@ -71,20 +80,6 @@ class DocxPreviewConverter:
             """)
 
             # Process paragraphs and tables in order
-            # Note: docx.Document.paragraphs only gets paragraphs, same for tables.
-            # To preserve order, we need to iterate over element.body.iter_children
-            # However, simplified approach: doc.paragraphs + doc.tables logic is complex for ordering.
-            # We will use doc.iter_inner_content (generic xml iteration) or just handle paragraphs for MVP if order matters strictly.
-            # For simplicity in this MVP, we'll iterate paragraphs as primary content.
-            # (Note: real docx structure is body -> (p | tbl | ...)*)
-
-            # Better approach for order:
-            from docx.document import Document as _Document
-            from docx.oxml.text.paragraph import CT_P
-            from docx.text.paragraph import Paragraph
-            from docx.oxml.table import CT_Tbl
-            from docx.table import Table
-
             parent = doc._body
 
             para_index = 0
@@ -109,10 +104,7 @@ class DocxPreviewConverter:
             return "\n".join(html_parts)
 
         except Exception as e:
-            import traceback
-
-            # traceback.print_exc()
-            print(f"Preview generation error: {e}")
+            logger.error(f"Preview generation error: {traceback.format_exc()}")
             return f"<div class='error'>Error generating preview: {str(e)}</div>"
 
     def _convert_paragraph(self, para, index, fix_info=None):
@@ -173,8 +165,7 @@ class DocxPreviewConverter:
             desc_list = [f"[{f['rule']}] {f['desc']}" for f in fix_info]
             full_desc = "; ".join(desc_list)
             title_str = f' title="{html.escape(full_desc)}"'
-        else:
-            class_str = ' class="dict-preview-table"'
+        else:class_str = ' class="dict-preview-table"'
 
         rows = []
         for row in table.rows:

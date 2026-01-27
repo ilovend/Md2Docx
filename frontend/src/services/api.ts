@@ -218,7 +218,24 @@ export const batchApi = {
   },
 };
 
+export interface RuleMetadata {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  priority: number;
+  parameters: Record<string, any>;
+}
+
 export const rulesApi = {
+  /**
+   * 获取所有可用规则的元数据
+   */
+  getAll: async (): Promise<{ rules: RuleMetadata[] }> => {
+    const response = await axios.get<{ rules: RuleMetadata[] }>(`${API_BASE}/rules`);
+    return response.data;
+  },
+
   exportAll: (): string => {
     return `${API_BASE}/rules/export`;
   },

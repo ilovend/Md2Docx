@@ -164,18 +164,11 @@ export default function Workspace() {
       if (selectedFiles.length === 1) {
         // 单个文件处理
         const file = selectedFiles[0];
-        console.log('Uploading file:', file.name);
-
         const uploadRes = await documentApi.upload(file);
-        console.log('Upload response:', uploadRes);
-
-        // 处理文档
-        console.log('Processing with preset:', selectedPresetId);
         const processRes = await documentApi.process({
           document_id: uploadRes.document_id,
           preset: selectedPresetId,
         });
-        console.log('Process response:', processRes);
 
         setProcessResult(processRes);
 
@@ -204,12 +197,6 @@ export default function Workspace() {
         }
       } else {
         // 批量文件处理
-        console.log('Processing multiple files:', selectedFiles.length);
-
-        const batchItems = selectedFiles.map((file) => ({
-          document_id: file.name,
-          preset: selectedPresetId,
-        }));
 
         // 这里应该使用batch API，但为了简化，我们先逐个处理
         let processedCount = 0;
@@ -217,10 +204,8 @@ export default function Workspace() {
 
         for (const file of selectedFiles) {
           try {
-            console.log('Uploading file:', file.name);
             const uploadRes = await documentApi.upload(file);
 
-            console.log('Processing file:', file.name);
             const processRes = await documentApi.process({
               document_id: uploadRes.document_id,
               preset: selectedPresetId,

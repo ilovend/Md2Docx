@@ -1,12 +1,24 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime
 import json
+import logging
+import os
+import time
+import uuid
+import yaml
+import zipfile
+import io
+import traceback
+from datetime import datetime
+from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse, Response, StreamingResponse
+from pydantic import BaseModel
 from backend.api.schemas import ProcessRequest, ProcessResponse
 from backend.core.processor import DocumentProcessor
 from backend.core.config import settings
+from backend.core.preview_converter import DocxPreviewConverter
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 processor = DocumentProcessor()
@@ -52,8 +64,6 @@ async def upload_document(file: UploadFile = File(...)):
 
 @router.post("/process", response_model=ProcessResponse)
 async def process_document(request: ProcessRequest):
-    import traceback
-
     try:
         result = processor.process(
             request.document_id, request.preset, request.preset_config
@@ -63,7 +73,7 @@ async def process_document(request: ProcessRequest):
         raise HTTPException(404, "Document not found")
     except Exception as e:
         error_detail = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
-        print(f"Process error: {error_detail}")
+        logger.error(f"Process error: {error_detail}")
         raise HTTPException(500, f"{type(e).__name__}: {str(e)}")
 
 
@@ -174,95 +184,20 @@ class RuleUpdate(RuleBase):
 
 @router.get("/rules")
 async def get_rules():
-    """Get all available rules"""
-    # For now, we'll return a list of rule types with default configurations
-    # In a real implementation, this would load from a rules database or config
-    rule_types = [
-        {
-            "id": "font_standard",
-            "name": "字体标准",
-            "description": "统一文档字体",
-            "enabled": True,
-            "parameters": {
-                "western_font": "Arial",
-                "chinese_font": "SimSun",
-                "font_size_body": 12,
-            },
-        },
-        {
-            "id": "table_border",
-            "name": "表格边框",
-            "description": "统一表格边框样式",
-            "enabled": True,
-            "parameters": {
-                "border_size": 4,
-                "border_color": "000000",
-                "add_table_header_format": True,
-                "table_header_bg_color": "E3E3E3",
-            },
-        },
-        {
-            "id": "table_cell_spacing",
-            "name": "单元格间距",
-            "description": "调整表格单元格间距",
-            "enabled": True,
-            "parameters": {
-                "cell_margin_top": 50,
-                "cell_margin_left": 50,
-                "cell_margin_bottom": 50,
-                "cell_margin_right": 50,
-            },
-        },
-        {
-            "id": "paragraph_spacing",
-            "name": "段落间距",
-            "description": "设置段落间距",
-            "enabled": True,
-            "parameters": {"line_spacing": 1.5, "space_before": 0, "space_after": 6},
-        },
-        {
-            "id": "title_bold",
-            "name": "标题加粗",
-            "description": "使所有标题加粗",
-            "enabled": True,
-            "parameters": {},
-        },
-        {
-            "id": "font_color",
-            "name": "字体颜色",
-            "description": "设置文本颜色",
-            "enabled": True,
-            "parameters": {"text_color": "000000"},
-        },
-        {
-            "id": "first_line_indent",
-            "name": "首行缩进",
-            "description": "设置中文首行缩进",
-            "enabled": True,
-            "parameters": {"indent_size": 2},
-        },
-        {
-            "id": "heading_style",
-            "name": "标题样式",
-            "description": "统一标题样式",
-            "enabled": True,
-            "parameters": {"h1_size": 22, "h2_size": 16, "h3_size": 14},
-        },
-        {
-            "id": "image_center",
-            "name": "图片居中",
-            "description": "居中对齐图片",
-            "enabled": True,
-            "parameters": {},
-        },
-        {
-            "id": "latex_to_omml",
-            "name": "LaTeX转换",
-            "description": "将LaTeX转换为Word公式",
-            "enabled": True,
-            "parameters": {},
-        },
-    ]
+    """Get all available rules dynamically from the registry"""
+    from backend.engine import registry
+    
+    rule_types = []
+    for rule in sorted(registry.get_all_rules(), key=lambda r: r.priority):
+        rule_types.append({
+            "id": rule.id,
+            "name": rule.name,
+            "category": rule.category,
+            "description": rule.description,
+            "priority": rule.priority,
+            "parameters": rule.get_default_params()
+        })
+    
     return {"rules": rule_types}
 
 
@@ -283,8 +218,6 @@ async def create_rule(rule: RuleCreate):
     """Create a new rule"""
     # In a real implementation, this would save to a rules database or config
     # For now, we'll just return the created rule with a generated ID
-    import uuid
-
     new_rule = {
         "id": f"custom_{uuid.uuid4().hex[:8]}",
         "name": rule.name,
@@ -324,9 +257,6 @@ async def delete_rule(rule_id: str):
 
 
 # ===== Rules Import/Export API =====
-
-import yaml
-from fastapi.responses import Response
 
 
 @router.get("/rules/export")
@@ -412,9 +342,6 @@ async def test_rule(request: RuleTestRequest):
     Test rules on markdown content.
     Returns: HTML preview of the processed document.
     """
-    import uuid
-    import time
-
     # 1. Save markdown to temp file
     temp_id = f"test_{int(time.time())}_{uuid.uuid4().hex[:8]}.md"
     temp_path = settings.UPLOAD_DIR / temp_id
@@ -433,8 +360,6 @@ async def test_rule(request: RuleTestRequest):
         if not fixed_path.exists():
             raise HTTPException(500, "Processing failed to generate output")
 
-        from backend.core.preview_converter import DocxPreviewConverter
-
         converter = DocxPreviewConverter()
         html_content = converter.convert_to_html(
             str(fixed_path), fixes=result.get("fixes")
@@ -443,9 +368,7 @@ async def test_rule(request: RuleTestRequest):
         return Response(content=html_content, media_type="text/html")
 
     except Exception as e:
-        import traceback
-
-        print(f"Test rule error: {traceback.format_exc()}")
+        logger.error(f"Test rule error: {traceback.format_exc()}")
         raise HTTPException(500, f"Error testing rule: {str(e)}")
     finally:
         # Cleanup temp files
@@ -505,8 +428,6 @@ async def update_preset_route(preset_id: str, request: PresetUpdateRequest):
 @router.post("/presets")
 async def create_preset(request: PresetUpdateRequest):
     """Create a new preset"""
-    import uuid
-
     new_id = f"custom_{uuid.uuid4().hex[:8]}"
 
     data = {
@@ -526,7 +447,6 @@ async def create_preset(request: PresetUpdateRequest):
 
 
 # ===== Preview API =====
-from backend.core.preview_converter import DocxPreviewConverter
 
 
 @router.get("/preview/{document_id}")
@@ -543,15 +463,13 @@ async def get_document_preview(document_id: str, type: str = "original"):
 
         # Try to load result metadata for highlighting
         try:
-            import json
-
             result_path = settings.OUTPUT_DIR / f"{document_id}_result.json"
             if result_path.exists():
                 with open(result_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     fixes = data.get("fixes", [])
         except Exception as e:
-            print(f"Failed to load result metadata: {e}")
+            logger.error(f"Failed to load result metadata: {e}")
 
     else:
         # Check if original exists (uploaded)
@@ -608,9 +526,6 @@ batch_jobs = {}
 @router.post("/batch/start", response_model=BatchResponse)
 async def start_batch_processing(request: BatchRequest):
     """Start a new batch processing job."""
-    import uuid
-    import time
-
     batch_id = f"batch_{int(time.time())}_{uuid.uuid4().hex[:8]}"
 
     results = []
@@ -672,10 +587,6 @@ async def get_batch_status(batch_id: str):
 @router.get("/batch/{batch_id}/download")
 async def download_batch_results(batch_id: str):
     """Download all processed documents from a batch as a zip file."""
-    import zipfile
-    import io
-    from fastapi.responses import StreamingResponse
-
     if batch_id not in batch_jobs:
         raise HTTPException(404, "Batch job not found")
 
@@ -707,10 +618,6 @@ class ZipRequest(BaseModel):
 @router.post("/batch/zip")
 async def create_batch_zip(request: ZipRequest):
     """Create a zip file from a list of document IDs."""
-    import zipfile
-    import io
-    from fastapi.responses import StreamingResponse
-
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         for doc_id in request.document_ids:
