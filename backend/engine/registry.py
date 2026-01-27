@@ -1,18 +1,21 @@
 from typing import Dict, Type, List, Optional
 from backend.engine.base import BaseRule
 
+
 class RuleRegistry:
     """
     规则注册表，负责规则的收集和检索。
     """
-    
+
     _rules: Dict[str, BaseRule] = {}
 
     @classmethod
     def register(cls, rule_instance: BaseRule):
         """注册一个规则实例"""
         if not rule_instance.id:
-            raise ValueError(f"Rule {rule_instance.__class__.__name__} must have an id.")
+            raise ValueError(
+                f"Rule {rule_instance.__class__.__name__} must have an id."
+            )
         cls._rules[rule_instance.id] = rule_instance
 
     @classmethod
@@ -34,6 +37,7 @@ class RuleRegistry:
     def clear(cls):
         """清空注册表 (主要用于测试)"""
         cls._rules = {}
+
 
 # 全局注册表实例
 registry = RuleRegistry()

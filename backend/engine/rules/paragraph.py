@@ -4,6 +4,7 @@ from docx.shared import Pt
 from backend.engine.base import BaseRule
 from backend.engine.registry import registry
 
+
 class ParagraphSpacingRule(BaseRule):
     id = "paragraph_spacing"
     name = "段落间距规则"
@@ -12,11 +13,7 @@ class ParagraphSpacingRule(BaseRule):
     priority = 50
 
     def get_default_params(self) -> Dict[str, Any]:
-        return {
-            "line_spacing": 1.5,
-            "space_before": 0,
-            "space_after": 6
-        }
+        return {"line_spacing": 1.5, "space_before": 0, "space_after": 6}
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
@@ -34,13 +31,16 @@ class ParagraphSpacingRule(BaseRule):
             affected_indices.append(i)
 
         if affected_indices:
-            fixes.append({
-                "id": "fix_spacing_all",
-                "rule_id": self.id,
-                "description": f"已应用行间距 {line_spacing}x，段前 {space_before}pt，段后 {space_after}pt",
-                "paragraph_indices": affected_indices,
-            })
+            fixes.append(
+                {
+                    "id": "fix_spacing_all",
+                    "rule_id": self.id,
+                    "description": f"已应用行间距 {line_spacing}x，段前 {space_before}pt，段后 {space_after}pt",
+                    "paragraph_indices": affected_indices,
+                }
+            )
         return fixes
+
 
 class FirstLineIndentRule(BaseRule):
     id = "first_line_indent"
@@ -50,9 +50,7 @@ class FirstLineIndentRule(BaseRule):
     priority = 90
 
     def get_default_params(self) -> Dict[str, Any]:
-        return {
-            "indent_size": 2
-        }
+        return {"indent_size": 2}
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
@@ -73,13 +71,16 @@ class FirstLineIndentRule(BaseRule):
                 affected_indices.append(i)
 
         if affected_indices:
-            fixes.append({
-                "id": "fix_first_line_indent",
-                "rule_id": self.id,
-                "description": f"已应用 {indent_size} 字符首行缩进",
-                "paragraph_indices": affected_indices,
-            })
+            fixes.append(
+                {
+                    "id": "fix_first_line_indent",
+                    "rule_id": self.id,
+                    "description": f"已应用 {indent_size} 字符首行缩进",
+                    "paragraph_indices": affected_indices,
+                }
+            )
         return fixes
+
 
 class TitleBoldRule(BaseRule):
     id = "title_bold"
@@ -99,13 +100,16 @@ class TitleBoldRule(BaseRule):
                         run.bold = True
                         changed = True
                 if changed:
-                    fixes.append({
-                        "id": f"fix_title_bold_{i}",
-                        "rule_id": self.id,
-                        "description": f"已将标题 '{para.style.name}' 加粗",
-                        "paragraph_indices": [i],
-                    })
+                    fixes.append(
+                        {
+                            "id": f"fix_title_bold_{i}",
+                            "rule_id": self.id,
+                            "description": f"已将标题 '{para.style.name}' 加粗",
+                            "paragraph_indices": [i],
+                        }
+                    )
         return fixes
+
 
 class HeadingStyleRule(BaseRule):
     id = "heading_style"
@@ -115,11 +119,7 @@ class HeadingStyleRule(BaseRule):
     priority = 100
 
     def get_default_params(self) -> Dict[str, Any]:
-        return {
-            "h1_size": 22,
-            "h2_size": 16,
-            "h3_size": 14
-        }
+        return {"h1_size": 22, "h2_size": 16, "h3_size": 14}
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
@@ -144,13 +144,16 @@ class HeadingStyleRule(BaseRule):
                         run.bold = True
                         changed = True
                 if changed:
-                    fixes.append({
-                        "id": f"fix_heading_{i}",
-                        "rule_id": self.id,
-                        "description": f"已应用 {target_size}pt 到标题 {para.style.name}",
-                        "paragraph_indices": [i],
-                    })
+                    fixes.append(
+                        {
+                            "id": f"fix_heading_{i}",
+                            "rule_id": self.id,
+                            "description": f"已应用 {target_size}pt 到标题 {para.style.name}",
+                            "paragraph_indices": [i],
+                        }
+                    )
         return fixes
+
 
 registry.register(ParagraphSpacingRule())
 registry.register(FirstLineIndentRule())

@@ -5,6 +5,7 @@ from docx.oxml.ns import qn
 from backend.engine.base import BaseRule
 from backend.engine.registry import registry
 
+
 class TableBorderRule(BaseRule):
     id = "table_border"
     name = "表格边框规则"
@@ -17,7 +18,7 @@ class TableBorderRule(BaseRule):
             "border_size": 4,
             "border_color": "000000",
             "add_table_header_format": True,
-            "table_header_bg_color": "E3E3E3"
+            "table_header_bg_color": "E3E3E3",
         }
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -30,17 +31,26 @@ class TableBorderRule(BaseRule):
             self._set_table_borders(table, border_size, border_color)
             desc = f"已为表格 {i+1} 应用 {border_size}pt 边框"
 
-            if params.get("add_table_header_format", defaults["add_table_header_format"]) and len(table.rows) > 0:
-                header_bg = params.get("table_header_bg_color", defaults["table_header_bg_color"])
+            if (
+                params.get(
+                    "add_table_header_format", defaults["add_table_header_format"]
+                )
+                and len(table.rows) > 0
+            ):
+                header_bg = params.get(
+                    "table_header_bg_color", defaults["table_header_bg_color"]
+                )
                 self._set_row_shading(table.rows[0], header_bg)
                 desc += f" 且设置表头背景色 #{header_bg}"
 
-            fixes.append({
-                "id": f"fix_table_{i}",
-                "rule_id": self.id,
-                "description": desc,
-                "table_indices": [i],
-            })
+            fixes.append(
+                {
+                    "id": f"fix_table_{i}",
+                    "rule_id": self.id,
+                    "description": desc,
+                    "table_indices": [i],
+                }
+            )
         return fixes
 
     def _set_table_borders(self, table, size, color):
@@ -64,6 +74,7 @@ class TableBorderRule(BaseRule):
             shd.set(qn("w:fill"), color)
             tcPr.append(shd)
 
+
 class TableCellSpacingRule(BaseRule):
     id = "table_cell_spacing"
     name = "表格单元格间距规则"
@@ -76,7 +87,7 @@ class TableCellSpacingRule(BaseRule):
             "cell_margin_top": 50,
             "cell_margin_left": 50,
             "cell_margin_bottom": 50,
-            "cell_margin_right": 50
+            "cell_margin_right": 50,
         }
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -92,19 +103,24 @@ class TableCellSpacingRule(BaseRule):
                 for cell in row.cells:
                     tcPr = cell._tc.get_or_add_tcPr()
                     tcMar = OxmlElement("w:tcMar")
-                    for side, val in zip(["top", "left", "bottom", "right"], [tm, lm, bm, rm]):
+                    for side, val in zip(
+                        ["top", "left", "bottom", "right"], [tm, lm, bm, rm]
+                    ):
                         node = OxmlElement(f"w:{side}")
                         node.set(qn("w:w"), str(val))
                         node.set(qn("w:type"), "dxa")
                         tcMar.append(node)
                     tcPr.append(tcMar)
-            fixes.append({
-                "id": f"fix_table_cell_spacing_{i}",
-                "rule_id": self.id,
-                "description": f"已为表格 {i+1} 应用单元格间距",
-                "table_indices": [i],
-            })
+            fixes.append(
+                {
+                    "id": f"fix_table_cell_spacing_{i}",
+                    "rule_id": self.id,
+                    "description": f"已为表格 {i+1} 应用单元格间距",
+                    "table_indices": [i],
+                }
+            )
         return fixes
+
 
 class TableColumnWidthRule(BaseRule):
     id = "table_column_width"
@@ -128,13 +144,16 @@ class TableColumnWidthRule(BaseRule):
                     tcPr = cell._tc.get_or_add_tcPr()
                     for element in tcPr.findall(qn("w:tcW")):
                         tcPr.remove(element)
-            fixes.append({
-                "id": f"fix_table_column_width_{i}",
-                "rule_id": self.id,
-                "description": f"已为表格 {i+1} 应用自动列宽",
-                "table_indices": [i],
-            })
+            fixes.append(
+                {
+                    "id": f"fix_table_column_width_{i}",
+                    "rule_id": self.id,
+                    "description": f"已为表格 {i+1} 应用自动列宽",
+                    "table_indices": [i],
+                }
+            )
         return fixes
+
 
 registry.register(TableBorderRule())
 registry.register(TableCellSpacingRule())

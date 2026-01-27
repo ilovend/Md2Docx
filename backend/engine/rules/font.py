@@ -5,6 +5,7 @@ from docx.oxml.ns import qn
 from backend.engine.base import BaseRule
 from backend.engine.registry import registry
 
+
 class FontStandardRule(BaseRule):
     id = "font_standard"
     name = "标准字体规则"
@@ -13,11 +14,7 @@ class FontStandardRule(BaseRule):
     priority = 10
 
     def get_default_params(self) -> Dict[str, Any]:
-        return {
-            "western_font": "Arial",
-            "chinese_font": "SimSun",
-            "font_size_body": 12
-        }
+        return {"western_font": "Arial", "chinese_font": "SimSun", "font_size_body": 12}
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
@@ -41,13 +38,16 @@ class FontStandardRule(BaseRule):
                     changed = True
 
             if changed:
-                fixes.append({
-                    "id": f"fix_font_{i}",
-                    "rule_id": self.id,
-                    "description": f"已应用字体 {western_font}/{chinese_font} 大小 {font_size}pt",
-                    "paragraph_indices": [i],
-                })
+                fixes.append(
+                    {
+                        "id": f"fix_font_{i}",
+                        "rule_id": self.id,
+                        "description": f"已应用字体 {western_font}/{chinese_font} 大小 {font_size}pt",
+                        "paragraph_indices": [i],
+                    }
+                )
         return fixes
+
 
 class FontColorRule(BaseRule):
     id = "font_color"
@@ -57,9 +57,7 @@ class FontColorRule(BaseRule):
     priority = 70
 
     def get_default_params(self) -> Dict[str, Any]:
-        return {
-            "text_color": "000000"
-        }
+        return {"text_color": "000000"}
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
@@ -85,13 +83,16 @@ class FontColorRule(BaseRule):
                 affected_indices.append(i)
 
         if affected_indices:
-            fixes.append({
-                "id": "fix_font_color_all",
-                "rule_id": self.id,
-                "description": f"已应用字体颜色 #{text_color}",
-                "paragraph_indices": affected_indices,
-            })
+            fixes.append(
+                {
+                    "id": "fix_font_color_all",
+                    "rule_id": self.id,
+                    "description": f"已应用字体颜色 #{text_color}",
+                    "paragraph_indices": affected_indices,
+                }
+            )
         return fixes
+
 
 class FontReplacementRule(BaseRule):
     id = "font_replacement"
@@ -110,15 +111,19 @@ class FontReplacementRule(BaseRule):
                 "楷体": "KaiTi",
             },
             "default_western_font": "Arial",
-            "default_chinese_font": "SimSun"
+            "default_chinese_font": "SimSun",
         }
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
         defaults = self.get_default_params()
         font_map = params.get("font_map", defaults["font_map"])
-        default_western_font = params.get("default_western_font", defaults["default_western_font"])
-        default_chinese_font = params.get("default_chinese_font", defaults["default_chinese_font"])
+        default_western_font = params.get(
+            "default_western_font", defaults["default_western_font"]
+        )
+        default_chinese_font = params.get(
+            "default_chinese_font", defaults["default_chinese_font"]
+        )
 
         affected_indices = []
         for i, para in enumerate(doc.paragraphs):
@@ -159,13 +164,16 @@ class FontReplacementRule(BaseRule):
                 affected_indices.append(i)
 
         if affected_indices:
-            fixes.append({
-                "id": "fix_font_replacement_all",
-                "rule_id": self.id,
-                "description": f"已将非标准字体替换为 {default_western_font}/{default_chinese_font}",
-                "paragraph_indices": affected_indices,
-            })
+            fixes.append(
+                {
+                    "id": "fix_font_replacement_all",
+                    "rule_id": self.id,
+                    "description": f"已将非标准字体替换为 {default_western_font}/{default_chinese_font}",
+                    "paragraph_indices": affected_indices,
+                }
+            )
         return fixes
+
 
 # 自动注册
 registry.register(FontStandardRule())

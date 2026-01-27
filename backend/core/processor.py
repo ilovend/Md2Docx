@@ -71,10 +71,12 @@ class DocumentProcessor:
         # --- Rule Execution ---
         if rules:
             from backend.engine import registry
-            
+
             # Get all registered rules and sort by priority
-            registered_rules = sorted(registry.get_all_rules(), key=lambda r: r.priority)
-            
+            registered_rules = sorted(
+                registry.get_all_rules(), key=lambda r: r.priority
+            )
+
             for rule in registered_rules:
                 rule_config = rules.get(rule.id)
                 if rule_config and rule_config.get("enabled"):

@@ -4,6 +4,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from backend.engine.base import BaseRule
 from backend.engine.registry import registry
 
+
 class ImageCenterRule(BaseRule):
     id = "image_center"
     name = "图片居中规则"
@@ -25,13 +26,16 @@ class ImageCenterRule(BaseRule):
             if has_image:
                 if para.paragraph_format.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
                     para.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-                    fixes.append({
-                        "id": f"fix_image_center_{i}",
-                        "rule_id": self.id,
-                        "description": f"已将第 {i+1} 段中的图片居中",
-                        "paragraph_indices": [i],
-                    })
+                    fixes.append(
+                        {
+                            "id": f"fix_image_center_{i}",
+                            "rule_id": self.id,
+                            "description": f"已将第 {i+1} 段中的图片居中",
+                            "paragraph_indices": [i],
+                        }
+                    )
         return fixes
+
 
 class ImageResizeRule(BaseRule):
     id = "image_resize"
@@ -41,10 +45,7 @@ class ImageResizeRule(BaseRule):
     priority = 120
 
     def get_default_params(self) -> Dict[str, Any]:
-        return {
-            "max_width": 6.0,
-            "max_height": 8.0
-        }
+        return {"max_width": 6.0, "max_height": 8.0}
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
@@ -59,9 +60,19 @@ class ImageResizeRule(BaseRule):
                 drawings = run._element.xpath(".//w:drawing")
                 for drawing in drawings:
                     for tag in ["wp:inline", "wp:anchor"]:
-                        element = drawing.find(f".//{tag}", namespaces={"wp": "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"})
+                        element = drawing.find(
+                            f".//{tag}",
+                            namespaces={
+                                "wp": "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+                            },
+                        )
                         if element is not None:
-                            extent = element.find(".//wp:extent", namespaces={"wp": "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"})
+                            extent = element.find(
+                                ".//wp:extent",
+                                namespaces={
+                                    "wp": "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+                                },
+                            )
                             if extent is not None:
                                 cx, cy = int(extent.get("cx")), int(extent.get("cy"))
                                 if cx > max_width_emu or cy > max_height_emu:
@@ -74,13 +85,16 @@ class ImageResizeRule(BaseRule):
                                         new_cx = int(new_cy * ratio)
                                     extent.set("cx", str(new_cx))
                                     extent.set("cy", str(new_cy))
-                                    fixes.append({
-                                        "id": f"fix_image_resize_{i}",
-                                        "rule_id": self.id,
-                                        "description": f"已缩放第 {i+1} 段中的图片",
-                                        "paragraph_indices": [i],
-                                    })
+                                    fixes.append(
+                                        {
+                                            "id": f"fix_image_resize_{i}",
+                                            "rule_id": self.id,
+                                            "description": f"已缩放第 {i+1} 段中的图片",
+                                            "paragraph_indices": [i],
+                                        }
+                                    )
         return fixes
+
 
 class ImageCaptionRule(BaseRule):
     id = "image_caption"
@@ -88,12 +102,9 @@ class ImageCaptionRule(BaseRule):
     category = "image"
     description = "为图片添加默认的题注占位符或序号。"
     priority = 130
-    
+
     def get_default_params(self) -> Dict[str, Any]:
-        return {
-            "caption_format": "图 {number}",
-            "caption_font_size": 10
-        }
+        return {"caption_format": "图 {number}", "caption_font_size": 10}
 
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         fixes = []
@@ -110,27 +121,34 @@ class ImageCaptionRule(BaseRule):
 
             if has_image:
                 # Add caption paragraph after the image paragraph
-                caption_format = params.get("caption_format", defaults["caption_format"])
+                caption_format = params.get(
+                    "caption_format", defaults["caption_format"]
+                )
                 caption_text = caption_format.format(number=image_counter)
-                
+
                 # Create and insert caption paragraph
                 caption_para = doc.add_paragraph(caption_text)
                 caption_para.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-                
+
                 # Set caption font size
-                font_size = params.get("caption_font_size", defaults["caption_font_size"])
+                font_size = params.get(
+                    "caption_font_size", defaults["caption_font_size"]
+                )
                 for run in caption_para.runs:
                     run.font.size = Pt(font_size)
-                
+
                 image_counter += 1
-                fixes.append({
-                    "id": f"fix_image_caption_{i}",
-                    "rule_id": self.id,
-                    "description": f"已为第 {i+1} 段中的图片添加题注 '{caption_text}'",
-                    "paragraph_indices": [i],
-                })
+                fixes.append(
+                    {
+                        "id": f"fix_image_caption_{i}",
+                        "rule_id": self.id,
+                        "description": f"已为第 {i+1} 段中的图片添加题注 '{caption_text}'",
+                        "paragraph_indices": [i],
+                    }
+                )
 
         return fixes
+
 
 registry.register(ImageCenterRule())
 registry.register(ImageResizeRule())

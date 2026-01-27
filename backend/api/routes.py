@@ -186,18 +186,20 @@ class RuleUpdate(RuleBase):
 async def get_rules():
     """Get all available rules dynamically from the registry"""
     from backend.engine import registry
-    
+
     rule_types = []
     for rule in sorted(registry.get_all_rules(), key=lambda r: r.priority):
-        rule_types.append({
-            "id": rule.id,
-            "name": rule.name,
-            "category": rule.category,
-            "description": rule.description,
-            "priority": rule.priority,
-            "parameters": rule.get_default_params()
-        })
-    
+        rule_types.append(
+            {
+                "id": rule.id,
+                "name": rule.name,
+                "category": rule.category,
+                "description": rule.description,
+                "priority": rule.priority,
+                "parameters": rule.get_default_params(),
+            }
+        )
+
     return {"rules": rule_types}
 
 

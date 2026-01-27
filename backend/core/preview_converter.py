@@ -165,7 +165,8 @@ class DocxPreviewConverter:
             desc_list = [f"[{f['rule']}] {f['desc']}" for f in fix_info]
             full_desc = "; ".join(desc_list)
             title_str = f' title="{html.escape(full_desc)}"'
-        else:class_str = ' class="dict-preview-table"'
+        else:
+            class_str = ' class="dict-preview-table"'
 
         rows = []
         for row in table.rows:

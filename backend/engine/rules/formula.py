@@ -5,6 +5,7 @@ from backend.engine.base import BaseRule
 from backend.engine.registry import registry
 from backend.core.latex_converter import convert_latex_in_document
 
+
 class LatexToOmmlRule(BaseRule):
     id = "latex_to_omml"
     name = "LaTeX公式转换规则"
@@ -18,6 +19,7 @@ class LatexToOmmlRule(BaseRule):
     def apply(self, doc: Document, params: Dict[str, Any]) -> List[Dict[str, Any]]:
         # This calls the existing specialized converter
         return convert_latex_in_document(doc)
+
 
 class FormulaNumberingRule(BaseRule):
     id = "formula_numbering"
@@ -64,6 +66,7 @@ class FormulaNumberingRule(BaseRule):
 
         return fixes
 
+
 class InlineFormulaStyleRule(BaseRule):
     id = "inline_formula_style"
     name = "行内公式样式规则"
@@ -100,6 +103,7 @@ class InlineFormulaStyleRule(BaseRule):
                 )
 
         return fixes
+
 
 class DisplayFormulaCenterRule(BaseRule):
     id = "display_formula_center"
@@ -140,6 +144,7 @@ class DisplayFormulaCenterRule(BaseRule):
                     )
 
         return fixes
+
 
 registry.register(LatexToOmmlRule())
 registry.register(FormulaNumberingRule())
