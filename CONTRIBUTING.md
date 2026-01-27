@@ -50,18 +50,35 @@
 - **代码风格**: 请遵循项目现有的代码风格。我们使用 [Black](https://github.com/psf/black) 进行代码格式化，使用 [Ruff](https://github.com/astral-sh/ruff) 进行 Linting。
 - **测试**: 对于任何代码更改，请确保相关的测试用例都能够通过。如果添加新功能，请附上相应的测试。
 
-### Git 钩子配置
+### 代码质量工具配置 (Code Quality Setup)
 
-本项目使用 Git 钩子来确保代码质量。请在克隆仓库后运行以下命令启用：
+本项目使用 `pre-commit` 框架统一管理代码检查。请按以下步骤配置开发环境：
+
+1. **安装 Python 依赖**:
+
+   ```sh
+   pip install -r requirements.txt
+   pip install pre-commit
+   ```
+
+2. **安装前端依赖**:
+
+   ```sh
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+3. **启用 Pre-commit 钩子**:
+   ```sh
+   pre-commit install
+   ```
+
+现在，每次 `git commit` 时会自动运行格式化和检查。您也可以随时手动运行验证：
 
 ```sh
-git config core.hooksPath .githooks
+pre-commit run --all-files
 ```
-
-钩子功能：
-
-- **pre-commit**: 检查代码变更是否关联文档，运行基本语法检查
-- **commit-msg**: 检查提交信息是否符合 [Conventional Commits](https://www.conventionalcommits.org/) 规范
 
 ### 📚 单一真源文档规则
 
