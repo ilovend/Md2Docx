@@ -47,14 +47,16 @@ export default function Workspace() {
             if (entry.isFile) {
               // 处理单个文件
               return new Promise<File>((resolve) => {
-                entry.file((file: File) => {
+                // @ts-ignore - file方法在FileSystemFileEntry上存在
+                const fileEntry = entry as FileSystemFileEntry;
+                fileEntry.file((file: File) => {
                   files.push(file);
                   resolve(file);
                 });
               });
             } else if (entry.isDirectory) {
               // 处理文件夹
-              return processDirectory(entry);
+              return processDirectory(entry as FileSystemDirectoryEntry);
             }
           }
         }
@@ -75,7 +77,9 @@ export default function Workspace() {
             if (entry.isFile) {
               // 处理文件
               await new Promise<void>((resolve) => {
-                (entry as FileSystemFileEntry).file((file: File) => {
+                // @ts-ignore - file方法在FileSystemFileEntry上存在
+                const fileEntry = entry as FileSystemFileEntry;
+                fileEntry.file((file: File) => {
                   // 只添加支持的文件类型
                   const supportedTypes = ['.md', '.docx', '.txt'];
                   const fileExtension = entry.name.toLowerCase().substring(entry.name.lastIndexOf('.'));
@@ -118,7 +122,7 @@ export default function Workspace() {
       if (e.target.files) {
         const files = Array.from(e.target.files);
         // 过滤出支持的文件类型
-        const supportedFiles = files.filter(file => {
+        const supportedFiles = files.filter((file) => {
           const supportedTypes = ['.md', '.docx', '.txt'];
           const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
           return supportedTypes.includes(fileExtension);
@@ -243,11 +247,13 @@ export default function Workspace() {
               <input
                 type="file"
                 multiple
-                directory
-                webkitdirectory
                 accept=".md,.docx,.txt"
                 onChange={handleFileSelect}
                 className="hidden"
+                // @ts-ignore - directory属性在TypeScript类型定义中不存在，但浏览器支持
+                directory
+                // @ts-ignore - webkitdirectory属性在TypeScript类型定义中不存在，但浏览器支持
+                webkitdirectory
               />
               <span className="inline-block cursor-pointer rounded-lg bg-blue-500 px-6 py-2.5 text-white transition-colors hover:bg-blue-600">
                 {t('workspace.dropzone.selectFiles')}
