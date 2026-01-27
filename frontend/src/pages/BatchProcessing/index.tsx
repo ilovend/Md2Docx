@@ -99,8 +99,8 @@ export default function BatchProcessing() {
         prev.map((f) =>
           f.id === file.id
             ? { ...f, status: 'processing' as const, uploadedTime: 'Processing...' }
-            : f
-        )
+            : f,
+        ),
       );
 
       try {
@@ -124,8 +124,8 @@ export default function BatchProcessing() {
                   documentId: uploadRes.document_id,
                   fixes: processRes.total_fixes,
                 }
-              : f
-          )
+              : f,
+          ),
         );
       } catch (error: any) {
         // 更新状态为错误
@@ -138,8 +138,8 @@ export default function BatchProcessing() {
                   uploadedTime: 'Failed',
                   error: error.message,
                 }
-              : f
-          )
+              : f,
+          ),
         );
       }
     }
@@ -380,8 +380,8 @@ export default function BatchProcessing() {
                           onChange={(e) => {
                             setFiles(
                               files.map((f) =>
-                                f.id === file.id ? { ...f, preset: e.target.value } : f
-                              )
+                                f.id === file.id ? { ...f, preset: e.target.value } : f,
+                              ),
                             );
                           }}
                           className="appearance-none rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-1.5 pr-8 text-sm text-white focus:border-blue-500 focus:outline-none"

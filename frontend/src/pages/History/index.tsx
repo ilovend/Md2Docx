@@ -19,7 +19,7 @@ export default function History() {
         response.history.map((h) => ({
           ...h,
           status: h.status as 'completed' | 'error',
-        }))
+        })),
       );
     } catch (error) {
       console.error('Failed to load history:', error);
@@ -27,7 +27,7 @@ export default function History() {
   };
 
   const filteredHistory = history.filter((item) =>
-    item.filename.toLowerCase().includes(searchTerm.toLowerCase())
+    item.filename.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleDownload = (item: HistoryItem) => {

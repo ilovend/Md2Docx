@@ -40,7 +40,7 @@ export const useRuleStore = create<RuleState>((set) => ({
   toggleRule: (id) =>
     set((state) => ({
       rules: state.rules.map((rule) =>
-        rule.id === id ? { ...rule, enabled: !rule.enabled } : rule
+        rule.id === id ? { ...rule, enabled: !rule.enabled } : rule,
       ),
     })),
 

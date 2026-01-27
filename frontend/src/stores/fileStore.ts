@@ -46,7 +46,7 @@ export const useFileStore = create<FileState>((set) => ({
   updateDocumentStatus: (id, status) =>
     set((state) => ({
       uploadedDocuments: state.uploadedDocuments.map((doc) =>
-        doc.id === id ? { ...doc, status } : doc
+        doc.id === id ? { ...doc, status } : doc,
       ),
     })),
 

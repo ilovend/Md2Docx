@@ -41,7 +41,7 @@ export default function Workspace() {
         addFiles(files);
       }
     },
-    [addFiles]
+    [addFiles],
   );
 
   const handleFileSelect = useCallback(
@@ -51,7 +51,7 @@ export default function Workspace() {
         addFiles(files);
       }
     },
-    [addFiles]
+    [addFiles],
   );
 
   const handleStartRepair = async () => {

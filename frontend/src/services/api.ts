@@ -111,11 +111,11 @@ export const presetApi = {
    */
   update: async (
     presetId: string,
-    data: Partial<PresetDetail>
+    data: Partial<PresetDetail>,
   ): Promise<{ success: boolean; preset: PresetDetail }> => {
     const response = await axios.put<{ success: boolean; preset: PresetDetail }>(
       `${API_BASE}/presets/${presetId}`,
-      data
+      data,
     );
     return response.data;
   },
@@ -143,7 +143,7 @@ export const historyApi = {
   add: async (item: HistoryItem): Promise<{ success: boolean; id: string }> => {
     const response = await axios.post<{ success: boolean; id: string }>(
       `${API_BASE}/history`,
-      item
+      item,
     );
     return response.data;
   },
@@ -212,7 +212,7 @@ export const batchApi = {
     const response = await axios.post(
       `${API_BASE}/batch/zip`,
       { document_ids: documentIds },
-      { responseType: 'blob' }
+      { responseType: 'blob' },
     );
     return response.data;
   },
@@ -228,7 +228,7 @@ export const rulesApi = {
   },
 
   import: async (
-    yamlContent: string
+    yamlContent: string,
   ): Promise<{ success: boolean; imported_count: number; message: string }> => {
     const response = await axios.post(`${API_BASE}/rules/import`, { yaml_content: yamlContent });
     return response.data;

@@ -95,7 +95,7 @@ export default function RuleEditor() {
 
   const toggleCategory = (categoryId: string) => {
     setCategories(
-      categories.map((cat) => (cat.id === categoryId ? { ...cat, expanded: !cat.expanded } : cat))
+      categories.map((cat) => (cat.id === categoryId ? { ...cat, expanded: !cat.expanded } : cat)),
     );
   };
 
@@ -104,15 +104,15 @@ export default function RuleEditor() {
       categories.map((cat) => ({
         ...cat,
         rules: cat.rules.map((rule) =>
-          rule.id === ruleId ? { ...rule, active: !rule.active } : rule
+          rule.id === ruleId ? { ...rule, active: !rule.active } : rule,
         ),
-      }))
+      })),
     );
   };
 
   const activeRulesCount = categories.reduce(
     (acc, cat) => acc + cat.rules.filter((r) => r.active).length,
-    0
+    0,
   );
   const totalRulesCount = categories.reduce((acc, cat) => acc + cat.rules.length, 0);
 

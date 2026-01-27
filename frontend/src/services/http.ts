@@ -33,7 +33,7 @@ class HttpClient {
         // if (token) config.headers.Authorization = `Bearer ${token}`;
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // 响应拦截器
@@ -72,7 +72,7 @@ class HttpClient {
         }
         this.handleError(message);
         return Promise.reject(error);
-      }
+      },
     );
   }
 
