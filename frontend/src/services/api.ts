@@ -55,6 +55,22 @@ export const documentApi = {
     getDownloadUrl: (documentId: string): string => {
         return `${API_BASE}/download/${documentId}`;
     },
+
+    /**
+     * 获取文档预览HTML
+     */
+    getPreviewHtml: async (documentId: string, type: 'original' | 'fixed'): Promise<string> => {
+        try {
+            const response = await axios.get(`${API_BASE}/preview/${documentId}`, {
+                params: { type },
+                responseType: 'text' // Important: we expect HTML string
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Preview fetch failed:', error);
+            return '<div class="p-4 text-red-500">Failed to load preview</div>';
+        }
+    },
 };
 
 const BACKEND_BASE = 'http://127.0.0.1:8000';
@@ -81,12 +97,23 @@ export const presetApi = {
         const response = await axios.get<{ presets: PresetInfo[] }>(`${API_BASE}/presets`);
         return response.data;
     },
-    
+
     /**
      * 获取预设详情
      */
     getDetail: async (presetId: string): Promise<PresetDetail> => {
         const response = await axios.get<PresetDetail>(`${API_BASE}/presets/${presetId}`);
+        return response.data;
+    },
+
+    /**
+     * 更新预设
+     */
+    update: async (presetId: string, data: Partial<PresetDetail>): Promise<{ success: boolean; preset: PresetDetail }> => {
+        const response = await axios.put<{ success: boolean; preset: PresetDetail }>(
+            `${API_BASE}/presets/${presetId}`,
+            data
+        );
         return response.data;
     },
 };
@@ -109,17 +136,17 @@ export const historyApi = {
         const response = await axios.get<{ history: HistoryItem[] }>(`${API_BASE}/history`);
         return response.data;
     },
-    
+
     add: async (item: HistoryItem): Promise<{ success: boolean; id: string }> => {
         const response = await axios.post<{ success: boolean; id: string }>(`${API_BASE}/history`, item);
         return response.data;
     },
-    
+
     delete: async (itemId: string): Promise<{ success: boolean }> => {
         const response = await axios.delete<{ success: boolean }>(`${API_BASE}/history/${itemId}`);
         return response.data;
     },
-    
+
     clear: async (): Promise<{ success: boolean }> => {
         const response = await axios.delete<{ success: boolean }>(`${API_BASE}/history`);
         return response.data;
@@ -180,11 +207,11 @@ export const rulesApi = {
     exportAll: (): string => {
         return `${API_BASE}/rules/export`;
     },
-    
+
     exportPreset: (presetId: string): string => {
         return `${API_BASE}/rules/export/${presetId}`;
     },
-    
+
     import: async (yamlContent: string): Promise<{ success: boolean; imported_count: number; message: string }> => {
         const response = await axios.post(`${API_BASE}/rules/import`, { yaml_content: yamlContent });
         return response.data;

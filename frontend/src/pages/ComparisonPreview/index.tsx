@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Download, Settings as SettingsIcon, X, Check, ArrowLeft } from 'lucide-react';
+import { FileText, Download, Settings as SettingsIcon, X, Check, ArrowLeft, Loader2 } from 'lucide-react';
 import { documentApi } from '@/services/api';
 
 interface FixItem {
@@ -27,12 +27,14 @@ export default function ComparisonPreview() {
   const [showAdjustment, setShowAdjustment] = useState(false);
   const [processResult, setProcessResult] = useState<ProcessResult | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
+  const [originalHtml, setOriginalHtml] = useState<string>('');
+  const [repairedHtml, setRepairedHtml] = useState<string>('');
 
   useEffect(() => {
     // 从 sessionStorage 读取处理结果
     const resultStr = sessionStorage.getItem('processResult');
     const docId = sessionStorage.getItem('documentId');
-    
+
     if (resultStr) {
       try {
         setProcessResult(JSON.parse(resultStr));
@@ -40,9 +42,12 @@ export default function ComparisonPreview() {
         console.error('Failed to parse process result:', e);
       }
     }
-    
+
     if (docId) {
       setDocumentId(docId);
+      // Fetch previews
+      documentApi.getPreviewHtml(docId, 'original').then(setOriginalHtml);
+      documentApi.getPreviewHtml(docId, 'fixed').then(setRepairedHtml);
     }
   }, []);
 
@@ -117,19 +122,17 @@ export default function ComparisonPreview() {
           <div className="flex overflow-hidden rounded bg-[#151822]">
             <button
               onClick={() => setViewMode('side-by-side')}
-              className={`px-3 py-1.5 text-xs transition-colors ${
-                viewMode === 'side-by-side'
+              className={`px-3 py-1.5 text-xs transition-colors ${viewMode === 'side-by-side'
                   ? 'bg-blue-500 text-white'
                   : 'text-gray-400 hover:text-white'
-              }`}
+                }`}
             >
               {t('comparison.sideBySide')}
             </button>
             <button
               onClick={() => setViewMode('overlay')}
-              className={`px-3 py-1.5 text-xs transition-colors ${
-                viewMode === 'overlay' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
-              }`}
+              className={`px-3 py-1.5 text-xs transition-colors ${viewMode === 'overlay' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
+                }`}
             >
               {t('comparison.overlay')}
             </button>
@@ -153,7 +156,7 @@ export default function ComparisonPreview() {
             </button>
           </div>
 
-          <button 
+          <button
             onClick={handleDownload}
             disabled={!documentId}
             className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed"
@@ -175,54 +178,16 @@ export default function ComparisonPreview() {
             <span className="text-xs text-gray-500">只读</span>
           </div>
 
-          <div className="flex-1 overflow-auto p-6">
-            {processResult ? (
-              <div className="max-w-3xl rounded-lg bg-[#151822] p-6">
-                <div className="mb-6">
-                  <h3 className="text-lg text-white mb-4">{t('comparison.documentInfo')}</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t('comparison.documentId')}</span>
-                      <span className="text-white font-mono">{documentId}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t('comparison.status')}</span>
-                      <span className="text-green-400">{processResult.status}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{t('comparison.processingTime')}</span>
-                      <span className="text-white">{processResult.duration_ms}ms</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border-t border-[#2a2d3e] pt-4">
-                  <h3 className="text-lg text-white mb-4">{t('comparison.appliedRules')}</h3>
-                  <div className="space-y-2">
-                    {fixes.map((fix, index) => (
-                      <div key={fix.id} className="flex items-start gap-3 text-sm">
-                        <span className="text-gray-500">{index + 1}.</span>
-                        <div>
-                          <span className="text-blue-400">[{fix.rule_id}]</span>
-                          <span className="text-gray-300 ml-2">{fix.description}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+          <div className="flex-1 overflow-auto bg-white p-8">
+            {originalHtml ? (
+              <div
+                className="prose max-w-none text-black selection:bg-blue-200"
+                dangerouslySetInnerHTML={{ __html: originalHtml }}
+                style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+              />
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                <FileText className="h-16 w-16 mb-4 opacity-50" />
-                <p className="text-lg mb-2">{t('comparison.noData')}</p>
-                <p className="text-sm mb-4">{t('comparison.noDataHint')}</p>
-                <button
-                  onClick={handleBackToWorkspace}
-                  className="flex items-center gap-2 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  {t('comparison.backToWorkspace')}
-                </button>
+                <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
               </div>
             )}
           </div>
@@ -241,71 +206,21 @@ export default function ComparisonPreview() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-6">
-            {processResult ? (
+          <div className="flex-1 overflow-auto bg-white p-8">
+            {repairedHtml ? (
               <div
-                className="mx-auto max-w-3xl rounded-lg bg-white p-12 shadow-lg"
+                className="prose max-w-none text-black selection:bg-green-200"
+                dangerouslySetInnerHTML={{ __html: repairedHtml }}
                 style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
-              >
-                <div className="text-center mb-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-4">
-                    <Check className="h-10 w-10 text-green-600" />
-                  </div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    {t('comparison.processComplete')}
-                  </h1>
-                  <p className="text-gray-600">
-                    {t('comparison.fixesApplied', { count: processResult.total_fixes })}
-                  </p>
-                </div>
-
-                <div className="border-t border-gray-200 pt-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                    {t('comparison.fixDetails')}
-                  </h2>
-                  <div className="space-y-3">
-                    {fixes.map((fix) => (
-                      <div
-                        key={fix.id}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-                          <Check className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{fix.rule_id}</div>
-                          <div className="text-sm text-gray-600">{fix.description}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={handleDownload}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-                  >
-                    <Download className="h-5 w-5" />
-                    {t('comparison.downloadFixed')}
-                  </button>
-                </div>
-              </div>
+              />
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                <FileText className="h-16 w-16 mb-4 opacity-50" />
-                <p className="text-lg mb-2">{t('comparison.noData')}</p>
-                <button
-                  onClick={handleBackToWorkspace}
-                  className="flex items-center gap-2 px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  {t('comparison.backToWorkspace')}
-                </button>
+                <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
               </div>
             )}
           </div>
         </div>
+
 
         {/* Summary Panel */}
         <aside className="flex w-80 flex-col border-l border-[#2a2d3e] bg-[#151822]">

@@ -191,6 +191,91 @@ async def import_rules(request: ImportRulesRequest):
         raise HTTPException(400, f"YAML parse error: {str(e)}")
 
 
+
+# ===== Presets Management API =====
+
+class PresetUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    rules: Dict[str, Any]
+
+@router.put("/presets/{preset_id}")
+async def update_preset_route(preset_id: str, request: PresetUpdateRequest):
+    """Update an existing preset"""
+    current = processor.rule_parser.get_preset(preset_id)
+    if not current:
+        raise HTTPException(404, "Preset not found")
+    
+    # Merge updates
+    updated_data = current.copy()
+    if request.name:
+        updated_data['name'] = request.name
+    if request.description:
+        updated_data['description'] = request.description
+    if request.rules:
+        updated_data['rules'] = request.rules
+        
+    try:
+        success = processor.rule_parser.update_preset(preset_id, updated_data)
+        if success:
+            return {"success": True, "preset": updated_data}
+        else:
+            raise HTTPException(500, "Failed to save preset")
+    except Exception as e:
+        raise HTTPException(500, f"Error saving preset: {str(e)}")
+
+@router.post("/presets")
+async def create_preset(request: PresetUpdateRequest):
+    """Create a new preset"""
+    import uuid
+    new_id = f"custom_{uuid.uuid4().hex[:8]}"
+    
+    data = {
+        "name": request.name or "New Preset",
+        "description": request.description or "Custom preset",
+        "rules": request.rules
+    }
+    
+    try:
+        success = processor.rule_parser.update_preset(new_id, data)
+        if success:
+            return {"success": True, "id": new_id, "preset": data}
+        else:
+            raise HTTPException(500, "Failed to create preset")
+    except Exception as e:
+        raise HTTPException(500, f"Error creating preset: {str(e)}")
+
+# ===== Preview API =====
+from backend.core.preview_converter import DocxPreviewConverter
+
+@router.get("/preview/{document_id}")
+async def get_document_preview(document_id: str, type: str = "original"):
+    """
+    Get HTML preview of the document.
+    type: 'original' or 'fixed'
+    """
+    if type == "fixed":
+        filename = f"{document_id}_fixed.docx"
+        file_path = settings.OUTPUT_DIR / filename
+    else:
+        # Check if original exists (uploaded)
+        file_path = settings.UPLOAD_DIR / document_id
+        
+        # If original was markdown, we might want to show the converted docx intermediate
+        # or just the raw markdown? For 'preview' consistency, let's look for converted docx or fallback
+        if document_id.endswith('.md'):
+            converted_path = settings.UPLOAD_DIR / f"{document_id}_converted.docx"
+            if converted_path.exists():
+                file_path = converted_path
+
+    if not file_path.exists():
+        raise HTTPException(404, "Document file not found")
+        
+    converter = DocxPreviewConverter()
+    html_content = converter.convert_to_html(str(file_path))
+    
+    return Response(content=html_content, media_type="text/html")
+
 # ============== Batch Processing API ==============
 
 class BatchItem(BaseModel):

@@ -39,7 +39,7 @@ export default function RuleEditor() {
       try {
         const detail = await presetApi.getDetail(selectedPresetId);
         setPresetDetail(detail);
-        
+
         // 转换规则为分类显示
         const ruleEntries = Object.entries(detail.rules || {});
         const newCategories: RuleCategory[] = [
@@ -56,11 +56,11 @@ export default function RuleEditor() {
           },
         ];
         setCategories(newCategories);
-        
+
         // 生成 YAML 内容
         const yaml = generateYaml(detail);
         setYamlContent(yaml);
-        
+
         if (ruleEntries.length > 0 && !selectedRule) {
           setSelectedRule(ruleEntries[0][0]);
         }
@@ -77,7 +77,7 @@ export default function RuleEditor() {
     let yaml = `# 预设配置: ${detail.name}\n`;
     yaml += `# ${detail.description}\n\n`;
     yaml += `preset_id: "${detail.id}"\n\n`;
-    
+
     for (const [ruleId, config] of Object.entries(detail.rules || {})) {
       yaml += `${ruleId}:\n`;
       yaml += `  enabled: ${(config as any)?.enabled ?? true}\n`;
@@ -116,6 +116,45 @@ export default function RuleEditor() {
   );
   const totalRulesCount = categories.reduce((acc, cat) => acc + cat.rules.length, 0);
 
+  const handleSave = async () => {
+    if (!selectedPresetId || !presetDetail) return;
+
+    // Parse YAML content to JSON object
+    // For simplicity, we assume we might need a yaml-to-json parser on frontend or 
+    // better, just push the rules object if modified via UI. 
+    // But since we have a YAML editor, we should probably parse that.
+    // Given the constraints and libraries available, let's try to update based on current state 'categories'
+    // mapping back to rules object if the user used the UI toggles.
+    // If they used the editor, 'yamlContent' is the source of truth.
+
+    // For this implementation, let's assume UI toggles update the underlying 'presetDetail' state 
+    // or we reconstruct it.
+
+    // Let's rely on categories state for enable/disable status for now as a simple approach
+    // Reconstruct rules object
+    const updatedRules = { ...presetDetail.rules };
+    categories.forEach(cat => {
+      cat.rules.forEach(r => {
+        if (updatedRules[r.id]) {
+          // @ts-ignore
+          updatedRules[r.id].enabled = r.active;
+        }
+      });
+    });
+
+    try {
+      await presetApi.update(selectedPresetId, {
+        description: presetDetail.description,
+        rules: updatedRules
+      });
+      // Show success message (using simple alert for now or just log)
+      alert("规则已保存！");
+    } catch (error) {
+      console.error("Save failed", error);
+      alert("保存失败");
+    }
+  };
+
   return (
     <div className="flex size-full flex-col">
       {/* Header */}
@@ -144,7 +183,10 @@ export default function RuleEditor() {
           <button className="px-4 py-2 text-sm text-gray-300 transition-colors hover:text-white">
             {t('common.export')}
           </button>
-          <button className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600">
+          <button
+            onClick={handleSave}
+            className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
+          >
             {t('rules.saveChanges')}
           </button>
           <button className="flex h-8 w-8 items-center justify-center text-gray-400 hover:text-white">
@@ -200,11 +242,10 @@ export default function RuleEditor() {
                       <div
                         key={rule.id}
                         onClick={() => setSelectedRule(rule.id)}
-                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${
-                          selectedRule === rule.id
+                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${selectedRule === rule.id
                             ? 'bg-blue-500/20 text-blue-400'
                             : 'text-gray-300 hover:bg-[#1a1d2e]'
-                        }`}
+                          }`}
                       >
                         <div className="flex flex-1 items-center gap-2">
                           <span className="text-xs">{rule.name}</span>
@@ -240,22 +281,20 @@ export default function RuleEditor() {
           <div className="flex items-center border-b border-[#2a2d3e]">
             <button
               onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
-                activeTab === 'editor'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'editor'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-              }`}
+                }`}
             >
               <Code2 className="h-4 w-4" />
               {t('rules.editor')}
             </button>
             <button
               onClick={() => setActiveTab('properties')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
-                activeTab === 'properties'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'properties'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-              }`}
+                }`}
             >
               <FileText className="h-4 w-4" />
               {t('rules.properties')}
