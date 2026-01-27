@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Plus, ChevronRight, ChevronDown, Code2, FileText, Loader2 } from 'lucide-react';
+import { Search, Plus, ChevronRight, ChevronDown, Code2, FileText, Loader2, Play } from 'lucide-react';
 import Editor from '@monaco-editor/react';
-import { presetApi, type PresetDetail } from '@/services/api';
+import { presetApi, rulesApi, type PresetDetail } from '@/services/api';
 import { useRuleStore } from '@/stores';
+import yaml from 'js-yaml';
 
 interface RuleCategory {
   id: string;
@@ -23,6 +24,11 @@ export default function RuleEditor() {
   const [presetDetail, setPresetDetail] = useState<PresetDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [yamlContent, setYamlContent] = useState('');
+
+  // Test Workbench States
+  const [testContent, setTestContent] = useState('| 标题 1 | 标题 2 |\n| ------ | ------ |\n| 行 1 A | 行 1 B |\n| 行 2 A | 行 2 B |');
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   // 加载预设列表
   useEffect(() => {
@@ -46,7 +52,7 @@ export default function RuleEditor() {
           {
             id: 'all',
             name: '所有规则',
-            icon: '�',
+            icon: '📋',
             expanded: true,
             rules: ruleEntries.map(([id, config]: [string, any]) => ({
               id,
@@ -77,6 +83,23 @@ export default function RuleEditor() {
     let yaml = `# 预设配置: ${detail.name}\n`;
     yaml += `# ${detail.description}\n\n`;
     yaml += `preset_id: "${detail.id}"\n\n`;
+
+    // Ensure 'rules' key exists for clear structure, though backend handles flat too?
+    // Based on backend routes, it seems to expect rules object structure.
+    // Let's verify backend route 'create_preset' uses 'rules' key.
+    // In 'generateYaml', we flatly listed rules? No, we need to correct this structure to match expected import/export if needed.
+    // But for 'test', we need a valid dict.
+
+    // Actually, let's keep it simple: Just dump the whole structure under 'rules'?
+    // The previous implementation loops:
+    /*
+    for (const [ruleId, config] of Object.entries(detail.rules || {})) {
+      yaml += `${ruleId}:\n`; ...
+    }
+    */
+    // This creates a flat YAML where root keys are rule IDs.
+    // Backend processor.process() -> preset_config.get("rules", preset_config) handles this (checks "rules" key or uses root).
+    // So flat structure is fine for backend processor.
 
     for (const [ruleId, config] of Object.entries(detail.rules || {})) {
       yaml += `${ruleId}:\n`;
@@ -119,39 +142,58 @@ export default function RuleEditor() {
   const handleSave = async () => {
     if (!selectedPresetId || !presetDetail) return;
 
-    // Parse YAML content to JSON object
-    // For simplicity, we assume we might need a yaml-to-json parser on frontend or
-    // better, just push the rules object if modified via UI.
-    // But since we have a YAML editor, we should probably parse that.
-    // Given the constraints and libraries available, let's try to update based on current state 'categories'
-    // mapping back to rules object if the user used the UI toggles.
-    // If they used the editor, 'yamlContent' is the source of truth.
+    // Try to parse YAML from editor to save accurate config
+    let updatedRules: any = {};
+    try {
+      const parsed = yaml.load(yamlContent) as any;
+      // The parsed object might be flat rules.
+      // Clean up metadata keys like 'preset_id' if present (though generateYaml adds them as comments or keys?)
+      // In generateYaml: `preset_id: ...` is added.
+      // We should filter that out for 'rules'
 
-    // For this implementation, let's assume UI toggles update the underlying 'presetDetail' state
-    // or we reconstruct it.
+      updatedRules = { ...parsed };
+      delete updatedRules.preset_id;
 
-    // Let's rely on categories state for enable/disable status for now as a simple approach
-    // Reconstruct rules object
-    const updatedRules = { ...presetDetail.rules };
-    categories.forEach((cat) => {
-      cat.rules.forEach((r) => {
-        if (updatedRules[r.id]) {
-          // @ts-ignore
-          updatedRules[r.id].enabled = r.active;
-        }
+    } catch (e) {
+      console.error("YAML parse error, falling back to UI state", e);
+      // Fallback to UI state
+      updatedRules = { ...presetDetail.rules };
+      categories.forEach((cat) => {
+        cat.rules.forEach((r) => {
+          if (updatedRules[r.id]) {
+            // @ts-ignore
+            updatedRules[r.id].enabled = r.active;
+          }
+        });
       });
-    });
+    }
 
     try {
       await presetApi.update(selectedPresetId, {
         description: presetDetail.description,
         rules: updatedRules,
       });
-      // Show success message (using simple alert for now or just log)
       alert('规则已保存！');
     } catch (error) {
       console.error('Save failed', error);
       alert('保存失败');
+    }
+  };
+
+  const handleRunTest = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      // Parse YAML
+      const config = yaml.load(yamlContent);
+
+      const html = await rulesApi.testRule(testContent, config);
+      setTestResult(html);
+    } catch (error) {
+      console.error("Test run failed", error);
+      setTestResult(`<div class="p-2 text-red-400 text-xs">Error: ${(error as any).message || 'Failed to run test'}</div>`);
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -242,11 +284,10 @@ export default function RuleEditor() {
                       <div
                         key={rule.id}
                         onClick={() => setSelectedRule(rule.id)}
-                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${
-                          selectedRule === rule.id
+                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${selectedRule === rule.id
                             ? 'bg-blue-500/20 text-blue-400'
                             : 'text-gray-300 hover:bg-[#1a1d2e]'
-                        }`}
+                          }`}
                       >
                         <div className="flex flex-1 items-center gap-2">
                           <span className="text-xs">{rule.name}</span>
@@ -287,22 +328,20 @@ export default function RuleEditor() {
           <div className="flex items-center border-b border-[#2a2d3e]">
             <button
               onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
-                activeTab === 'editor'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'editor'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-              }`}
+                }`}
             >
               <Code2 className="h-4 w-4" />
               {t('rules.editor')}
             </button>
             <button
               onClick={() => setActiveTab('properties')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
-                activeTab === 'properties'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'properties'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-              }`}
+                }`}
             >
               <FileText className="h-4 w-4" />
               {t('rules.properties')}
@@ -373,58 +412,47 @@ export default function RuleEditor() {
           <div className="border-b border-[#2a2d3e] p-4">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-sm text-white">{t('rules.testWorkbench')}</span>
-              <button className="rounded bg-blue-500 px-3 py-1.5 text-xs text-white hover:bg-blue-600">
+              <button
+                onClick={handleRunTest}
+                disabled={isTesting}
+                className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1.5 text-xs text-white hover:bg-blue-600 disabled:opacity-50"
+              >
+                {isTesting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
                 运行
               </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-4">
-            <div className="mb-4">
-              <div className="mb-2 text-xs text-gray-400">{t('rules.input')}</div>
-              <div className="rounded border border-[#2a2d3e] bg-[#1a1d2e] p-3 font-mono text-xs text-gray-300">
-                <div>| 标题 1 | 标题 2 |</div>
-                <div>| ------ | ------ |</div>
-                <div>| 行 1 A | 行 1 B |</div>
-                <div>| 行 2 A | 行 2 B |</div>
-              </div>
+          <div className="flex-1 overflow-auto p-4 flex flex-col gap-4">
+            <div className="flex-1 flex flex-col min-h-[200px]">
+              <div className="mb-2 text-xs text-gray-400">{t('rules.input')} (Markdown)</div>
+              <textarea
+                value={testContent}
+                onChange={(e) => setTestContent(e.target.value)}
+                className="flex-1 rounded border border-[#2a2d3e] bg-[#1a1d2e] p-3 font-mono text-xs text-gray-300 focus:border-blue-500 focus:outline-none resize-none"
+                placeholder="在此输入 Markdown..."
+              />
             </div>
 
-            <div>
+            <div className="flex-1 flex flex-col min-h-[200px]">
               <div className="mb-2 text-xs text-gray-400">{t('rules.outputPreview')}</div>
-              <div className="rounded border border-[#2a2d3e] bg-white p-3">
-                <table className="w-full border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-800 px-3 py-2 text-left">标题 1</th>
-                      <th className="border border-gray-800 px-3 py-2 text-left">标题 2</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-gray-800 px-3 py-2">行 1 A</td>
-                      <td className="border border-gray-800 px-3 py-2">行 1 B</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-800 px-3 py-2">行 2 A</td>
-                      <td className="border border-gray-800 px-3 py-2">行 2 B</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <p className="mt-3 border-l-2 border-gray-400 pl-3 text-xs text-gray-600 italic">
-                  注意：检查边框是否正确应用到此块。
-                </p>
+              <div className="flex-1 rounded border border-[#2a2d3e] bg-white text-black p-3 overflow-auto">
+                {testResult ? (
+                  <div
+                    className="prose prose-sm max-w-none prose-table:border-collapse prose-td:border prose-td:border-gray-300 prose-td:p-2 prose-th:border prose-th:border-gray-300 prose-th:bg-gray-100 prose-th:p-2"
+                    dangerouslySetInnerHTML={{ __html: testResult }}
+                  />
+                ) : (
+                  <div className="text-gray-400 text-xs italic text-center mt-10">点击运行查看结果</div>
+                )}
               </div>
             </div>
           </div>
 
           <div className="border-t border-[#2a2d3e] p-4">
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-              <span className="text-xs text-gray-400">{t('rules.engineReady')}</span>
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="text-xs text-gray-500">🔧 main</span>
+              <div className={`h-2 w-2 rounded-full ${testResult ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+              <span className="text-xs text-gray-400">{testResult ? '测试完成' : t('rules.engineReady')}</span>
             </div>
           </div>
         </aside>

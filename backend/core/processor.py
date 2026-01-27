@@ -28,7 +28,7 @@ class DocumentProcessor:
 
         return doc_id
 
-    def process(self, document_id: str, preset_id: str):
+    def process(self, document_id: str, preset_id: str = None, preset_config: dict = None):
         start_time = time.time()
         input_path = settings.UPLOAD_DIR / document_id
 
@@ -47,13 +47,19 @@ class DocumentProcessor:
         doc = Document(input_path)
 
         # Load Rules
-        preset = self.rule_parser.get_preset(preset_id)
+        # Priority: explicit config > preset_id > None
+        rules = {}
+        if preset_config:
+            rules = preset_config.get("rules", preset_config) # Handle if passed as full preset or just rules
+        elif preset_id:
+            preset = self.rule_parser.get_preset(preset_id)
+            if preset and "rules" in preset:
+                rules = preset["rules"]
+        
         fixes = []
 
         # --- Rule Execution ---
-        if preset and "rules" in preset:
-            rules = preset["rules"]
-
+        if rules:
             # Font Standard Rule
             font_rule = rules.get("font_standard", {})
             if font_rule and font_rule.get("enabled"):
