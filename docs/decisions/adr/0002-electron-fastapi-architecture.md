@@ -113,7 +113,7 @@
 
 ## 相关文档
 
-- [设计文档](../DESIGN_DOC.md)
-- [架构文档](../ARCHITECTURE.md)
+- [设计文档](../../../DESIGN_DOC.md)
+- [架构文档](../../../ARCHITECTURE.md)
 - [前端架构](FRONTEND.md)
 - [后端架构](BACKEND.md)
