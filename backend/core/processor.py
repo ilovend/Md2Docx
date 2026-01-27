@@ -85,6 +85,12 @@ class DocumentProcessor:
                 params = table_rule.get("parameters", {})
                 fixes.extend(self._apply_table_border(doc, params))
 
+            # Table Cell Spacing Rule
+            cell_spacing_rule = rules.get("table_cell_spacing", {})
+            if cell_spacing_rule and cell_spacing_rule.get("enabled"):
+                params = cell_spacing_rule.get("parameters", {})
+                fixes.extend(self._apply_table_cell_spacing(doc, params))
+
             # Paragraph Spacing Rule
             spacing_rule = rules.get("paragraph_spacing", {})
             if spacing_rule and spacing_rule.get("enabled"):
@@ -265,6 +271,69 @@ class DocumentProcessor:
             shd = OxmlElement("w:shd")
             shd.set(qn("w:fill"), color)
             tcPr.append(shd)
+
+    def _apply_table_cell_spacing(self, doc, params):
+        """
+        Table Cell Spacing Rule: Applies uniform cell spacing to all tables.
+        """
+        fixes = []
+        cell_margin_top = params.get("cell_margin_top", 50)
+        cell_margin_left = params.get("cell_margin_left", 50)
+        cell_margin_bottom = params.get("cell_margin_bottom", 50)
+        cell_margin_right = params.get("cell_margin_right", 50)
+
+        for i, table in enumerate(doc.tables):
+            self._set_table_cell_spacing(
+                table,
+                cell_margin_top,
+                cell_margin_left,
+                cell_margin_bottom,
+                cell_margin_right,
+            )
+            fixes.append(
+                {
+                    "id": f"fix_table_cell_spacing_{i}",
+                    "rule_id": "table_cell_spacing",
+                    "description": f"Applied cell spacing to table {i+1}",
+                    "table_indices": [i],
+                }
+            )
+
+        return fixes
+
+    def _set_table_cell_spacing(self, table, top, left, bottom, right):
+        """Set cell spacing for all cells in a table."""
+        for row in table.rows:
+            for cell in row.cells:
+                tcPr = cell._tc.get_or_add_tcPr()
+                # Set cell margins
+                tcMar = OxmlElement("w:tcMar")
+
+                # Top margin
+                top_mar = OxmlElement("w:top")
+                top_mar.set(qn("w:w"), str(top))
+                top_mar.set(qn("w:type"), "dxa")
+                tcMar.append(top_mar)
+
+                # Left margin
+                left_mar = OxmlElement("w:left")
+                left_mar.set(qn("w:w"), str(left))
+                left_mar.set(qn("w:type"), "dxa")
+                tcMar.append(left_mar)
+
+                # Bottom margin
+                bottom_mar = OxmlElement("w:bottom")
+                bottom_mar.set(qn("w:w"), str(bottom))
+                bottom_mar.set(qn("w:type"), "dxa")
+                tcMar.append(bottom_mar)
+
+                # Right margin
+                right_mar = OxmlElement("w:right")
+                right_mar.set(qn("w:w"), str(right))
+                right_mar.set(qn("w:type"), "dxa")
+                tcMar.append(right_mar)
+
+                tcPr.append(tcMar)
 
     def _apply_paragraph_spacing(self, doc, params):
         """
