@@ -8,7 +8,7 @@ from backend.api import routes
 app = FastAPI(
     title="Md2Docx API",
     description="Backend service for Md2Docx desktop application",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS middleware
@@ -24,10 +24,12 @@ app.add_middleware(
 app.include_router(routes.router, prefix="/api")
 app.include_router(routes.router, prefix="/api/v1")
 
+
 @app.get("/health")
 @app.get("/v1/health")
 async def health_check():
     return {"status": "ok", "version": "1.0.0"}
+
 
 # WebSocket Connection Manager
 class ConnectionManager:
@@ -49,7 +51,9 @@ class ConnectionManager:
             except:
                 pass
 
+
 manager = ConnectionManager()
+
 
 @app.websocket("/ws/progress")
 async def websocket_progress(websocket: WebSocket):
@@ -62,9 +66,16 @@ async def websocket_progress(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
+
 # Export manager for use in routes
 app.state.ws_manager = manager
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
+
+    uvicorn.run(
+        "backend.main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.DEBUG,
+    )
