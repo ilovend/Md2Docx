@@ -153,58 +153,116 @@ class LaTeXConverter:
 
         return omath
 
+    def replace_latex_with_omml(self, para, match_start, match_end, omml_element):
+        """
+        Replace text in paragraph with OMML element.
+        This is a complex operation in python-docx because we need to split runs.
+        """
+        p = para._p
+        
+        # 1. Remove the original text
+        # This is a simplification. robust implementation needs to handle runs carefully.
+        # For now, we'll assume the simple case where we can just clear the paragraph text 
+        # around the match, but that's risky. 
+        
+        # Better approach: 
+        # 1. Clear the paragraph text (or the specific runs)
+        # 2. Rebuild the paragraph with: Text Before -> OMML -> Text After
+        
+        original_text = para.text
+        text_before = original_text[:match_start]
+        text_after = original_text[match_end:]
+        
+        # Clear all runs
+        for run in para.runs:
+            p.remove(run._r)
+            
+        # Add text before
+        if text_before:
+            para.add_run(text_before)
+            
+        # Add OMML
+        # We need to wrap OMML in a run-like structure or append directly to p
+        # Microsoft Word expects m:oMathPara for display math or m:oMath for inline
+        # inside the paragraph.
+        
+        # If display math, we might want a new paragraph, but here we stay in same para
+        # to minimize disruption.
+        
+        p.append(omml_element)
+        
+        # Add text after
+        if text_after:
+            para.add_run(text_after)
+
     def process_document(self, doc: Document) -> list:
         """
         Find and convert LaTeX expressions in document.
-
-        Looks for patterns like $...$ or $$...$$ or \[...\]
-
+        
         Returns list of fixes applied.
         """
         fixes = []
-
+        
         # LaTeX patterns
+        # Order matters! Check for display math first
         patterns = [
             (r"\$\$(.+?)\$\$", "display"),  # Display math $$...$$
             (r"\\\[(.+?)\\\]", "display"),  # Display math \[...\]
-            (r"\$(.+?)\$", "inline"),  # Inline math $...$
             (r"\\begin\{equation\}(.+?)\\end\{equation\}", "display"),  # equation env
+            (r"\$(.+?)\$", "inline"),       # Inline math $...$
         ]
-
+        
+        # Iterate backwards to avoid index shifting issues when replacing
+        # But python-docx doesn't support easy replacement, so we might need a different strategy.
+        # Since we are modifying the paragraph content entirely in replace_latex_with_omml,
+        # we need to be careful not to invalidate iteration.
+        
+        # Safe strategy: Find one match, replace it, restart search in that paragraph?
+        # Or just one match per paragraph for MVP safety.
+        
         for para_idx, para in enumerate(doc.paragraphs):
+            # Skip if empty
+            if not para.text.strip():
+                continue
+                
             original_text = para.text
-            modified = False
-
+            
             for pattern, math_type in patterns:
-                matches = list(re.finditer(pattern, para.text, re.DOTALL))
-
-                for match in matches:
+                # Find *one* match per paragraph to keep it safe for MVP
+                # A full recurring search is harder because we modify valid ranges
+                match = re.search(pattern, original_text, re.DOTALL)
+                
+                if match:
                     latex_expr = match.group(1).strip()
-
-                    # Try to convert to OMML
+                    full_match = match.group(0)
+                    start, end = match.span()
+                    
+                    # Try OMML conversion
                     omml = self.latex_to_omml(latex_expr)
-
+                    
                     if omml is not None:
-                        # For now, we'll note the conversion but the actual
-                        # OMML insertion into python-docx is complex
-                        fixes.append(
-                            {
-                                "id": f"fix_latex_{para_idx}_{match.start()}",
+                        try:
+                            self.replace_latex_with_omml(para, start, end, omml)
+                            
+                            fixes.append({
+                                "id": f"fix_latex_{para_idx}",
                                 "rule_id": "latex_to_omml",
-                                "description": f"Converted LaTeX: {latex_expr[:30]}{'...' if len(latex_expr) > 30 else ''}",
-                            }
-                        )
-                        modified = True
-                    else:
-                        # Fallback: mark as equation placeholder
-                        fixes.append(
-                            {
-                                "id": f"fix_latex_mark_{para_idx}_{match.start()}",
+                                "description": f"Converted LaTeX: {latex_expr[:30]}",
+                                "paragraph_indices": [para_idx]
+                            })
+                            
+                            # Break inner loop to move to next paragraph
+                            # (Limitation: Only 1 formula per paragraph supported in MVP)
+                            break 
+                        except Exception as e:
+                            print(f"Error inserting OMML: {e}")
+                            fixes.append({
+                                "id": f"err_latex_{para_idx}",
                                 "rule_id": "latex_to_omml",
-                                "description": f"Marked LaTeX for manual conversion: {latex_expr[:30]}{'...' if len(latex_expr) > 30 else ''}",
-                            }
-                        )
-
+                                "description": f"Failed to insert formula: {e}",
+                                "status": "failed"
+                            })
+                    
         return fixes
 
 

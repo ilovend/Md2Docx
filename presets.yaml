@@ -218,6 +218,8 @@ presets:
         enabled: true
       TitleFontRule:
         enabled: true
+      latex_to_omml:
+        enabled: true
   meeting_minutes:
     description: 适合会议纪要的格式
     name: 会议纪要格式
@@ -439,6 +441,8 @@ presets:
           auto_adjust_columns: true
           table_width_percent: 100
       title_bold:
+        enabled: true
+      latex_to_omml:
         enabled: true
   test_preset:
     description: 这是一个测试预设
