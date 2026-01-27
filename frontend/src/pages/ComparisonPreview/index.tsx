@@ -71,10 +71,7 @@ export default function ComparisonPreview() {
   const [zebraStriping, setZebraStriping] = useState(true);
   const [headerHighlight, setHeaderHighlight] = useState(true);
 
-  const handleElementClick = (elementId: string) => {
-    setSelectedElement(elementId);
-    setShowAdjustment(true);
-  };
+
 
   const handleApplyAdjustment = () => {
     setShowAdjustment(false);
@@ -123,8 +120,8 @@ export default function ComparisonPreview() {
             <button
               onClick={() => setViewMode('side-by-side')}
               className={`px-3 py-1.5 text-xs transition-colors ${viewMode === 'side-by-side'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-400 hover:text-white'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-400 hover:text-white'
                 }`}
             >
               {t('comparison.sideBySide')}

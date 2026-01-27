@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings as SettingsIcon, Globe, Moon, Sun, FolderOpen, Bell, Database, Info } from 'lucide-react';
+import { Settings as SettingsIcon, Moon, FolderOpen, Bell, Database, Info } from 'lucide-react';
 
 interface SettingsState {
   theme: 'dark' | 'light' | 'system';
@@ -45,13 +45,13 @@ export default function Settings() {
 
   const handleSave = () => {
     localStorage.setItem('md2docx_settings', JSON.stringify(settings));
-    
+
     // Apply language change
     if (settings.language !== (i18n.language.startsWith('zh') ? 'zh' : 'en')) {
       i18n.changeLanguage(settings.language);
       localStorage.setItem('language', settings.language);
     }
-    
+
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -83,7 +83,7 @@ export default function Settings() {
               <Moon className="h-5 w-5 text-blue-400" />
               {t('settings.appearance.title')}
             </h2>
-            
+
             <div className="space-y-4">
               {/* Theme */}
               <div className="flex items-center justify-between">
@@ -126,7 +126,7 @@ export default function Settings() {
               <Database className="h-5 w-5 text-blue-400" />
               {t('settings.processing.title')}
             </h2>
-            
+
             <div className="space-y-4">
               {/* Output Directory */}
               <div className="flex items-center justify-between">
@@ -191,7 +191,7 @@ export default function Settings() {
               <Bell className="h-5 w-5 text-blue-400" />
               {t('settings.notifications.title')}
             </h2>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -218,7 +218,7 @@ export default function Settings() {
               <Database className="h-5 w-5 text-blue-400" />
               {t('settings.data.title')}
             </h2>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -255,7 +255,7 @@ export default function Settings() {
               <Info className="h-5 w-5 text-blue-400" />
               {t('settings.about.title')}
             </h2>
-            
+
             <div className="space-y-2 text-sm text-gray-400">
               <div className="flex justify-between">
                 <span>{t('settings.about.version')}</span>

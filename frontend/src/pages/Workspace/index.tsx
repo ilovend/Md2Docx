@@ -9,7 +9,7 @@ export default function Workspace() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { selectedFiles, addFiles } = useFileStore();
-  const { selectedPresetId, selectPreset, presets, loadPresets, isLoadingPresets } = useRuleStore();
+  const { selectedPresetId, selectPreset, presets, loadPresets } = useRuleStore();
   const { backendConnected, backendLatency } = useAppStore();
 
   const [isDragging, setIsDragging] = useState(false);
@@ -65,7 +65,7 @@ export default function Workspace() {
       // 上传第一个文件（简化演示）
       const file = selectedFiles[0];
       console.log('Uploading file:', file.name);
-      
+
       const uploadRes = await documentApi.upload(file);
       console.log('Upload response:', uploadRes);
 
@@ -78,7 +78,7 @@ export default function Workspace() {
       console.log('Process response:', processRes);
 
       setProcessResult(processRes);
-      
+
       // 如果成功，跳转到对比预览
       if (processRes.status === 'completed') {
         // 添加历史记录
@@ -96,7 +96,7 @@ export default function Workspace() {
         } catch (historyErr) {
           console.error('Failed to add history:', historyErr);
         }
-        
+
         // 存储结果供对比页面使用
         sessionStorage.setItem('processResult', JSON.stringify(processRes));
         sessionStorage.setItem('documentId', uploadRes.document_id);

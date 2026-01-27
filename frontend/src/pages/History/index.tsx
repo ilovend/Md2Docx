@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, File, Download, Trash2, Search, Calendar, Filter, Loader2 } from 'lucide-react';
+import { FileText, File, Download, Trash2, Search, Calendar, Filter } from 'lucide-react';
 import { historyApi, documentApi, type HistoryItem } from '@/services/api';
 
 
@@ -8,14 +8,12 @@ export default function History() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadHistory();
   }, []);
 
   const loadHistory = async () => {
-    setIsLoading(true);
     try {
       const response = await historyApi.getAll();
       setHistory(response.history.map(h => ({
@@ -24,8 +22,6 @@ export default function History() {
       })));
     } catch (error) {
       console.error('Failed to load history:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
