@@ -201,6 +201,14 @@ export const batchApi = {
     getDownloadUrl: (batchId: string): string => {
         return `${API_BASE}/batch/${batchId}/download`;
     },
+
+    downloadZip: async (documentIds: string[]): Promise<Blob> => {
+        const response = await axios.post(`${API_BASE}/batch/zip`,
+            { document_ids: documentIds },
+            { responseType: 'blob' }
+        );
+        return response.data;
+    },
 };
 
 export const rulesApi = {

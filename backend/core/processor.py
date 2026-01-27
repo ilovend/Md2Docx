@@ -123,12 +123,20 @@ class DocumentProcessor:
         # Add Markdown conversion stats if applicable
         if md_stats:
             result["markdown_conversion"] = md_stats
+            # Insert at beginning
             fixes.insert(0, {
                 "id": "fix_md_convert",
                 "rule_id": "markdown_conversion",
-                "description": f"Converted Markdown: {md_stats.get('headings', 0)} headings, {md_stats.get('paragraphs', 0)} paragraphs, {md_stats.get('tables', 0)} tables"
+                "description": f"Converted Markdown: {md_stats.get('headings', 0)} headings, {md_stats.get('paragraphs', 0)} paragraphs, {md_stats.get('tables', 0)} tables",
+                "paragraph_indices": [] # Global content
             })
             result["total_fixes"] = len(fixes)
+            
+        # Save Result Metadata
+        import json
+        result_path = settings.OUTPUT_DIR / f"{document_id}_result.json"
+        with open(result_path, 'w', encoding='utf-8') as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
         
         return result
 
@@ -151,13 +159,16 @@ class DocumentProcessor:
                     rFonts = run._element.rPr.rFonts
                     if rFonts is not None:
                         rFonts.set(qn('w:eastAsia'), chinese_font)
-                run.font.size = Pt(font_size)
+                if run.font.size != Pt(font_size):
+                    run.font.size = Pt(font_size)
+                    changed = True
             
             if changed:
                 fixes.append({
                     "id": f"fix_font_{i}",
                     "rule_id": "font_standard",
-                    "description": f"Applied font {western_font}/{chinese_font} size {font_size}pt"
+                    "description": f"Applied font {western_font}/{chinese_font} size {font_size}pt",
+                    "paragraph_indices": [i]
                 })
         return fixes
 
@@ -171,21 +182,20 @@ class DocumentProcessor:
         
         for i, table in enumerate(doc.tables):
             self._set_table_borders(table, border_size, border_color)
-            fixes.append({
-                "id": f"fix_table_{i}",
-                "rule_id": "table_border",
-                "description": f"Applied {border_size}pt border to table {i+1}"
-            })
+            desc = f"Applied {border_size}pt border to table {i+1}"
             
             # Apply header format if enabled
             if params.get('add_table_header_format') and len(table.rows) > 0:
                 header_bg = params.get('table_header_bg_color', 'E3E3E3')
                 self._set_row_shading(table.rows[0], header_bg)
-                fixes.append({
-                    "id": f"fix_table_header_{i}",
-                    "rule_id": "table_border",
-                    "description": f"Applied header shading #{header_bg} to table {i+1}"
-                })
+                desc += f" with header shading #{header_bg}"
+            
+            fixes.append({
+                "id": f"fix_table_{i}",
+                "rule_id": "table_border",
+                "description": desc,
+                "table_indices": [i]
+            })
         
         return fixes
 
@@ -223,19 +233,22 @@ class DocumentProcessor:
         space_before = params.get('space_before', 0)
         space_after = params.get('space_after', 6)
         
-        count = 0
-        for para in doc.paragraphs:
+        affected_indices = []
+        for i, para in enumerate(doc.paragraphs):
             pf = para.paragraph_format
+            # Check if change is needed (simplification: just apply and record if it wasn't already set perfectly)
+            # For robustness, we just apply it.
             pf.line_spacing = line_spacing
             pf.space_before = Pt(space_before)
             pf.space_after = Pt(space_after)
-            count += 1
+            affected_indices.append(i)
         
-        if count > 0:
+        if affected_indices:
             fixes.append({
                 "id": "fix_spacing_all",
                 "rule_id": "paragraph_spacing",
-                "description": f"Applied line spacing {line_spacing}x to {count} paragraphs"
+                "description": f"Applied line spacing {line_spacing}x to document",
+                "paragraph_indices": affected_indices
             })
         
         return fixes
@@ -249,15 +262,19 @@ class DocumentProcessor:
         
         for i, para in enumerate(doc.paragraphs):
             if para.style and para.style.name in heading_styles:
+                changed = False
                 for run in para.runs:
                     if not run.bold:
                         run.bold = True
-                        fixes.append({
-                            "id": f"fix_title_bold_{i}",
-                            "rule_id": "title_bold",
-                            "description": f"Made '{para.style.name}' bold"
-                        })
-                        break
+                        changed = True
+                
+                if changed:
+                    fixes.append({
+                        "id": f"fix_title_bold_{i}",
+                        "rule_id": "title_bold",
+                        "description": f"Made '{para.style.name}' bold",
+                        "paragraph_indices": [i]
+                    })
         
         return fixes
 
@@ -269,23 +286,30 @@ class DocumentProcessor:
         text_color = params.get('text_color', '000000')
         
         # Convert hex to RGB
-        r = int(text_color[0:2], 16)
-        g = int(text_color[2:4], 16)
-        b = int(text_color[4:6], 16)
-        color = RGBColor(r, g, b)
+        try:
+            r = int(text_color[0:2], 16)
+            g = int(text_color[2:4], 16)
+            b = int(text_color[4:6], 16)
+            color = RGBColor(r, g, b)
+        except:
+            color = RGBColor(0, 0, 0)
         
-        count = 0
-        for para in doc.paragraphs:
+        affected_indices = []
+        for i, para in enumerate(doc.paragraphs):
+            changed = False
             for run in para.runs:
                 if run.font.color.rgb != color:
                     run.font.color.rgb = color
-                    count += 1
+                    changed = True
+            if changed:
+                affected_indices.append(i)
         
-        if count > 0:
+        if affected_indices:
             fixes.append({
                 "id": "fix_font_color_all",
                 "rule_id": "font_color",
-                "description": f"Applied text color #{text_color} to {count} runs"
+                "description": f"Applied text color #{text_color}",
+                "paragraph_indices": affected_indices
             })
         
         return fixes
@@ -298,10 +322,10 @@ class DocumentProcessor:
         indent_size = params.get('indent_size', 2)  # 字符数
         indent_pt = Pt(indent_size * 12)  # 转换为磅值
         
-        count = 0
         heading_styles = ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title']
         
-        for para in doc.paragraphs:
+        affected_indices = []
+        for i, para in enumerate(doc.paragraphs):
             # 跳过标题
             if para.style and para.style.name in heading_styles:
                 continue
@@ -312,13 +336,14 @@ class DocumentProcessor:
             pf = para.paragraph_format
             if pf.first_line_indent != indent_pt:
                 pf.first_line_indent = indent_pt
-                count += 1
+                affected_indices.append(i)
         
-        if count > 0:
+        if affected_indices:
             fixes.append({
                 "id": "fix_first_line_indent",
                 "rule_id": "first_line_indent",
-                "description": f"Applied {indent_size} character first line indent to {count} paragraphs"
+                "description": f"Applied {indent_size} char indent",
+                "paragraph_indices": affected_indices
             })
         
         return fixes
@@ -342,25 +367,26 @@ class DocumentProcessor:
         for i, para in enumerate(doc.paragraphs):
             if para.style and para.style.name in size_map:
                 target_size = size_map[para.style.name]
+                changed = False
                 for run in para.runs:
                     if run.font.size != Pt(target_size):
                         run.font.size = Pt(target_size)
                         run.bold = True
-                        fixes.append({
-                            "id": f"fix_heading_{i}",
-                            "rule_id": "heading_style",
-                            "description": f"Applied {target_size}pt to {para.style.name}"
-                        })
-                        break
+                        changed = True
+                
+                if changed:
+                    fixes.append({
+                        "id": f"fix_heading_{i}",
+                        "rule_id": "heading_style",
+                        "description": f"Applied {target_size}pt to {para.style.name}",
+                        "paragraph_indices": [i]
+                    })
         
         return fixes
 
     def _apply_image_center(self, doc, params):
-        """
-        Image Center Rule: Centers all images in the document.
-        """
-        from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
         fixes = []
+        from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
         
         for i, para in enumerate(doc.paragraphs):
             # 检查段落是否包含图片 (通过检查是否有 drawing 元素)
@@ -371,11 +397,13 @@ class DocumentProcessor:
                     break
             
             if has_image:
-                para.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-                fixes.append({
-                    "id": f"fix_image_center_{i}",
-                    "rule_id": "image_center",
-                    "description": f"Centered image in paragraph {i+1}"
-                })
+                if para.paragraph_format.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+                    para.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                    fixes.append({
+                        "id": f"fix_image_center_{i}",
+                        "rule_id": "image_center",
+                        "description": f"Centered image in paragraph {i+1}",
+                        "paragraph_indices": [i]
+                    })
         
         return fixes

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, File, X, FolderOpen, Play, Trash2, ChevronDown, Loader2 } from 'lucide-react';
+import { FileText, File, X, FolderOpen, Play, Trash2, ChevronDown, Loader2, Download } from 'lucide-react';
 import { useRuleStore, useFileStore } from '@/stores';
-import { documentApi } from '@/services/api';
+import { documentApi, batchApi } from '@/services/api';
 
 interface BatchFile {
   id: string;
@@ -77,33 +77,33 @@ export default function BatchProcessing() {
 
   const handleStartBatch = async () => {
     if (files.length === 0 || isProcessing) return;
-    
+
     setIsProcessing(true);
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.status !== 'pending') continue;
-      
+
       // 更新状态为处理中
-      setFiles(prev => prev.map(f => 
+      setFiles(prev => prev.map(f =>
         f.id === file.id ? { ...f, status: 'processing' as const, uploadedTime: 'Processing...' } : f
       ));
-      
+
       try {
         // 上传文件
         const uploadRes = await documentApi.upload(file.file);
-        
+
         // 处理文件
         const processRes = await documentApi.process({
           document_id: uploadRes.document_id,
           preset: file.preset,
         });
-        
+
         // 更新状态为完成
-        setFiles(prev => prev.map(f => 
-          f.id === file.id ? { 
-            ...f, 
-            status: 'completed' as const, 
+        setFiles(prev => prev.map(f =>
+          f.id === file.id ? {
+            ...f,
+            status: 'completed' as const,
             uploadedTime: 'Completed',
             documentId: uploadRes.document_id,
             fixes: processRes.total_fixes,
@@ -111,17 +111,17 @@ export default function BatchProcessing() {
         ));
       } catch (error: any) {
         // 更新状态为错误
-        setFiles(prev => prev.map(f => 
-          f.id === file.id ? { 
-            ...f, 
-            status: 'error' as const, 
+        setFiles(prev => prev.map(f =>
+          f.id === file.id ? {
+            ...f,
+            status: 'error' as const,
             uploadedTime: 'Failed',
             error: error.message,
           } : f
         ));
       }
     }
-    
+
     setIsProcessing(false);
   };
 
@@ -130,24 +130,57 @@ export default function BatchProcessing() {
     clearFiles();
   };
 
-  const processingCount = files.filter(f => f.status === 'processing').length;
-  const completedCount = files.filter((f) => f.status === 'completed').length;
-  const totalFiles = files.length;
-  const progress = (completedCount / totalFiles) * 100;
-
   const handleRemoveFile = (id: string) => {
     setFiles(files.filter((f) => f.id !== id));
   };
 
   const handleApplyGlobalPreset = () => {
-    if (globalPreset !== 'Select a rule preset...') {
+    if (globalPreset) {
       setFiles(files.map((f) => ({ ...f, preset: globalPreset })));
     }
   };
 
-  // const handleToggleProcessing = () => {
-  //   setIsProcessing(!isProcessing);
-  // };
+  const handleDownload = async (file: BatchFile) => {
+    if (file.status === 'completed' && file.documentId) {
+      const url = documentApi.getDownloadUrl(file.documentId);
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${file.name.replace(/\.[^/.]+$/, "")}_fixed.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    const completedDocs = files
+      .filter(f => f.status === 'completed' && f.documentId)
+      .map(f => f.documentId as string);
+
+    if (completedDocs.length === 0) return;
+
+    try {
+      const blob = await batchApi.downloadZip(completedDocs);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      const dateStr = new Date().toISOString().split('T')[0];
+      link.download = `batch_result_${dateStr}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Batch download failed", e);
+      // Show error notification if toast existed
+    }
+  };
+
+  const processingCount = files.filter(f => f.status === 'processing').length;
+  const completedCount = files.filter((f) => f.status === 'completed').length;
+  const totalFiles = files.length;
+  const progress = totalFiles > 0 ? (completedCount / totalFiles) * 100 : 0;
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -217,11 +250,11 @@ export default function BatchProcessing() {
               <div>
                 <h1 className="mb-1 text-2xl text-white">{t('batch.title')}</h1>
                 <p className="mt-2 text-xs text-gray-500">
-                {t('batch.exportSettings.namingHint')}
-              </p>
+                  {t('batch.exportSettings.namingHint')}
+                </p>
               </div>
               <div className="flex items-center gap-2">
-                <button 
+                <button
                   onClick={handleClearAll}
                   className="rounded border border-[#2a2d3e] px-4 py-2 text-sm text-gray-300 transition-colors hover:text-white"
                 >
@@ -255,6 +288,7 @@ export default function BatchProcessing() {
                   onChange={(e) => setGlobalPreset(e.target.value)}
                   className="rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-1.5 text-sm text-white focus:border-blue-500 focus:outline-none"
                 >
+                  <option value="" disabled>Select a rule preset...</option>
                   {presets.map((preset) => (
                     <option key={preset.id} value={preset.id}>{preset.name}</option>
                   ))}
@@ -319,6 +353,7 @@ export default function BatchProcessing() {
                           className="appearance-none rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-1.5 pr-8 text-sm text-white focus:border-blue-500 focus:outline-none"
                           disabled={file.status !== 'pending'}
                         >
+                          <option value="default">Default</option>
                           {presets.map((preset) => (
                             <option key={preset.id} value={preset.id}>{preset.name}</option>
                           ))}
@@ -334,6 +369,15 @@ export default function BatchProcessing() {
                     </td>
                     <td className="px-8 py-4">
                       <div className="flex items-center justify-end gap-2">
+                        {file.status === 'completed' && (
+                          <button
+                            onClick={() => handleDownload(file)}
+                            className="p-1.5 text-gray-400 transition-colors hover:text-green-400"
+                            title="Download"
+                          >
+                            <Download className="h-4 w-4" />
+                          </button>
+                        )}
                         {file.status === 'processing' && (
                           <button className="p-1.5 text-gray-400 transition-colors hover:text-white">
                             <X className="h-4 w-4" />
@@ -371,33 +415,44 @@ export default function BatchProcessing() {
               ></div>
             </div>
             <div className="mt-3 text-xs text-gray-400">
-                <span className="inline-flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-gray-500"></span>
-                  {t('batch.autoExport')}
-                </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-gray-500"></span>
+                {t('batch.autoExport')}
+              </span>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-2 border-t border-[#2a2d3e] px-8 py-4">
-            <button 
+            <button
               disabled={isProcessing}
               className="rounded border border-[#2a2d3e] px-6 py-2.5 text-sm text-gray-300 transition-colors hover:text-white disabled:opacity-50"
             >
               {isProcessing ? t('common.processing') : t('batch.pause')}
             </button>
-            <button 
-              onClick={handleStartBatch}
-              disabled={files.length === 0 || isProcessing || files.every(f => f.status !== 'pending')}
-              className="flex items-center gap-2 rounded bg-blue-500 px-6 py-2.5 text-sm text-white transition-colors hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed"
-            >
-              {isProcessing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
-              {isProcessing ? t('common.processing') : t('batch.startBatch')}
-            </button>
+
+            {progress === 100 && completedCount > 0 ? (
+              <button
+                onClick={handleDownloadAll}
+                className="flex items-center gap-2 rounded bg-green-500 px-6 py-2.5 text-sm text-white transition-colors hover:bg-green-600"
+              >
+                <Download className="h-4 w-4" />
+                Download All
+              </button>
+            ) : (
+              <button
+                onClick={handleStartBatch}
+                disabled={files.length === 0 || isProcessing || files.every(f => f.status !== 'pending')}
+                className="flex items-center gap-2 rounded bg-blue-500 px-6 py-2.5 text-sm text-white transition-colors hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed"
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+                {isProcessing ? t('common.processing') : t('batch.startBatch')}
+              </button>
+            )}
           </div>
         </div>
 
@@ -407,7 +462,7 @@ export default function BatchProcessing() {
             <div className="flex items-center justify-between border-b border-[#2a2d3e] p-4">
               <div className="flex items-center gap-2">
                 <FolderOpen className="h-4 w-4 text-blue-400" />
-              <span className="text-sm text-white">{t('batch.exportSettings.title')}</span>
+                <span className="text-sm text-white">{t('batch.exportSettings.title')}</span>
               </div>
               <button
                 onClick={() => setShowExportSettings(false)}

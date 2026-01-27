@@ -254,9 +254,23 @@ async def get_document_preview(document_id: str, type: str = "original"):
     Get HTML preview of the document.
     type: 'original' or 'fixed'
     """
+    fixes = None
+    
     if type == "fixed":
         filename = f"{document_id}_fixed.docx"
         file_path = settings.OUTPUT_DIR / filename
+        
+        # Try to load result metadata for highlighting
+        try:
+            import json
+            result_path = settings.OUTPUT_DIR / f"{document_id}_result.json"
+            if result_path.exists():
+                with open(result_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    fixes = data.get('fixes', [])
+        except Exception as e:
+            print(f"Failed to load result metadata: {e}")
+            
     else:
         # Check if original exists (uploaded)
         file_path = settings.UPLOAD_DIR / document_id
@@ -272,7 +286,7 @@ async def get_document_preview(document_id: str, type: str = "original"):
         raise HTTPException(404, "Document file not found")
         
     converter = DocxPreviewConverter()
-    html_content = converter.convert_to_html(str(file_path))
+    html_content = converter.convert_to_html(str(file_path), fixes=fixes)
     
     return Response(content=html_content, media_type="text/html")
 
@@ -388,4 +402,36 @@ async def download_batch_results(batch_id: str):
         zip_buffer,
         media_type="application/zip",
         headers={"Content-Disposition": f"attachment; filename={batch_id}.zip"}
+    )
+
+class ZipRequest(BaseModel):
+    document_ids: List[str]
+
+@router.post("/batch/zip")
+async def create_batch_zip(request: ZipRequest):
+    """Create a zip file from a list of document IDs."""
+    import zipfile
+    import io
+    from fastapi.responses import StreamingResponse
+    
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for doc_id in request.document_ids:
+            # Determine filename - we can assume {doc_id}_fixed.docx for now
+            # Ideally we might want original filenames, but we don't track them easily here 
+            # without looking up history or having frontend pass them.
+            # Let's check if we can resolve a better name from history or just use doc_id.
+            
+            # Simple approach: check output dir
+            output_path = settings.OUTPUT_DIR / f"{doc_id}_fixed.docx"
+            if output_path.exists():
+                zip_file.write(output_path, f"{doc_id}_fixed.docx")
+                
+    zip_buffer.seek(0)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename=batch_result_{timestamp}.zip"}
     )
