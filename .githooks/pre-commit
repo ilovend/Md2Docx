@@ -42,11 +42,49 @@ if [ -n "$DOCS_FILES" ]; then
     fi
 fi
 
+# 代码格式化检查
+echo -e "\n运行代码格式化检查..."
+
+# 前端代码格式化
+FRONTEND_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|json|yaml|yml|md)$' || true)
+if [ -n "$FRONTEND_FILES" ] && [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
+    echo -e "\n[1/2] 前端代码格式化..."
+    cd frontend
+    if command -v npx &> /dev/null; then
+        echo "  运行 Prettier 格式化..."
+        npx prettier --write .
+        if [ $? -eq 0 ]; then
+            echo "  ✓ 前端代码格式化完成"
+        else
+            echo "  ⚠️  前端代码格式化失败，但不阻止提交"
+        fi
+    else
+        echo "  ⚠️  npx 未找到，跳过前端格式化"
+    fi
+    cd ..
+fi
+
+# Python 代码格式化
+PY_FILES=$(echo "$STAGED_FILES" | grep '\.py$' || true)
+if [ -n "$PY_FILES" ]; then
+    echo -e "\n[2/2] Python 代码格式化..."
+    if command -v python &> /dev/null && python -m black --version &> /dev/null; then
+        echo "  运行 Black 格式化..."
+        python -m black .
+        if [ $? -eq 0 ]; then
+            echo "  ✓ Python 代码格式化完成"
+        else
+            echo "  ⚠️  Python 代码格式化失败，但不阻止提交"
+        fi
+    else
+        echo "  ⚠️  Black 未安装，跳过Python格式化"
+    fi
+fi
+
 # 运行基本的语法检查
-echo "运行语法检查..."
+echo -e "\n运行语法检查..."
 
 # Python 语法检查
-PY_FILES=$(echo "$STAGED_FILES" | grep '\.py$' || true)
 if [ -n "$PY_FILES" ]; then
     for file in $PY_FILES; do
         if [ -f "$file" ]; then

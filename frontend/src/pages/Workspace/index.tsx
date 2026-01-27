@@ -31,13 +31,82 @@ export default function Workspace() {
   }, []);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent) => {
+    async (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragging(false);
 
-      // 只处理文件，不处理目录（简化）
-      if (e.dataTransfer.files) {
-        const files = Array.from(e.dataTransfer.files);
+      // 处理文件和文件夹
+      const items = e.dataTransfer.items;
+      const files: File[] = [];
+
+      // 递归处理文件和文件夹
+      const processItem = async (item: DataTransferItem) => {
+        if (item.kind === 'file') {
+          const entry = item.webkitGetAsEntry();
+          if (entry) {
+            if (entry.isFile) {
+              // 处理单个文件
+              return new Promise<File>((resolve) => {
+                entry.file((file: File) => {
+                  files.push(file);
+                  resolve(file);
+                });
+              });
+            } else if (entry.isDirectory) {
+              // 处理文件夹
+              return processDirectory(entry);
+            }
+          }
+        }
+      };
+
+      // 递归处理文件夹
+      const processDirectory = async (directory: FileSystemDirectoryEntry) => {
+        const reader = directory.createReader();
+        const readEntries = () => {
+          return new Promise<FileSystemEntry[]>((resolve) => {
+            reader.readEntries(resolve, () => resolve([]));
+          });
+        };
+
+        let entries = await readEntries();
+        while (entries.length > 0) {
+          for (const entry of entries) {
+            if (entry.isFile) {
+              // 处理文件
+              await new Promise<void>((resolve) => {
+                (entry as FileSystemFileEntry).file((file: File) => {
+                  // 只添加支持的文件类型
+                  const supportedTypes = ['.md', '.docx', '.txt'];
+                  const fileExtension = entry.name.toLowerCase().substring(entry.name.lastIndexOf('.'));
+                  if (supportedTypes.includes(fileExtension)) {
+                    files.push(file);
+                  }
+                  resolve();
+                });
+              });
+            } else if (entry.isDirectory) {
+              // 递归处理子文件夹
+              await processDirectory(entry as FileSystemDirectoryEntry);
+            }
+          }
+          entries = await readEntries();
+        }
+      };
+
+      // 处理所有拖拽项
+      for (let i = 0; i < items.length; i++) {
+        await processItem(items[i]);
+      }
+
+      // 如果没有通过items获取到文件，尝试从files获取
+      if (files.length === 0 && e.dataTransfer.files.length > 0) {
+        const dataTransferFiles = Array.from(e.dataTransfer.files);
+        files.push(...dataTransferFiles);
+      }
+
+      // 添加文件到store
+      if (files.length > 0) {
         addFiles(files);
       }
     },
@@ -48,7 +117,15 @@ export default function Workspace() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
         const files = Array.from(e.target.files);
-        addFiles(files);
+        // 过滤出支持的文件类型
+        const supportedFiles = files.filter(file => {
+          const supportedTypes = ['.md', '.docx', '.txt'];
+          const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+          return supportedTypes.includes(fileExtension);
+        });
+        if (supportedFiles.length > 0) {
+          addFiles(supportedFiles);
+        }
       }
     },
     [addFiles],
@@ -166,6 +243,8 @@ export default function Workspace() {
               <input
                 type="file"
                 multiple
+                directory
+                webkitdirectory
                 accept=".md,.docx,.txt"
                 onChange={handleFileSelect}
                 className="hidden"
