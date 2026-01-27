@@ -64,7 +64,7 @@ export const useRuleStore = create<RuleState>((set) => ({
         set((state) => ({
           selectedPresetId: presets.find((p: PresetInfo) => p.id === state.selectedPresetId)
             ? state.selectedPresetId
-            : presets[0].id
+            : presets[0].id,
         }));
       }
     } catch (error) {

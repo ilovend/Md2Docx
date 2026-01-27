@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, File, X, FolderOpen, Play, Trash2, ChevronDown, Loader2, Download } from 'lucide-react';
+import {
+  FileText,
+  File,
+  X,
+  FolderOpen,
+  Play,
+  Trash2,
+  ChevronDown,
+  Loader2,
+  Download,
+} from 'lucide-react';
 import { useRuleStore, useFileStore } from '@/stores';
 import { documentApi, batchApi } from '@/services/api';
 
@@ -85,9 +95,13 @@ export default function BatchProcessing() {
       if (file.status !== 'pending') continue;
 
       // 更新状态为处理中
-      setFiles(prev => prev.map(f =>
-        f.id === file.id ? { ...f, status: 'processing' as const, uploadedTime: 'Processing...' } : f
-      ));
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === file.id
+            ? { ...f, status: 'processing' as const, uploadedTime: 'Processing...' }
+            : f
+        )
+      );
 
       try {
         // 上传文件
@@ -100,25 +114,33 @@ export default function BatchProcessing() {
         });
 
         // 更新状态为完成
-        setFiles(prev => prev.map(f =>
-          f.id === file.id ? {
-            ...f,
-            status: 'completed' as const,
-            uploadedTime: 'Completed',
-            documentId: uploadRes.document_id,
-            fixes: processRes.total_fixes,
-          } : f
-        ));
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.id === file.id
+              ? {
+                  ...f,
+                  status: 'completed' as const,
+                  uploadedTime: 'Completed',
+                  documentId: uploadRes.document_id,
+                  fixes: processRes.total_fixes,
+                }
+              : f
+          )
+        );
       } catch (error: any) {
         // 更新状态为错误
-        setFiles(prev => prev.map(f =>
-          f.id === file.id ? {
-            ...f,
-            status: 'error' as const,
-            uploadedTime: 'Failed',
-            error: error.message,
-          } : f
-        ));
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.id === file.id
+              ? {
+                  ...f,
+                  status: 'error' as const,
+                  uploadedTime: 'Failed',
+                  error: error.message,
+                }
+              : f
+          )
+        );
       }
     }
 
@@ -146,7 +168,7 @@ export default function BatchProcessing() {
       // Trigger download
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${file.name.replace(/\.[^/.]+$/, "")}_fixed.docx`;
+      link.download = `${file.name.replace(/\.[^/.]+$/, '')}_fixed.docx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -155,8 +177,8 @@ export default function BatchProcessing() {
 
   const handleDownloadAll = async () => {
     const completedDocs = files
-      .filter(f => f.status === 'completed' && f.documentId)
-      .map(f => f.documentId as string);
+      .filter((f) => f.status === 'completed' && f.documentId)
+      .map((f) => f.documentId as string);
 
     if (completedDocs.length === 0) return;
 
@@ -172,12 +194,12 @@ export default function BatchProcessing() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      console.error("Batch download failed", e);
+      console.error('Batch download failed', e);
       // Show error notification if toast existed
     }
   };
 
-  const processingCount = files.filter(f => f.status === 'processing').length;
+  const processingCount = files.filter((f) => f.status === 'processing').length;
   const completedCount = files.filter((f) => f.status === 'completed').length;
   const totalFiles = files.length;
   const progress = totalFiles > 0 ? (completedCount / totalFiles) * 100 : 0;
@@ -249,9 +271,7 @@ export default function BatchProcessing() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="mb-1 text-2xl text-white">{t('batch.title')}</h1>
-                <p className="mt-2 text-xs text-gray-500">
-                  {t('batch.exportSettings.namingHint')}
-                </p>
+                <p className="mt-2 text-xs text-gray-500">{t('batch.exportSettings.namingHint')}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -260,7 +280,7 @@ export default function BatchProcessing() {
                 >
                   {t('batch.clearAll')}
                 </button>
-                <label className="flex items-center gap-2 rounded bg-[#1f2333] px-4 py-2 text-sm text-white transition-colors hover:bg-[#252938] cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2 rounded bg-[#1f2333] px-4 py-2 text-sm text-white transition-colors hover:bg-[#252938]">
                   <FolderOpen className="h-4 w-4" />
                   {t('batch.addFiles')}
                   <input
@@ -288,9 +308,13 @@ export default function BatchProcessing() {
                   onChange={(e) => setGlobalPreset(e.target.value)}
                   className="rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-1.5 text-sm text-white focus:border-blue-500 focus:outline-none"
                 >
-                  <option value="" disabled>Select a rule preset...</option>
+                  <option value="" disabled>
+                    Select a rule preset...
+                  </option>
                   {presets.map((preset) => (
-                    <option key={preset.id} value={preset.id}>{preset.name}</option>
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </option>
                   ))}
                 </select>
                 <button
@@ -308,11 +332,21 @@ export default function BatchProcessing() {
             <table className="w-full">
               <thead className="sticky top-0 border-b border-[#2a2d3e] bg-[#151822]">
                 <tr>
-                  <th className="px-8 py-3 text-left text-xs text-gray-400 uppercase">{t('batch.table.fileName')}</th>
-                  <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('batch.table.size')}</th>
-                  <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('batch.table.rulePreset')}</th>
-                  <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('batch.table.status')}</th>
-                  <th className="px-8 py-3 text-right text-xs text-gray-400 uppercase">{t('batch.table.actions')}</th>
+                  <th className="px-8 py-3 text-left text-xs text-gray-400 uppercase">
+                    {t('batch.table.fileName')}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                    {t('batch.table.size')}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                    {t('batch.table.rulePreset')}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                    {t('batch.table.status')}
+                  </th>
+                  <th className="px-8 py-3 text-right text-xs text-gray-400 uppercase">
+                    {t('batch.table.actions')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -355,7 +389,9 @@ export default function BatchProcessing() {
                         >
                           <option value="default">Default</option>
                           {presets.map((preset) => (
-                            <option key={preset.id} value={preset.id}>{preset.name}</option>
+                            <option key={preset.id} value={preset.id}>
+                              {preset.name}
+                            </option>
                           ))}
                         </select>
                         <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -442,8 +478,10 @@ export default function BatchProcessing() {
             ) : (
               <button
                 onClick={handleStartBatch}
-                disabled={files.length === 0 || isProcessing || files.every(f => f.status !== 'pending')}
-                className="flex items-center gap-2 rounded bg-blue-500 px-6 py-2.5 text-sm text-white transition-colors hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                disabled={
+                  files.length === 0 || isProcessing || files.every((f) => f.status !== 'pending')
+                }
+                className="flex items-center gap-2 rounded bg-blue-500 px-6 py-2.5 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-600"
               >
                 {isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -475,7 +513,9 @@ export default function BatchProcessing() {
             <div className="flex-1 space-y-6 overflow-auto p-6">
               {/* Naming Template */}
               <div>
-                <label className="mb-1 block text-xs text-gray-400">{t('batch.exportSettings.namingTemplate')}</label>
+                <label className="mb-1 block text-xs text-gray-400">
+                  {t('batch.exportSettings.namingTemplate')}
+                </label>
                 <input
                   type="text"
                   value={namingTemplate}
@@ -492,7 +532,9 @@ export default function BatchProcessing() {
 
               {/* Output Destination */}
               <div>
-                <label className="mb-1 block text-xs text-gray-400">{t('batch.exportSettings.outputDestination')}</label>
+                <label className="mb-1 block text-xs text-gray-400">
+                  {t('batch.exportSettings.outputDestination')}
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -510,8 +552,12 @@ export default function BatchProcessing() {
               <div>
                 <label className="flex cursor-pointer items-center justify-between">
                   <div>
-                    <div className="mb-1 text-sm text-gray-300">{t('batch.exportSettings.overwriteFiles')}</div>
-                    <span className="text-xs text-gray-500">{t('batch.exportSettings.overwriteHint')}</span>
+                    <div className="mb-1 text-sm text-gray-300">
+                      {t('batch.exportSettings.overwriteFiles')}
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {t('batch.exportSettings.overwriteHint')}
+                    </span>
                   </div>
                   <div className="relative">
                     <input

@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Download, Settings as SettingsIcon, X, Check, ArrowLeft, Loader2 } from 'lucide-react';
+import {
+  FileText,
+  Download,
+  Settings as SettingsIcon,
+  X,
+  Check,
+  ArrowLeft,
+  Loader2,
+} from 'lucide-react';
 import { documentApi } from '@/services/api';
 
 interface FixItem {
@@ -71,8 +79,6 @@ export default function ComparisonPreview() {
   const [zebraStriping, setZebraStriping] = useState(true);
   const [headerHighlight, setHeaderHighlight] = useState(true);
 
-
-
   const handleApplyAdjustment = () => {
     setShowAdjustment(false);
     setSelectedElement(null);
@@ -119,17 +125,19 @@ export default function ComparisonPreview() {
           <div className="flex overflow-hidden rounded bg-[#151822]">
             <button
               onClick={() => setViewMode('side-by-side')}
-              className={`px-3 py-1.5 text-xs transition-colors ${viewMode === 'side-by-side'
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-400 hover:text-white'
-                }`}
+              className={`px-3 py-1.5 text-xs transition-colors ${
+                viewMode === 'side-by-side'
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
             >
               {t('comparison.sideBySide')}
             </button>
             <button
               onClick={() => setViewMode('overlay')}
-              className={`px-3 py-1.5 text-xs transition-colors ${viewMode === 'overlay' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
-                }`}
+              className={`px-3 py-1.5 text-xs transition-colors ${
+                viewMode === 'overlay' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
+              }`}
             >
               {t('comparison.overlay')}
             </button>
@@ -156,7 +164,7 @@ export default function ComparisonPreview() {
           <button
             onClick={handleDownload}
             disabled={!documentId}
-            className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-600"
           >
             <Download className="h-4 w-4" />
             {t('comparison.exportDocx')}
@@ -183,7 +191,7 @@ export default function ComparisonPreview() {
                 style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              <div className="flex h-full flex-col items-center justify-center text-gray-400">
                 <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
               </div>
             )}
@@ -211,13 +219,12 @@ export default function ComparisonPreview() {
                 style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              <div className="flex h-full flex-col items-center justify-center text-gray-400">
                 <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
               </div>
             )}
           </div>
         </div>
-
 
         {/* Summary Panel */}
         <aside className="flex w-80 flex-col border-l border-[#2a2d3e] bg-[#151822]">
@@ -226,18 +233,16 @@ export default function ComparisonPreview() {
               <SettingsIcon className="h-4 w-4 text-blue-400" />
               <span className="text-sm text-white">{t('comparison.fixSummary')}</span>
             </div>
-            <div className="rounded bg-blue-500 px-2 py-1 text-xs text-white">
-              {fixes.length}
-            </div>
+            <div className="rounded bg-blue-500 px-2 py-1 text-xs text-white">{fixes.length}</div>
           </div>
 
           <div className="flex-1 space-y-3 overflow-auto p-4">
             {fixes.length === 0 ? (
-              <div className="text-center text-gray-400 py-8">
+              <div className="py-8 text-center text-gray-400">
                 <p>{t('history.noRecords')}</p>
                 <button
                   onClick={handleBackToWorkspace}
-                  className="mt-4 flex items-center gap-2 mx-auto text-blue-400 hover:text-blue-300"
+                  className="mx-auto mt-4 flex items-center gap-2 text-blue-400 hover:text-blue-300"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   {t('workspace.title')}
@@ -400,7 +405,9 @@ export default function ComparisonPreview() {
       <footer className="flex items-center justify-between border-t border-[#2a2d3e] bg-[#1a1d2e] px-8 py-2 text-xs">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${processResult ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+            <div
+              className={`h-2 w-2 rounded-full ${processResult ? 'bg-green-500' : 'bg-yellow-500'}`}
+            ></div>
             <span className={processResult ? 'text-green-400' : 'text-yellow-400'}>
               {processResult ? t('comparison.ready') : t('comparison.waiting')}
             </span>

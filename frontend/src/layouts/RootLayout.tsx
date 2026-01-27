@@ -6,7 +6,12 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const navItemsConfig = [
   { path: '/workspace', labelKey: 'nav.workspace', icon: FolderOpen, view: 'workspace' as const },
-  { path: '/comparison', labelKey: 'nav.comparison', icon: GitCompare, view: 'comparison' as const },
+  {
+    path: '/comparison',
+    labelKey: 'nav.comparison',
+    icon: GitCompare,
+    view: 'comparison' as const,
+  },
   { path: '/batch', labelKey: 'nav.batch', icon: Layers, view: 'batch' as const },
   { path: '/rules', labelKey: 'nav.rules', icon: Wrench, view: 'rules' as const },
   { path: '/history', labelKey: 'nav.history', icon: History, view: 'history' as const },

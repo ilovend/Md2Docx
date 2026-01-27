@@ -26,7 +26,7 @@ describe('Health API', () => {
     (axios.get as any).mockResolvedValue(mockResponse);
 
     const result = await healthApi.check();
-    
+
     expect(result.status).toBe('ok');
     expect(result.version).toBe('1.0.0');
   });
@@ -49,7 +49,7 @@ describe('Preset API', () => {
     (axios.get as any).mockResolvedValue(mockResponse);
 
     const result = await presetApi.getAll();
-    
+
     expect(result.presets).toHaveLength(2);
     expect(result.presets[0].id).toBe('academic');
   });
@@ -66,7 +66,7 @@ describe('Preset API', () => {
     (axios.get as any).mockResolvedValue(mockResponse);
 
     const result = await presetApi.getDetail('academic');
-    
+
     expect(result.id).toBe('academic');
     expect(result.rules).toBeDefined();
   });
@@ -83,9 +83,11 @@ describe('Document API', () => {
     };
     (axios.post as any).mockResolvedValue(mockResponse);
 
-    const file = new File(['test'], 'test.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const file = new File(['test'], 'test.docx', {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    });
     const result = await documentApi.upload(file);
-    
+
     expect(result.document_id).toBe('doc_123');
     expect(result.filename).toBe('test.docx');
   });
@@ -103,7 +105,7 @@ describe('Document API', () => {
     (axios.post as any).mockResolvedValue(mockResponse);
 
     const result = await documentApi.process({ document_id: 'doc_123', preset: 'academic' });
-    
+
     expect(result.status).toBe('completed');
     expect(result.total_fixes).toBe(5);
   });
@@ -126,7 +128,7 @@ describe('History API', () => {
     (axios.get as any).mockResolvedValue(mockResponse);
 
     const result = await historyApi.getAll();
-    
+
     expect(result.history).toEqual([]);
   });
 
@@ -146,7 +148,7 @@ describe('History API', () => {
       status: 'completed' as const,
     };
     const result = await historyApi.add(item);
-    
+
     expect(result.success).toBe(true);
   });
 
@@ -157,7 +159,7 @@ describe('History API', () => {
     (axios.delete as any).mockResolvedValue(mockResponse);
 
     const result = await historyApi.delete('test_123');
-    
+
     expect(result.success).toBe(true);
   });
 });
@@ -180,7 +182,7 @@ describe('Rules API', () => {
     (axios.post as any).mockResolvedValue(mockResponse);
 
     const result = await rulesApi.import('presets:\n  test:\n    rules: {}');
-    
+
     expect(result.success).toBe(true);
     expect(result.imported_count).toBe(1);
   });

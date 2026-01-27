@@ -138,7 +138,7 @@ export default function Workspace() {
   }, [backendConnected, presets.length, loadPresets]);
 
   return (
-    <div className="flex flex-col h-full gap-6 p-6">
+    <div className="flex h-full flex-col gap-6 p-6">
       {/* Header */}
       <header className="border-b border-[#2a2d3e] px-8 py-6">
         <h1 className="mb-1 text-2xl text-white">{t('workspace.title')}</h1>
@@ -152,17 +152,16 @@ export default function Workspace() {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`mb-8 rounded-lg border-2 border-dashed p-16 transition-colors ${isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-gray-600 bg-[#1f2333]'
-            }`}
+          className={`mb-8 rounded-lg border-2 border-dashed p-16 transition-colors ${
+            isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-gray-600 bg-[#1f2333]'
+          }`}
         >
           <div className="text-center">
             <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20">
               <Upload className="h-8 w-8 text-blue-400" />
             </div>
             <h3 className="mb-2 text-lg text-white">{t('workspace.dropzone.title')}</h3>
-            <p className="mb-6 text-sm text-gray-400">
-              {t('workspace.dropzone.description')}
-            </p>
+            <p className="mb-6 text-sm text-gray-400">{t('workspace.dropzone.description')}</p>
             <label className="inline-block">
               <input
                 type="file"
@@ -180,16 +179,14 @@ export default function Workspace() {
                 {t('workspace.filesSelected', { count: selectedFiles.length })}
                 <div className="mt-2 text-xs text-gray-400">
                   {selectedFiles.map((f, i) => (
-                    <div key={i}>{f.name} ({(f.size / 1024).toFixed(1)} KB)</div>
+                    <div key={i}>
+                      {f.name} ({(f.size / 1024).toFixed(1)} KB)
+                    </div>
                   ))}
                 </div>
               </div>
             )}
-            {error && (
-              <div className="mt-4 text-sm text-red-400">
-                错误: {error}
-              </div>
-            )}
+            {error && <div className="mt-4 text-sm text-red-400">错误: {error}</div>}
             {processResult && (
               <div className="mt-4 text-sm text-blue-400">
                 处理完成: {processResult.total_fixes} 个修复，耗时 {processResult.duration_ms}ms
@@ -208,7 +205,9 @@ export default function Workspace() {
           <div className="grid grid-cols-2 gap-8">
             {/* Formatting Preset */}
             <div>
-              <label className="mb-2 block text-sm text-gray-400">{t('workspace.config.preset')}</label>
+              <label className="mb-2 block text-sm text-gray-400">
+                {t('workspace.config.preset')}
+              </label>
               <select
                 value={selectedPresetId}
                 onChange={(e) => selectPreset(e.target.value)}
@@ -283,10 +282,15 @@ export default function Workspace() {
               className={`h-2 w-2 rounded-full ${backendConnected ? 'bg-green-500' : 'bg-red-500'}`}
             ></div>
             <span className="text-gray-400">
-              {t('workspace.backend.connected').split('/')[0]}: {backendConnected ? t('workspace.backend.connected') : t('workspace.backend.disconnected')}
+              {t('workspace.backend.connected').split('/')[0]}:{' '}
+              {backendConnected
+                ? t('workspace.backend.connected')
+                : t('workspace.backend.disconnected')}
             </span>
           </div>
-          <span className="text-gray-400">{t('workspace.backend.latency')}: {backendLatency}ms</span>
+          <span className="text-gray-400">
+            {t('workspace.backend.latency')}: {backendLatency}ms
+          </span>
         </div>
         <div className="flex items-center gap-4 text-gray-400">
           <span>内存：124MB</span>

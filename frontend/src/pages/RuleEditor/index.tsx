@@ -50,7 +50,7 @@ export default function RuleEditor() {
             expanded: true,
             rules: ruleEntries.map(([id, config]: [string, any]) => ({
               id,
-              name: id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+              name: id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
               active: config?.enabled ?? true,
             })),
           },
@@ -120,21 +120,21 @@ export default function RuleEditor() {
     if (!selectedPresetId || !presetDetail) return;
 
     // Parse YAML content to JSON object
-    // For simplicity, we assume we might need a yaml-to-json parser on frontend or 
-    // better, just push the rules object if modified via UI. 
+    // For simplicity, we assume we might need a yaml-to-json parser on frontend or
+    // better, just push the rules object if modified via UI.
     // But since we have a YAML editor, we should probably parse that.
     // Given the constraints and libraries available, let's try to update based on current state 'categories'
     // mapping back to rules object if the user used the UI toggles.
     // If they used the editor, 'yamlContent' is the source of truth.
 
-    // For this implementation, let's assume UI toggles update the underlying 'presetDetail' state 
+    // For this implementation, let's assume UI toggles update the underlying 'presetDetail' state
     // or we reconstruct it.
 
     // Let's rely on categories state for enable/disable status for now as a simple approach
     // Reconstruct rules object
     const updatedRules = { ...presetDetail.rules };
-    categories.forEach(cat => {
-      cat.rules.forEach(r => {
+    categories.forEach((cat) => {
+      cat.rules.forEach((r) => {
         if (updatedRules[r.id]) {
           // @ts-ignore
           updatedRules[r.id].enabled = r.active;
@@ -145,13 +145,13 @@ export default function RuleEditor() {
     try {
       await presetApi.update(selectedPresetId, {
         description: presetDetail.description,
-        rules: updatedRules
+        rules: updatedRules,
       });
       // Show success message (using simple alert for now or just log)
-      alert("规则已保存！");
+      alert('规则已保存！');
     } catch (error) {
-      console.error("Save failed", error);
-      alert("保存失败");
+      console.error('Save failed', error);
+      alert('保存失败');
     }
   };
 
@@ -165,7 +165,7 @@ export default function RuleEditor() {
             <span className="text-white">格式修复专业版</span>
           </div>
           <span className="text-xs text-gray-400">
-            预设: {presets.find(p => p.id === selectedPresetId)?.name || selectedPresetId}
+            预设: {presets.find((p) => p.id === selectedPresetId)?.name || selectedPresetId}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -242,10 +242,11 @@ export default function RuleEditor() {
                       <div
                         key={rule.id}
                         onClick={() => setSelectedRule(rule.id)}
-                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${selectedRule === rule.id
+                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${
+                          selectedRule === rule.id
                             ? 'bg-blue-500/20 text-blue-400'
                             : 'text-gray-300 hover:bg-[#1a1d2e]'
-                          }`}
+                        }`}
                       >
                         <div className="flex flex-1 items-center gap-2">
                           <span className="text-xs">{rule.name}</span>
@@ -272,7 +273,12 @@ export default function RuleEditor() {
           </div>
 
           <div className="border-t border-[#2a2d3e] p-4 text-xs text-gray-400">
-            <div>{t('rules.activeRules', { active: activeRulesCount, disabled: totalRulesCount - activeRulesCount })}</div>
+            <div>
+              {t('rules.activeRules', {
+                active: activeRulesCount,
+                disabled: totalRulesCount - activeRulesCount,
+              })}
+            </div>
           </div>
         </aside>
 
@@ -281,20 +287,22 @@ export default function RuleEditor() {
           <div className="flex items-center border-b border-[#2a2d3e]">
             <button
               onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'editor'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
+                activeTab === 'editor'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-                }`}
+              }`}
             >
               <Code2 className="h-4 w-4" />
               {t('rules.editor')}
             </button>
             <button
               onClick={() => setActiveTab('properties')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'properties'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
+                activeTab === 'properties'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-                }`}
+              }`}
             >
               <FileText className="h-4 w-4" />
               {t('rules.properties')}
@@ -309,7 +317,7 @@ export default function RuleEditor() {
 
           <div className="flex-1 overflow-hidden">
             {isLoading && (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex h-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
               </div>
             )}
@@ -335,20 +343,16 @@ export default function RuleEditor() {
             )}
             {!isLoading && activeTab === 'properties' && selectedRule && (
               <div className="p-6">
-                <h3 className="text-lg font-medium text-white mb-4">
-                  {selectedRule.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                <h3 className="mb-4 text-lg font-medium text-white">
+                  {selectedRule.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                 </h3>
                 <div className="space-y-4">
-                  <div className="text-sm text-gray-400">
-                    {t('rules.noSchemaErrors')}
-                  </div>
+                  <div className="text-sm text-gray-400">{t('rules.noSchemaErrors')}</div>
                 </div>
               </div>
             )}
             {!isLoading && activeTab === 'properties' && !selectedRule && (
-              <div className="p-6 text-center text-gray-400">
-                请选择一个规则查看属性
-              </div>
+              <div className="p-6 text-center text-gray-400">请选择一个规则查看属性</div>
             )}
           </div>
 

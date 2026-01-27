@@ -34,12 +34,12 @@ export default function Settings() {
     // Sync language with i18n
     const currentLang = i18n.language.startsWith('zh') ? 'zh' : 'en';
     if (settings.language !== currentLang) {
-      setSettings(prev => ({ ...prev, language: currentLang as 'zh' | 'en' }));
+      setSettings((prev) => ({ ...prev, language: currentLang as 'zh' | 'en' }));
     }
   }, [i18n.language, settings.language]);
 
   const handleChange = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
     setSaved(false);
   };
 
@@ -106,7 +106,9 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-white">{t('settings.appearance.language')}</div>
-                  <div className="text-xs text-gray-400">{t('settings.appearance.languageDesc')}</div>
+                  <div className="text-xs text-gray-400">
+                    {t('settings.appearance.languageDesc')}
+                  </div>
                 </div>
                 <select
                   value={settings.language}
@@ -132,7 +134,9 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-white">{t('settings.processing.outputDir')}</div>
-                  <div className="text-xs text-gray-400">{t('settings.processing.outputDirDesc')}</div>
+                  <div className="text-xs text-gray-400">
+                    {t('settings.processing.outputDirDesc')}
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <input
@@ -151,7 +155,9 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-white">{t('settings.processing.parallel')}</div>
-                  <div className="text-xs text-gray-400">{t('settings.processing.parallelDesc')}</div>
+                  <div className="text-xs text-gray-400">
+                    {t('settings.processing.parallelDesc')}
+                  </div>
                 </div>
                 <select
                   value={settings.parallelProcessing}
@@ -169,7 +175,9 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-white">{t('settings.processing.autoSave')}</div>
-                  <div className="text-xs text-gray-400">{t('settings.processing.autoSaveDesc')}</div>
+                  <div className="text-xs text-gray-400">
+                    {t('settings.processing.autoSaveDesc')}
+                  </div>
                 </div>
                 <label className="relative inline-flex cursor-pointer items-center">
                   <input
@@ -179,7 +187,7 @@ export default function Settings() {
                     className="peer sr-only"
                   />
                   <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
-                  <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                  <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
                 </label>
               </div>
             </div>
@@ -196,7 +204,9 @@ export default function Settings() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-white">{t('settings.notifications.enable')}</div>
-                  <div className="text-xs text-gray-400">{t('settings.notifications.enableDesc')}</div>
+                  <div className="text-xs text-gray-400">
+                    {t('settings.notifications.enableDesc')}
+                  </div>
                 </div>
                 <label className="relative inline-flex cursor-pointer items-center">
                   <input
@@ -206,7 +216,7 @@ export default function Settings() {
                     className="peer sr-only"
                   />
                   <div className="h-6 w-11 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
-                  <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
+                  <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
                 </label>
               </div>
             </div>
@@ -267,7 +277,12 @@ export default function Settings() {
               </div>
               <div className="flex justify-between">
                 <span>{t('settings.about.github')}</span>
-                <a href="https://github.com/ilovend/Md2Docx" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                <a
+                  href="https://github.com/ilovend/Md2Docx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
                   ilovend/Md2Docx
                 </a>
               </div>
@@ -285,9 +300,7 @@ export default function Settings() {
           {t('settings.resetDefaults')}
         </button>
         <div className="flex items-center gap-4">
-          {saved && (
-            <span className="text-sm text-green-400">{t('settings.saved')}</span>
-          )}
+          {saved && <span className="text-sm text-green-400">{t('settings.saved')}</span>}
           <button
             onClick={handleSave}
             className="rounded bg-blue-500 px-6 py-2 text-sm text-white transition-colors hover:bg-blue-600"

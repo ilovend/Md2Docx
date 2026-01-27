@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { FileText, File, Download, Trash2, Search, Calendar, Filter } from 'lucide-react';
 import { historyApi, documentApi, type HistoryItem } from '@/services/api';
 
-
 export default function History() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,16 +15,18 @@ export default function History() {
   const loadHistory = async () => {
     try {
       const response = await historyApi.getAll();
-      setHistory(response.history.map(h => ({
-        ...h,
-        status: h.status as 'completed' | 'error'
-      })));
+      setHistory(
+        response.history.map((h) => ({
+          ...h,
+          status: h.status as 'completed' | 'error',
+        }))
+      );
     } catch (error) {
       console.error('Failed to load history:', error);
     }
   };
 
-  const filteredHistory = history.filter(item =>
+  const filteredHistory = history.filter((item) =>
     item.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -39,7 +40,7 @@ export default function History() {
   const handleDelete = async (id: string) => {
     try {
       await historyApi.delete(id);
-      setHistory(prev => prev.filter(h => h.id !== id));
+      setHistory((prev) => prev.filter((h) => h.id !== id));
     } catch (error) {
       console.error('Failed to delete history:', error);
     }
@@ -90,13 +91,27 @@ export default function History() {
         <table className="w-full">
           <thead className="sticky top-0 border-b border-[#2a2d3e] bg-[#151822]">
             <tr>
-              <th className="px-8 py-3 text-left text-xs text-gray-400 uppercase">{t('history.table.fileName')}</th>
-              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('history.table.processedTime')}</th>
-              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('history.table.fileSize')}</th>
-              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('history.table.preset')}</th>
-              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('history.table.fixes')}</th>
-              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">{t('history.table.status')}</th>
-              <th className="px-8 py-3 text-right text-xs text-gray-400 uppercase">{t('history.table.actions')}</th>
+              <th className="px-8 py-3 text-left text-xs text-gray-400 uppercase">
+                {t('history.table.fileName')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                {t('history.table.processedTime')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                {t('history.table.fileSize')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                {t('history.table.preset')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                {t('history.table.fixes')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs text-gray-400 uppercase">
+                {t('history.table.status')}
+              </th>
+              <th className="px-8 py-3 text-right text-xs text-gray-400 uppercase">
+                {t('history.table.actions')}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -182,15 +197,13 @@ export default function History() {
       <footer className="flex items-center justify-between border-t border-[#2a2d3e] px-8 py-3 text-xs">
         <div className="flex items-center gap-4">
           <span className="text-gray-400">
-            {t('history.stats.completed')}: {history.filter(h => h.status === 'completed').length}
+            {t('history.stats.completed')}: {history.filter((h) => h.status === 'completed').length}
           </span>
           <span className="text-gray-400">
-            {t('history.stats.failed')}: {history.filter(h => h.status === 'error').length}
+            {t('history.stats.failed')}: {history.filter((h) => h.status === 'error').length}
           </span>
         </div>
-        <div className="text-gray-500">
-          {t('history.retention')}
-        </div>
+        <div className="text-gray-500">{t('history.retention')}</div>
       </footer>
     </div>
   );
