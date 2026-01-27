@@ -82,7 +82,9 @@ export default function Workspace() {
                 fileEntry.file((file: File) => {
                   // 只添加支持的文件类型
                   const supportedTypes = ['.md', '.docx', '.txt'];
-                  const fileExtension = entry.name.toLowerCase().substring(entry.name.lastIndexOf('.'));
+                  const fileExtension = entry.name
+                    .toLowerCase()
+                    .substring(entry.name.lastIndexOf('.'));
                   if (supportedTypes.includes(fileExtension)) {
                     files.push(file);
                   }
