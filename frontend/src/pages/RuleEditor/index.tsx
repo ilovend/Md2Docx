@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Plus, ChevronRight, ChevronDown, Code2, FileText, Loader2, Play } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  ChevronRight,
+  ChevronDown,
+  Code2,
+  FileText,
+  Loader2,
+  Play,
+} from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { presetApi, rulesApi, type PresetDetail } from '@/services/api';
 import { useRuleStore } from '@/stores';
@@ -26,7 +35,9 @@ export default function RuleEditor() {
   const [yamlContent, setYamlContent] = useState('');
 
   // Test Workbench States
-  const [testContent, setTestContent] = useState('| 标题 1 | 标题 2 |\n| ------ | ------ |\n| 行 1 A | 行 1 B |\n| 行 2 A | 行 2 B |');
+  const [testContent, setTestContent] = useState(
+    '| 标题 1 | 标题 2 |\n| ------ | ------ |\n| 行 1 A | 行 1 B |\n| 行 2 A | 行 2 B |',
+  );
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
@@ -153,9 +164,8 @@ export default function RuleEditor() {
 
       updatedRules = { ...parsed };
       delete updatedRules.preset_id;
-
     } catch (e) {
-      console.error("YAML parse error, falling back to UI state", e);
+      console.error('YAML parse error, falling back to UI state', e);
       // Fallback to UI state
       updatedRules = { ...presetDetail.rules };
       categories.forEach((cat) => {
@@ -190,8 +200,10 @@ export default function RuleEditor() {
       const html = await rulesApi.testRule(testContent, config);
       setTestResult(html);
     } catch (error) {
-      console.error("Test run failed", error);
-      setTestResult(`<div class="p-2 text-red-400 text-xs">Error: ${(error as any).message || 'Failed to run test'}</div>`);
+      console.error('Test run failed', error);
+      setTestResult(
+        `<div class="p-2 text-red-400 text-xs">Error: ${(error as any).message || 'Failed to run test'}</div>`,
+      );
     } finally {
       setIsTesting(false);
     }
@@ -284,10 +296,11 @@ export default function RuleEditor() {
                       <div
                         key={rule.id}
                         onClick={() => setSelectedRule(rule.id)}
-                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${selectedRule === rule.id
+                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${
+                          selectedRule === rule.id
                             ? 'bg-blue-500/20 text-blue-400'
                             : 'text-gray-300 hover:bg-[#1a1d2e]'
-                          }`}
+                        }`}
                       >
                         <div className="flex flex-1 items-center gap-2">
                           <span className="text-xs">{rule.name}</span>
@@ -328,20 +341,22 @@ export default function RuleEditor() {
           <div className="flex items-center border-b border-[#2a2d3e]">
             <button
               onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'editor'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
+                activeTab === 'editor'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-                }`}
+              }`}
             >
               <Code2 className="h-4 w-4" />
               {t('rules.editor')}
             </button>
             <button
               onClick={() => setActiveTab('properties')}
-              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${activeTab === 'properties'
+              className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm transition-colors ${
+                activeTab === 'properties'
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-white'
-                }`}
+              }`}
             >
               <FileText className="h-4 w-4" />
               {t('rules.properties')}
@@ -417,7 +432,11 @@ export default function RuleEditor() {
                 disabled={isTesting}
                 className="flex items-center gap-1 rounded bg-blue-500 px-3 py-1.5 text-xs text-white hover:bg-blue-600 disabled:opacity-50"
               >
-                {isTesting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+                {isTesting ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Play className="h-3 w-3" />
+                )}
                 运行
               </button>
             </div>
@@ -443,7 +462,9 @@ export default function RuleEditor() {
                     dangerouslySetInnerHTML={{ __html: testResult }}
                   />
                 ) : (
-                  <div className="text-gray-400 text-xs italic text-center mt-10">点击运行查看结果</div>
+                  <div className="text-gray-400 text-xs italic text-center mt-10">
+                    点击运行查看结果
+                  </div>
                 )}
               </div>
             </div>
@@ -451,8 +472,12 @@ export default function RuleEditor() {
 
           <div className="border-t border-[#2a2d3e] p-4">
             <div className="flex items-center gap-2">
-              <div className={`h-2 w-2 rounded-full ${testResult ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-              <span className="text-xs text-gray-400">{testResult ? '测试完成' : t('rules.engineReady')}</span>
+              <div
+                className={`h-2 w-2 rounded-full ${testResult ? 'bg-green-500' : 'bg-blue-500'}`}
+              ></div>
+              <span className="text-xs text-gray-400">
+                {testResult ? '测试完成' : t('rules.engineReady')}
+              </span>
             </div>
           </div>
         </aside>

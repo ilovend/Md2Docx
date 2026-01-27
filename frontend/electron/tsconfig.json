@@ -1,21 +1,16 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "strict": true,
-        "noEmit": true,
-        "outDir": "dist-electron",
-        "baseUrl": ".",
-        "types": [
-            "vite-plugin-electron/electron-env"
-        ]
-    },
-    "include": [
-        "main/**/*.ts",
-        "preload/**/*.ts"
-    ]
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "noEmit": true,
+    "outDir": "dist-electron",
+    "baseUrl": ".",
+    "types": ["vite-plugin-electron/electron-env"]
+  },
+  "include": ["main/**/*.ts", "preload/**/*.ts"]
 }
