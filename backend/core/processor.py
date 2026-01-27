@@ -4,7 +4,10 @@ from pathlib import Path
 from fastapi import UploadFile
 from backend.core.config import settings
 from backend.engine.parser import RuleParser
-from backend.core.markdown_converter import convert_markdown_to_docx
+from backend.core.markdown_converter import (
+    convert_markdown_to_docx,
+    convert_text_to_docx,
+)
 from backend.core.latex_converter import convert_latex_in_document
 from docx import Document
 from docx.shared import Pt, Twips, RGBColor
@@ -39,10 +42,16 @@ class DocumentProcessor:
 
         # Check if Markdown file - convert to Word first
         md_stats = None
+        txt_stats = None
         if document_id.lower().endswith(".md"):
             # Convert Markdown to Word
             temp_docx_path = settings.UPLOAD_DIR / f"{document_id}_converted.docx"
             md_stats = convert_markdown_to_docx(input_path, temp_docx_path)
+            input_path = temp_docx_path
+        elif document_id.lower().endswith(".txt"):
+            # Convert plain text to Word
+            temp_docx_path = settings.UPLOAD_DIR / f"{document_id}_converted.docx"
+            txt_stats = convert_text_to_docx(input_path, temp_docx_path)
             input_path = temp_docx_path
 
         # Load Doc
@@ -141,6 +150,20 @@ class DocumentProcessor:
                     "id": "fix_md_convert",
                     "rule_id": "markdown_conversion",
                     "description": f"Converted Markdown: {md_stats.get('headings', 0)} headings, {md_stats.get('paragraphs', 0)} paragraphs, {md_stats.get('tables', 0)} tables",
+                    "paragraph_indices": [],  # Global content
+                },
+            )
+            result["total_fixes"] = len(fixes)
+        # Add text conversion stats if applicable
+        elif txt_stats:
+            result["text_conversion"] = txt_stats
+            # Insert at beginning
+            fixes.insert(
+                0,
+                {
+                    "id": "fix_txt_convert",
+                    "rule_id": "text_conversion",
+                    "description": f"Converted plain text: {txt_stats.get('paragraphs', 0)} paragraphs, {txt_stats.get('lines', 0)} lines",
                     "paragraph_indices": [],  # Global content
                 },
             )

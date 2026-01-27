@@ -278,3 +278,49 @@ def convert_markdown_to_docx(md_path: Path, docx_path: Path) -> dict:
     """
     converter = MarkdownConverter()
     return converter.convert(md_path, docx_path)
+
+
+def convert_text_to_docx(txt_path: Path, docx_path: Path) -> dict:
+    """
+    Convert plain text file to Word document.
+
+    Args:
+        txt_path: Path to the text file
+        docx_path: Path for the output Word document
+
+    Returns:
+        dict with conversion statistics
+    """
+    from docx import Document
+
+    doc = Document()
+    stats = {
+        "paragraphs": 0,
+        "lines": 0,
+    }
+
+    with open(txt_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    lines = content.split("\n")
+    current_paragraph = []
+
+    for line in lines:
+        stats["lines"] += 1
+
+        # Empty line indicates new paragraph
+        if not line.strip():
+            if current_paragraph:
+                doc.add_paragraph("\n".join(current_paragraph))
+                stats["paragraphs"] += 1
+                current_paragraph = []
+        else:
+            current_paragraph.append(line)
+
+    # Add last paragraph if exists
+    if current_paragraph:
+        doc.add_paragraph("\n".join(current_paragraph))
+        stats["paragraphs"] += 1
+
+    doc.save(docx_path)
+    return stats
