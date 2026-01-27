@@ -47,7 +47,6 @@ export default function Workspace() {
             if (entry.isFile) {
               // 处理单个文件
               return new Promise<File>((resolve) => {
-                // @ts-ignore - file方法在FileSystemFileEntry上存在
                 const fileEntry = entry as FileSystemFileEntry;
                 fileEntry.file((file: File) => {
                   files.push(file);
@@ -77,7 +76,6 @@ export default function Workspace() {
             if (entry.isFile) {
               // 处理文件
               await new Promise<void>((resolve) => {
-                // @ts-ignore - file方法在FileSystemFileEntry上存在
                 const fileEntry = entry as FileSystemFileEntry;
                 fileEntry.file((file: File) => {
                   // 只添加支持的文件类型

@@ -234,7 +234,6 @@ export default function RuleEditor() {
       categories.forEach((cat) => {
         cat.rules.forEach((r) => {
           if (updatedRules[r.id]) {
-            // @ts-ignore
             updatedRules[r.id].enabled = r.active;
           }
         });

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { GripVerticalIcon } from 'lucide-react';
-// @ts-ignore
+// @ts-expect-error - react-resizable-panels types are missing required exports in this environment
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 import { cn } from './utils';

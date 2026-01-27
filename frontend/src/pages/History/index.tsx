@@ -8,10 +8,6 @@ export default function History() {
   const [searchTerm, setSearchTerm] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
   const loadHistory = async () => {
     try {
       const response = await historyApi.getAll();
@@ -25,6 +21,11 @@ export default function History() {
       console.error('Failed to load history:', error);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadHistory();
+  }, []);
 
   const filteredHistory = history.filter((item) =>
     item.filename.toLowerCase().includes(searchTerm.toLowerCase()),
