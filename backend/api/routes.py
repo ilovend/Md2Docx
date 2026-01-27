@@ -226,9 +226,11 @@ async def import_rules(request: ImportRulesRequest):
 
 # ===== Rule Testing API =====
 
+
 class RuleTestRequest(BaseModel):
     markdown: str
-    config: dict # YAML parsed content
+    config: dict  # YAML parsed content
+
 
 @router.post("/rules/test")
 async def test_rule(request: RuleTestRequest):
@@ -238,33 +240,37 @@ async def test_rule(request: RuleTestRequest):
     """
     import uuid
     import time
-    
+
     # 1. Save markdown to temp file
     temp_id = f"test_{int(time.time())}_{uuid.uuid4().hex[:8]}.md"
     temp_path = settings.UPLOAD_DIR / temp_id
-    
+
     try:
         with open(temp_path, "w", encoding="utf-8") as f:
             f.write(request.markdown)
-            
+
         # 2. Process document with provided config
         result = processor.process(temp_id, preset_config=request.config)
-        
+
         # 3. Convert to HTML for preview
         # Use 'fixed' type to see the result of changes
         fixed_path = settings.OUTPUT_DIR / f"{temp_id}_fixed.docx"
-        
+
         if not fixed_path.exists():
             raise HTTPException(500, "Processing failed to generate output")
-            
+
         from backend.core.preview_converter import DocxPreviewConverter
+
         converter = DocxPreviewConverter()
-        html_content = converter.convert_to_html(str(fixed_path), fixes=result.get("fixes"))
-        
+        html_content = converter.convert_to_html(
+            str(fixed_path), fixes=result.get("fixes")
+        )
+
         return Response(content=html_content, media_type="text/html")
-        
+
     except Exception as e:
         import traceback
+
         print(f"Test rule error: {traceback.format_exc()}")
         raise HTTPException(500, f"Error testing rule: {str(e)}")
     finally:

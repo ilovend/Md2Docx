@@ -28,7 +28,9 @@ class DocumentProcessor:
 
         return doc_id
 
-    def process(self, document_id: str, preset_id: str = None, preset_config: dict = None):
+    def process(
+        self, document_id: str, preset_id: str = None, preset_config: dict = None
+    ):
         start_time = time.time()
         input_path = settings.UPLOAD_DIR / document_id
 
@@ -50,12 +52,14 @@ class DocumentProcessor:
         # Priority: explicit config > preset_id > None
         rules = {}
         if preset_config:
-            rules = preset_config.get("rules", preset_config) # Handle if passed as full preset or just rules
+            rules = preset_config.get(
+                "rules", preset_config
+            )  # Handle if passed as full preset or just rules
         elif preset_id:
             preset = self.rule_parser.get_preset(preset_id)
             if preset and "rules" in preset:
                 rules = preset["rules"]
-        
+
         fixes = []
 
         # --- Rule Execution ---
