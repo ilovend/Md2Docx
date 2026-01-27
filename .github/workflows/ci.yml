@@ -187,13 +187,13 @@ jobs:
           node-version: '18'
       
       - name: Install Dependencies
-        working-directory: ./Access Project Link
+        working-directory: ./frontend
         run: npm ci
       
       - name: Type Check
-        working-directory: ./Access Project Link
+        working-directory: ./frontend
         run: npx tsc --noEmit || echo "存在类型错误"
       
       - name: Build
-        working-directory: ./Access Project Link
+        working-directory: ./frontend
         run: npm run build
