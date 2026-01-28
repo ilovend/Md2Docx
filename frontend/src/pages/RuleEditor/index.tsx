@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Search,
@@ -9,8 +9,10 @@ import {
   FileText,
   Loader2,
   Play,
+  AlertCircle,
 } from 'lucide-react';
-import Editor from '@monaco-editor/react';
+import Editor, { type Monaco } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import { presetApi, rulesApi, type PresetDetail } from '@/services/api';
 import { useRuleStore } from '@/stores';
 import yaml from 'js-yaml';
@@ -33,10 +35,19 @@ export default function RuleEditor() {
   const [presetDetail, setPresetDetail] = useState<PresetDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [yamlContent, setYamlContent] = useState('');
-  const [yamlValidation, setYamlValidation] = useState({
+  const [yamlValidation, setYamlValidation] = useState<{
+    valid: boolean;
+    error: string;
+    line?: number;
+    column?: number;
+  }>({
     valid: true,
     error: '',
   });
+
+  // Monaco editor refs
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<Monaco | null>(null);
 
   // Test Workbench States
   const [testContent, setTestContent] = useState(
@@ -45,21 +56,58 @@ export default function RuleEditor() {
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
-  // Validate YAML content in real-time
+  // Validate YAML content in real-time with debounce
   useEffect(() => {
-    try {
-      yaml.load(yamlContent);
-      setYamlValidation({
-        valid: true,
-        error: '',
-      });
-    } catch (error) {
-      setYamlValidation({
-        valid: false,
-        error: (error as any).message,
-      });
-    }
+    const timer = setTimeout(() => {
+      try {
+        yaml.load(yamlContent);
+        setYamlValidation({
+          valid: true,
+          error: '',
+        });
+        // Clear Monaco markers
+        if (monacoRef.current && editorRef.current) {
+          const model = editorRef.current.getModel();
+          if (model) {
+            monacoRef.current.editor.setModelMarkers(model, 'yaml', []);
+          }
+        }
+      } catch (error: any) {
+        const yamlError = error as yaml.YAMLException;
+        const line = yamlError.mark?.line ? yamlError.mark.line + 1 : undefined;
+        const column = yamlError.mark?.column ? yamlError.mark.column + 1 : undefined;
+        setYamlValidation({
+          valid: false,
+          error: yamlError.reason || yamlError.message,
+          line,
+          column,
+        });
+        // Set Monaco markers for error
+        if (monacoRef.current && editorRef.current && line) {
+          const model = editorRef.current.getModel();
+          if (model) {
+            monacoRef.current.editor.setModelMarkers(model, 'yaml', [
+              {
+                startLineNumber: line,
+                startColumn: column || 1,
+                endLineNumber: line,
+                endColumn: model.getLineMaxColumn(line),
+                message: yamlError.reason || yamlError.message,
+                severity: monacoRef.current.MarkerSeverity.Error,
+              },
+            ]);
+          }
+        }
+      }
+    }, 300); // 300ms debounce
+    return () => clearTimeout(timer);
   }, [yamlContent]);
+
+  // Monaco editor mount handler
+  const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+  };
 
   // 加载预设列表
   useEffect(() => {
@@ -303,7 +351,9 @@ export default function RuleEditor() {
           </button>
           <button
             onClick={handleSave}
-            className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600"
+            disabled={!yamlValidation.valid}
+            className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-600"
+            title={!yamlValidation.valid ? 'YAML 语法错误，无法保存' : ''}
           >
             {t('rules.saveChanges')}
           </button>
@@ -446,6 +496,7 @@ export default function RuleEditor() {
                 theme="vs-dark"
                 value={yamlContent}
                 onChange={(value) => setYamlContent(value || '')}
+                onMount={handleEditorDidMount}
                 options={{
                   minimap: { enabled: false },
                   fontSize: 14,
@@ -456,6 +507,7 @@ export default function RuleEditor() {
                   tabSize: 2,
                   renderWhitespace: 'selection',
                   fontFamily: 'Consolas, Monaco, monospace',
+                  glyphMargin: true,
                 }}
               />
             )}
@@ -489,8 +541,32 @@ export default function RuleEditor() {
               <span className={yamlValidation.valid ? 'text-gray-500' : 'text-red-400'}>
                 {yamlValidation.valid
                   ? 'YAML 验证通过，未检测到架构错误。'
-                  : `YAML 语法错误: ${yamlValidation.error}`}
+                  : `YAML 语法错误: ${yamlValidation.error}${
+                      yamlValidation.line
+                        ? ` (行 ${yamlValidation.line}${
+                            yamlValidation.column ? `, 列 ${yamlValidation.column}` : ''
+                          })`
+                        : ''
+                    }`}
               </span>
+              {!yamlValidation.valid && yamlValidation.line && (
+                <button
+                  onClick={() => {
+                    if (editorRef.current && yamlValidation.line) {
+                      editorRef.current.revealLineInCenter(yamlValidation.line);
+                      editorRef.current.setPosition({
+                        lineNumber: yamlValidation.line,
+                        column: yamlValidation.column || 1,
+                      });
+                      editorRef.current.focus();
+                    }
+                  }}
+                  className="ml-2 flex items-center gap-1 text-red-400 hover:text-red-300"
+                >
+                  <AlertCircle className="h-3 w-3" />
+                  跳转到错误
+                </button>
+              )}
             </div>
             <div className="text-gray-500">
               行 {yamlContent.split('\n').length}，列 1 • UTF-8 • YAML

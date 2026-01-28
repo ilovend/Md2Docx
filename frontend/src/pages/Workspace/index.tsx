@@ -1,14 +1,21 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Upload, Wrench, Loader2 } from 'lucide-react';
+import { Upload, Wrench, Loader2, X, Trash2 } from 'lucide-react';
 import { useFileStore, useRuleStore, useAppStore } from '@/stores';
 import { documentApi, healthApi, historyApi } from '@/services/api';
 
 export default function Workspace() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { selectedFiles, addFiles } = useFileStore();
+  const {
+    selectedFiles,
+    addFiles,
+    removeFile,
+    clearFiles,
+    addProcessedDocument,
+    clearProcessedDocuments,
+  } = useFileStore();
   const { selectedPresetId, selectPreset, presets, loadPresets } = useRuleStore();
   const { backendConnected, backendLatency } = useAppStore();
 
@@ -166,6 +173,8 @@ export default function Workspace() {
         const processRes = await documentApi.process({
           document_id: uploadRes.document_id,
           preset: selectedPresetId,
+          strict: strictMode,
+          verbose: verboseLogs,
         });
 
         setProcessResult(processRes);
@@ -195,8 +204,7 @@ export default function Workspace() {
         }
       } else {
         // 批量文件处理
-
-        // 这里应该使用batch API，但为了简化，我们先逐个处理
+        clearProcessedDocuments();
         let processedCount = 0;
         let totalFixes = 0;
 
@@ -207,10 +215,20 @@ export default function Workspace() {
             const processRes = await documentApi.process({
               document_id: uploadRes.document_id,
               preset: selectedPresetId,
+              strict: strictMode,
+              verbose: verboseLogs,
             });
 
             processedCount++;
             totalFixes += processRes.total_fixes;
+
+            // 存储处理结果到 store
+            addProcessedDocument({
+              documentId: uploadRes.document_id,
+              filename: file.name,
+              processResult: processRes,
+              fixes: processRes.fixes || [],
+            });
 
             // 添加历史记录
             try {
@@ -240,8 +258,10 @@ export default function Workspace() {
           duration_ms: 0,
         });
 
-        // 提示用户处理完成
-        alert(`批量处理完成：成功处理 ${processedCount} 个文件，共 ${totalFixes} 个修复`);
+        // 跳转到对比预览页面（批量模式）
+        if (processedCount > 0) {
+          navigate('/comparison?batch=true');
+        }
       }
     } catch (err: any) {
       console.error('Processing error:', err);
@@ -320,11 +340,39 @@ export default function Workspace() {
             </p>
             {selectedFiles.length > 0 && (
               <div className="mt-4 text-sm text-green-400">
-                {t('workspace.filesSelected', { count: selectedFiles.length })}
-                <div className="mt-2 text-xs text-gray-400">
+                <div className="flex items-center justify-center gap-2">
+                  {t('workspace.filesSelected', { count: selectedFiles.length })}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      clearFiles();
+                    }}
+                    className="ml-2 flex items-center gap-1 rounded bg-red-500/20 px-2 py-0.5 text-xs text-red-400 hover:bg-red-500/30"
+                    title={t('workspace.clearAll')}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    {t('workspace.clearAll')}
+                  </button>
+                </div>
+                <div className="mt-2 max-h-32 overflow-y-auto text-xs text-gray-400">
                   {selectedFiles.map((f, i) => (
-                    <div key={i}>
-                      {f.name} ({(f.size / 1024).toFixed(1)} KB)
+                    <div
+                      key={i}
+                      className="group flex items-center justify-center gap-2 py-0.5 hover:bg-white/5 rounded"
+                    >
+                      <span>
+                        {f.name} ({(f.size / 1024).toFixed(1)} KB)
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFile(i);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-opacity"
+                        title={t('workspace.removeFile')}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   ))}
                 </div>

@@ -57,7 +57,21 @@ presets:
           h3_size: 14
       image_center:
         enabled: true
+      image_resize:
+        enabled: true
+        parameters:
+          max_width: 6.0
+          max_height: 8.0
+      image_caption:
+        enabled: true
+        parameters:
+          caption_format: "图 {number}"
+          caption_font_size: 10
       latex_to_omml:
+        enabled: true
+      display_formula_center:
+        enabled: true
+      formula_numbering:
         enabled: true
   bid:
     description: 专业竞标文档格式
@@ -188,6 +202,34 @@ presets:
           table_width_percent: 95
       title_bold:
         enabled: true
+      image_center:
+        enabled: true
+      image_resize:
+        enabled: true
+        parameters:
+          max_width: 6.0
+          max_height: 8.0
+      image_caption:
+        enabled: true
+        parameters:
+          caption_format: "图 {number}"
+          caption_font_size: 10
+      latex_to_omml:
+        enabled: true
+      display_formula_center:
+        enabled: true
+      formula_numbering:
+        enabled: true
+      first_line_indent:
+        enabled: true
+        parameters:
+          indent_size: 2
+      heading_style:
+        enabled: true
+        parameters:
+          h1_size: 22
+          h2_size: 16
+          h3_size: 14
   default:
     description: 包含所有常用规则的标准配置
     name: 默认配置

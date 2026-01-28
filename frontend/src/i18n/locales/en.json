@@ -42,6 +42,8 @@
     "startRepair": "Start Repair",
     "processing": "Processing...",
     "filesSelected": "{{count}} files selected",
+    "clearAll": "Clear All",
+    "removeFile": "Remove this file",
     "backend": {
       "connected": "Connected",
       "disconnected": "Disconnected",
@@ -104,7 +106,9 @@
     "before": "Before",
     "after": "After",
     "location": "Location",
-    "downloadFixed": "Download Fixed Document"
+    "downloadFixed": "Download Fixed Document",
+    "batchMode": "Batch Mode",
+    "documentSwitcher": "Document Switcher"
   },
   "rules": {
     "title": "Rule Editor",

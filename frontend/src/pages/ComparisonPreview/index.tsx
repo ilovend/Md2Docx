@@ -1,5 +1,5 @@
 import { useState, useEffect, type MouseEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FileText,
@@ -9,8 +9,11 @@ import {
   Check,
   ArrowLeft,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { documentApi } from '@/services/api';
+import { useFileStore } from '@/stores';
 
 interface FixItem {
   id: string;
@@ -34,6 +37,10 @@ interface ProcessResult {
 export default function ComparisonPreview() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isBatchMode = searchParams.get('batch') === 'true';
+  const { processedDocuments, currentDocumentIndex, setCurrentDocumentIndex } = useFileStore();
+
   const [viewMode, setViewMode] = useState<'side-by-side' | 'overlay'>('side-by-side');
   const [zoom, setZoom] = useState(100);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -46,27 +53,71 @@ export default function ComparisonPreview() {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [originalHtml, setOriginalHtml] = useState<string>('');
   const [repairedHtml, setRepairedHtml] = useState<string>('');
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+  // 加载文档预览的函数
+  const loadDocumentPreview = async (docId: string, result: ProcessResult) => {
+    setIsLoadingPreview(true);
+    setDocumentId(docId);
+    setProcessResult(result);
+    try {
+      const [origHtml, fixedHtml] = await Promise.all([
+        documentApi.getPreviewHtml(docId, 'original'),
+        documentApi.getPreviewHtml(docId, 'fixed'),
+      ]);
+      setOriginalHtml(origHtml);
+      setRepairedHtml(fixedHtml);
+    } catch (e) {
+      console.error('Failed to load preview:', e);
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
 
   useEffect(() => {
-    // 从 sessionStorage 读取处理结果
-    const resultStr = sessionStorage.getItem('processResult');
-    const docId = sessionStorage.getItem('documentId');
+    if (isBatchMode && processedDocuments.length > 0) {
+      // 批量模式：从 store 加载当前文档
+      const currentDoc = processedDocuments[currentDocumentIndex];
+      if (currentDoc) {
+        loadDocumentPreview(currentDoc.documentId, currentDoc.processResult);
+      }
+    } else {
+      // 单文档模式：从 sessionStorage 读取
+      const resultStr = sessionStorage.getItem('processResult');
+      const docId = sessionStorage.getItem('documentId');
 
-    if (resultStr) {
-      try {
-        setProcessResult(JSON.parse(resultStr));
-      } catch (e) {
-        console.error('Failed to parse process result:', e);
+      if (resultStr) {
+        try {
+          setProcessResult(JSON.parse(resultStr));
+        } catch (e) {
+          console.error('Failed to parse process result:', e);
+        }
+      }
+
+      if (docId) {
+        setDocumentId(docId);
+        documentApi.getPreviewHtml(docId, 'original').then(setOriginalHtml);
+        documentApi.getPreviewHtml(docId, 'fixed').then(setRepairedHtml);
       }
     }
+  }, [isBatchMode, currentDocumentIndex, processedDocuments]);
 
-    if (docId) {
-      setDocumentId(docId);
-      // Fetch previews
-      documentApi.getPreviewHtml(docId, 'original').then(setOriginalHtml);
-      documentApi.getPreviewHtml(docId, 'fixed').then(setRepairedHtml);
+  // 批量模式下的文档切换
+  const handlePrevDocument = () => {
+    if (currentDocumentIndex > 0) {
+      setCurrentDocumentIndex(currentDocumentIndex - 1);
     }
-  }, []);
+  };
+
+  const handleNextDocument = () => {
+    if (currentDocumentIndex < processedDocuments.length - 1) {
+      setCurrentDocumentIndex(currentDocumentIndex + 1);
+    }
+  };
+
+  const handleSelectDocument = (index: number) => {
+    setCurrentDocumentIndex(index);
+  };
 
   const handleDownload = () => {
     if (documentId) {
@@ -196,27 +247,66 @@ export default function ComparisonPreview() {
 
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-[#2a2d3e] bg-[#1a1d2e] px-8 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400 uppercase">{t('comparison.viewMode')}</span>
-          <div className="flex overflow-hidden rounded bg-[#151822]">
-            <button
-              onClick={() => setViewMode('side-by-side')}
-              className={`px-3 py-1.5 text-xs transition-colors ${
-                viewMode === 'side-by-side'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {t('comparison.sideBySide')}
-            </button>
-            <button
-              onClick={() => setViewMode('overlay')}
-              className={`px-3 py-1.5 text-xs transition-colors ${
-                viewMode === 'overlay' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {t('comparison.overlay')}
-            </button>
+        <div className="flex items-center gap-4">
+          {/* 批量模式文档切换器 */}
+          {isBatchMode && processedDocuments.length > 0 && (
+            <div className="flex items-center gap-2 border-r border-[#2a2d3e] pr-4">
+              <button
+                onClick={handlePrevDocument}
+                disabled={currentDocumentIndex === 0 || isLoadingPreview}
+                className="flex h-7 w-7 items-center justify-center rounded bg-[#151822] text-gray-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <select
+                value={currentDocumentIndex}
+                onChange={(e) => handleSelectDocument(Number(e.target.value))}
+                disabled={isLoadingPreview}
+                className="rounded border border-[#2a2d3e] bg-[#151822] px-2 py-1 text-xs text-white focus:border-blue-500 focus:outline-none disabled:opacity-50"
+              >
+                {processedDocuments.map((doc, idx) => (
+                  <option key={doc.documentId} value={idx}>
+                    {doc.filename}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleNextDocument}
+                disabled={currentDocumentIndex >= processedDocuments.length - 1 || isLoadingPreview}
+                className="flex h-7 w-7 items-center justify-center rounded bg-[#151822] text-gray-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              <span className="text-xs text-gray-500">
+                {currentDocumentIndex + 1} / {processedDocuments.length}
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400 uppercase">{t('comparison.viewMode')}</span>
+            <div className="flex overflow-hidden rounded bg-[#151822]">
+              <button
+                onClick={() => setViewMode('side-by-side')}
+                className={`px-3 py-1.5 text-xs transition-colors ${
+                  viewMode === 'side-by-side'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {t('comparison.sideBySide')}
+              </button>
+              <button
+                onClick={() => setViewMode('overlay')}
+                className={`px-3 py-1.5 text-xs transition-colors ${
+                  viewMode === 'overlay'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {t('comparison.overlay')}
+              </button>
+            </div>
           </div>
         </div>
 

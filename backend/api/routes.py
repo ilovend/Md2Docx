@@ -66,7 +66,11 @@ async def upload_document(file: UploadFile = File(...)):
 async def process_document(request: ProcessRequest):
     try:
         result = processor.process(
-            request.document_id, request.preset, request.preset_config
+            request.document_id,
+            request.preset,
+            request.preset_config,
+            strict=request.strict,
+            verbose=request.verbose,
         )
         return result
     except FileNotFoundError:

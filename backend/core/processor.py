@@ -29,13 +29,33 @@ class DocumentProcessor:
         return doc_id
 
     def process(
-        self, document_id: str, preset_id: str = None, preset_config: dict = None
+        self,
+        document_id: str,
+        preset_id: str = None,
+        preset_config: dict = None,
+        strict: bool = False,
+        verbose: bool = False,
     ):
+        """
+        Process document with specified preset and options.
+
+        Args:
+            document_id: Document identifier
+            preset_id: Preset configuration ID
+            preset_config: Custom preset configuration (overrides preset_id)
+            strict: Enable strict mode for more aggressive fixes
+            verbose: Enable verbose logging
+        """
         start_time = time.time()
         input_path = settings.UPLOAD_DIR / document_id
+        logs = [] if verbose else None
 
         if not input_path.exists():
             raise FileNotFoundError("Document not found")
+
+        if verbose:
+            logs.append(f"[INFO] Processing document: {document_id}")
+            logs.append(f"[INFO] Strict mode: {strict}")
 
         # Check if Markdown file - convert to Word first
         md_stats = None
@@ -81,11 +101,22 @@ class DocumentProcessor:
                 rule_config = rules.get(rule.id)
                 if rule_config and rule_config.get("enabled"):
                     params = rule_config.get("parameters", {})
+                    # 严格模式下可以调整参数
+                    if strict:
+                        params = self._apply_strict_params(rule.id, params)
                     try:
+                        if verbose:
+                            logs.append(f"[RULE] Applying: {rule.id} ({rule.name})")
                         rule_fixes = rule.apply(doc, params)
                         if rule_fixes:
                             fixes.extend(rule_fixes)
+                            if verbose:
+                                logs.append(
+                                    f"[RULE] {rule.id}: {len(rule_fixes)} fixes applied"
+                                )
                     except Exception as e:
+                        if verbose:
+                            logs.append(f"[ERROR] Rule {rule.id} failed: {e}")
                         print(f"Error applying rule {rule.id}: {e}")
 
         # Save Output
@@ -102,6 +133,10 @@ class DocumentProcessor:
             "fixes": fixes,
             "duration_ms": duration,
         }
+
+        # 添加 verbose 日志到结果
+        if verbose and logs:
+            result["logs"] = logs
 
         # Add Markdown conversion stats if applicable
         if md_stats:
@@ -138,3 +173,35 @@ class DocumentProcessor:
             json.dump(result, f, ensure_ascii=False, indent=2)
 
         return result
+
+    def _apply_strict_params(self, rule_id: str, params: dict) -> dict:
+        """
+        Apply strict mode adjustments to rule parameters.
+        Strict mode enables more aggressive/conservative fixes.
+        """
+        strict_params = params.copy()
+
+        # 严格模式下的参数调整
+        strict_overrides = {
+            "font_standard": {
+                "enforce_all": True,  # 强制所有字体替换
+            },
+            "paragraph_spacing": {
+                "strict_spacing": True,  # 严格段落间距
+            },
+            "table_border": {
+                "border_size": 6,  # 更粗的边框
+            },
+            "image_resize": {
+                "max_width": 5.5,  # 更小的最大宽度
+                "max_height": 7.0,
+            },
+            "first_line_indent": {
+                "indent_size": 2,  # 强制 2 字符缩进
+            },
+        }
+
+        if rule_id in strict_overrides:
+            strict_params.update(strict_overrides[rule_id])
+
+        return strict_params

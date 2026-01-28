@@ -24,6 +24,8 @@ export interface ProcessResponse {
 export interface ProcessRequest {
   document_id: string;
   preset: string;
+  strict?: boolean;
+  verbose?: boolean;
 }
 
 export const documentApi = {
@@ -227,12 +229,61 @@ export interface RuleMetadata {
   parameters: Record<string, any>;
 }
 
+export interface RuleCreateRequest {
+  name: string;
+  description?: string;
+  enabled?: boolean;
+  parameters?: Record<string, any>;
+}
+
+export interface RuleUpdateRequest {
+  name?: string;
+  description?: string;
+  enabled?: boolean;
+  parameters?: Record<string, any>;
+}
+
 export const rulesApi = {
   /**
    * 获取所有可用规则的元数据
    */
   getAll: async (): Promise<{ rules: RuleMetadata[] }> => {
     const response = await axios.get<{ rules: RuleMetadata[] }>(`${API_BASE}/rules`);
+    return response.data;
+  },
+
+  /**
+   * 获取单个规则详情
+   */
+  getById: async (ruleId: string): Promise<RuleMetadata> => {
+    const response = await axios.get<RuleMetadata>(`${API_BASE}/rules/${ruleId}`);
+    return response.data;
+  },
+
+  /**
+   * 创建新规则
+   */
+  create: async (rule: RuleCreateRequest): Promise<{ success: boolean; rule: RuleMetadata }> => {
+    const response = await axios.post(`${API_BASE}/rules`, rule);
+    return response.data;
+  },
+
+  /**
+   * 更新规则
+   */
+  update: async (
+    ruleId: string,
+    rule: RuleUpdateRequest,
+  ): Promise<{ success: boolean; rule: RuleMetadata }> => {
+    const response = await axios.put(`${API_BASE}/rules/${ruleId}`, rule);
+    return response.data;
+  },
+
+  /**
+   * 删除规则
+   */
+  delete: async (ruleId: string): Promise<{ success: boolean; message: string }> => {
+    const response = await axios.delete(`${API_BASE}/rules/${ruleId}`);
     return response.data;
   },
 
