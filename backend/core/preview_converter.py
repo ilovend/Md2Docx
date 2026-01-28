@@ -30,20 +30,25 @@ class DocxPreviewConverter:
                 for fix in fixes:
                     rule_id = fix.get("rule_id", "unknown")
                     desc = fix.get("description", "")
+                    fix_id = fix.get("id")
 
                     # Map paragraph indices
                     if "paragraph_indices" in fix:
                         for idx in fix["paragraph_indices"]:
                             if idx not in para_map:
                                 para_map[idx] = []
-                            para_map[idx].append({"rule": rule_id, "desc": desc})
+                            para_map[idx].append(
+                                {"id": fix_id, "rule": rule_id, "desc": desc}
+                            )
 
                     # Map table indices
                     if "table_indices" in fix:
                         for idx in fix["table_indices"]:
                             if idx not in table_map:
                                 table_map[idx] = []
-                            table_map[idx].append({"rule": rule_id, "desc": desc})
+                            table_map[idx].append(
+                                {"id": fix_id, "rule": rule_id, "desc": desc}
+                            )
 
             # Simple styles
             html_parts.append(
@@ -148,8 +153,10 @@ class DocxPreviewConverter:
             desc_list = [f"[{f['rule']}] {f['desc']}" for f in fix_info]
             full_desc = "; ".join(desc_list)
             title_str = f' title="{html.escape(full_desc)}"'
+            fix_ids = [f.get("id") for f in fix_info if f.get("id")]
             data_attr = (
                 f' data-rules="{html.escape(str([f["rule"] for f in fix_info]))}"'
+                f' data-fix-ids="{html.escape(str(fix_ids))}"'
             )
 
         content = html.escape(text)
@@ -166,6 +173,8 @@ class DocxPreviewConverter:
             desc_list = [f"[{f['rule']}] {f['desc']}" for f in fix_info]
             full_desc = "; ".join(desc_list)
             title_str = f' title="{html.escape(full_desc)}"'
+            fix_ids = [f.get("id") for f in fix_info if f.get("id")]
+            title_str += f' data-fix-ids="{html.escape(str(fix_ids))}"'
         else:
             class_str = ' class="dict-preview-table"'
 

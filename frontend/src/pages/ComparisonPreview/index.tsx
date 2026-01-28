@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -78,6 +78,32 @@ export default function ComparisonPreview() {
   };
 
   const fixes = processResult?.fixes || [];
+
+  const handlePreviewClick = (e: MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    const el = target.closest?.('[data-fix-ids]') as HTMLElement | null;
+    if (!el) return;
+
+    const raw = el.getAttribute('data-fix-ids');
+    if (!raw) return;
+
+    // backend emits Python list string like "['id1', 'id2']"; normalize to JSON
+    const normalized = raw.replace(/'/g, '"');
+    let ids: string[] = [];
+    try {
+      const parsed = JSON.parse(normalized);
+      if (Array.isArray(parsed)) ids = parsed;
+    } catch {
+      return;
+    }
+
+    const firstId = ids[0];
+    if (!firstId) return;
+    const fix = fixes.find((f) => f.id === firstId);
+    if (fix) openFixDetail(fix);
+  };
 
   // Manual adjustment states
   const [bottomMargin, setBottomMargin] = useState(24);
@@ -243,6 +269,7 @@ export default function ComparisonPreview() {
               <div
                 className="prose max-w-none text-black selection:bg-green-200"
                 dangerouslySetInnerHTML={{ __html: repairedHtml }}
+                onClick={handlePreviewClick}
                 style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
               />
             ) : (
