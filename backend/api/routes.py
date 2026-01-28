@@ -293,45 +293,76 @@ async def get_rule_detail(rule_id: str):
 
 @router.post("/rules")
 async def create_rule(rule: RuleCreate):
-    """Create a new rule"""
-    # In a real implementation, this would save to a rules database or config
-    # For now, we'll just return the created rule with a generated ID
-    new_rule = {
-        "id": f"custom_{uuid.uuid4().hex[:8]}",
+    """Create a new rule and persist it"""
+    from backend.core.rule_storage import rule_storage
+
+    rule_id = f"custom_{uuid.uuid4().hex[:8]}"
+    rule_data = {
         "name": rule.name,
         "description": rule.description,
         "enabled": rule.enabled,
         "parameters": rule.parameters,
+        "category": "custom",
     }
-    return {"success": True, "rule": new_rule}
+
+    success = rule_storage.save_custom_rule(rule_id, rule_data)
+    if success:
+        return {"success": True, "rule": {"id": rule_id, **rule_data}}
+    else:
+        raise HTTPException(500, "Failed to save custom rule")
 
 
 @router.put("/rules/{rule_id}")
 async def update_rule(rule_id: str, rule: RuleUpdate):
     """Update an existing rule"""
-    # Get the existing rule
-    existing_rule = await get_rule_detail(rule_id)
-    # Update the rule with provided data
-    updated_rule = existing_rule.copy()
-    if rule.name is not None:
-        updated_rule["name"] = rule.name
-    if rule.description is not None:
-        updated_rule["description"] = rule.description
-    if rule.enabled is not None:
-        updated_rule["enabled"] = rule.enabled
-    if rule.parameters is not None:
-        updated_rule["parameters"] = rule.parameters
-    # In a real implementation, this would save to a rules database or config
-    return {"success": True, "rule": updated_rule}
+    from backend.core.rule_storage import rule_storage
+
+    # Check if it's a custom rule
+    if rule_storage.rule_exists(rule_id):
+        updates = {}
+        if rule.name is not None:
+            updates["name"] = rule.name
+        if rule.description is not None:
+            updates["description"] = rule.description
+        if rule.enabled is not None:
+            updates["enabled"] = rule.enabled
+        if rule.parameters is not None:
+            updates["parameters"] = rule.parameters
+
+        updated_rule = rule_storage.update_custom_rule(rule_id, updates)
+        if updated_rule:
+            return {"success": True, "rule": updated_rule}
+        else:
+            raise HTTPException(500, "Failed to update rule")
+    else:
+        # For built-in rules, just return the updated data without persisting
+        existing_rule = await get_rule_detail(rule_id)
+        updated_rule = existing_rule.copy()
+        if rule.name is not None:
+            updated_rule["name"] = rule.name
+        if rule.description is not None:
+            updated_rule["description"] = rule.description
+        if rule.enabled is not None:
+            updated_rule["enabled"] = rule.enabled
+        if rule.parameters is not None:
+            updated_rule["parameters"] = rule.parameters
+        return {"success": True, "rule": updated_rule}
 
 
 @router.delete("/rules/{rule_id}")
 async def delete_rule(rule_id: str):
-    """Delete a rule"""
-    # Check if the rule exists
-    await get_rule_detail(rule_id)
-    # In a real implementation, this would delete from a rules database or config
-    return {"success": True, "message": f"Rule {rule_id} deleted successfully"}
+    """Delete a custom rule"""
+    from backend.core.rule_storage import rule_storage
+
+    if rule_storage.rule_exists(rule_id):
+        success = rule_storage.delete_custom_rule(rule_id)
+        if success:
+            return {"success": True, "message": f"Rule {rule_id} deleted successfully"}
+        else:
+            raise HTTPException(500, "Failed to delete rule")
+    else:
+        # Built-in rules cannot be deleted
+        raise HTTPException(400, "Cannot delete built-in rules")
 
 
 # ===== Rule Testing API =====
