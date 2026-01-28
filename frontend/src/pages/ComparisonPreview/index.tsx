@@ -40,6 +40,8 @@ export default function ComparisonPreview() {
   const [showAdjustment, setShowAdjustment] = useState(false);
   const [selectedFix, setSelectedFix] = useState<FixItem | null>(null);
   const [showFixDetail, setShowFixDetail] = useState(false);
+  const [showFixPicker, setShowFixPicker] = useState(false);
+  const [fixPickerItems, setFixPickerItems] = useState<FixItem[]>([]);
   const [processResult, setProcessResult] = useState<ProcessResult | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [originalHtml, setOriginalHtml] = useState<string>('');
@@ -101,8 +103,19 @@ export default function ComparisonPreview() {
 
     const firstId = ids[0];
     if (!firstId) return;
-    const fix = fixes.find((f) => f.id === firstId);
-    if (fix) openFixDetail(fix);
+
+    const picked = ids
+      .map((id) => fixes.find((f) => f.id === id))
+      .filter((f): f is FixItem => Boolean(f));
+
+    if (picked.length <= 0) return;
+    if (picked.length === 1) {
+      openFixDetail(picked[0]);
+      return;
+    }
+
+    setFixPickerItems(picked);
+    setShowFixPicker(true);
   };
 
   // Manual adjustment states
@@ -129,6 +142,16 @@ export default function ComparisonPreview() {
   const closeFixDetail = () => {
     setShowFixDetail(false);
     setSelectedFix(null);
+  };
+
+  const closeFixPicker = () => {
+    setShowFixPicker(false);
+    setFixPickerItems([]);
+  };
+
+  const handlePickFix = (fix: FixItem) => {
+    closeFixPicker();
+    openFixDetail(fix);
   };
 
   useEffect(() => {
@@ -428,6 +451,49 @@ export default function ComparisonPreview() {
             <div className="flex justify-end gap-2 border-t border-[#2a2d3e] p-4">
               <button
                 onClick={closeFixDetail}
+                className="rounded bg-[#1a1d2e] px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-[#252938]"
+              >
+                {t('common.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFixPicker && fixPickerItems.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={closeFixPicker}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-lg overflow-hidden rounded-lg border border-[#2a2d3e] bg-[#151822] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#2a2d3e] p-4">
+              <div className="text-sm text-white">{t('comparison.fixDetails')}</div>
+              <button onClick={closeFixPicker} className="text-gray-400 hover:text-white">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-auto p-2">
+              {fixPickerItems.map((fix) => (
+                <button
+                  key={fix.id}
+                  onClick={() => handlePickFix(fix)}
+                  className="w-full rounded border border-transparent px-3 py-3 text-left transition-colors hover:border-[#2a2d3e] hover:bg-[#1a1d2e]"
+                >
+                  <div className="text-xs text-gray-400">{fix.rule_id}</div>
+                  <div className="mt-1 text-sm text-gray-200">{fix.description}</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-[#2a2d3e] p-4">
+              <button
+                onClick={closeFixPicker}
                 className="rounded bg-[#1a1d2e] px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-[#252938]"
               >
                 {t('common.cancel')}
