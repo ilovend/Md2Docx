@@ -183,9 +183,59 @@ export default function ComparisonPreview() {
   };
 
   const handleDiscardAdjustment = () => {
+    // 重置调整参数到默认值
+    setBottomMargin(24);
+    setShowBorders(true);
+    setZebraStriping(true);
+    setHeaderHighlight(true);
     setShowAdjustment(false);
     setSelectedElement(null);
   };
+
+  // 实时预览：监听调整参数变化并应用样式
+  useEffect(() => {
+    if (!showAdjustment) return;
+
+    const previewContainer = document.querySelector('.preview-container');
+    if (!previewContainer) return;
+
+    // 应用表格样式
+    const tables = previewContainer.querySelectorAll('table');
+    tables.forEach((table) => {
+      // 边框
+      if (showBorders) {
+        table.style.border = '1px solid #d1d5db';
+        table.querySelectorAll('td, th').forEach((cell) => {
+          (cell as HTMLElement).style.border = '1px solid #d1d5db';
+        });
+      } else {
+        table.style.border = 'none';
+        table.querySelectorAll('td, th').forEach((cell) => {
+          (cell as HTMLElement).style.border = 'none';
+        });
+      }
+
+      // 斑马纹
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach((row, index) => {
+        (row as HTMLElement).style.backgroundColor =
+          zebraStriping && index % 2 === 1 ? '#f9fafb' : '';
+      });
+
+      // 标题高亮
+      const headers = table.querySelectorAll('th');
+      headers.forEach((th) => {
+        (th as HTMLElement).style.backgroundColor = headerHighlight ? '#f3f4f6' : '';
+        (th as HTMLElement).style.fontWeight = headerHighlight ? 'bold' : 'normal';
+      });
+    });
+
+    // 应用段落行间距
+    const paragraphs = previewContainer.querySelectorAll('p');
+    paragraphs.forEach((p) => {
+      (p as HTMLElement).style.lineHeight = `${bottomMargin / 8}`;
+    });
+  }, [showAdjustment, showBorders, zebraStriping, headerHighlight, bottomMargin]);
 
   const openFixDetail = (fix: FixItem) => {
     setSelectedFix(fix);
