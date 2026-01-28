@@ -25,7 +25,8 @@ class ImageCenterRule(BaseRule):
                     has_image = True
                     break
             if has_image:
-                if para.paragraph_format.alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
+                before_alignment = para.paragraph_format.alignment
+                if before_alignment != WD_PARAGRAPH_ALIGNMENT.CENTER:
                     para.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                     fixes.append(
                         {
@@ -33,6 +34,12 @@ class ImageCenterRule(BaseRule):
                             "rule_id": self.id,
                             "description": f"已将第 {i+1} 段中的图片居中",
                             "paragraph_indices": [i],
+                            "before": str(before_alignment),
+                            "after": str(WD_PARAGRAPH_ALIGNMENT.CENTER),
+                            "location": {
+                                "paragraph_index": i,
+                                "type": "image_alignment",
+                            },
                         }
                     )
         return fixes
@@ -77,6 +84,7 @@ class ImageResizeRule(BaseRule):
                             if extent is not None:
                                 cx, cy = int(extent.get("cx")), int(extent.get("cy"))
                                 if cx > max_width_emu or cy > max_height_emu:
+                                    before_size = {"cx": cx, "cy": cy}
                                     ratio = cx / cy
                                     if ratio > 1:
                                         new_cx = max_width_emu
@@ -86,12 +94,21 @@ class ImageResizeRule(BaseRule):
                                         new_cx = int(new_cy * ratio)
                                     extent.set("cx", str(new_cx))
                                     extent.set("cy", str(new_cy))
+                                    after_size = {"cx": new_cx, "cy": new_cy}
                                     fixes.append(
                                         {
                                             "id": f"fix_image_resize_{i}",
                                             "rule_id": self.id,
                                             "description": f"已缩放第 {i+1} 段中的图片",
                                             "paragraph_indices": [i],
+                                            "before": str(before_size),
+                                            "after": str(after_size),
+                                            "location": {
+                                                "paragraph_index": i,
+                                                "type": "image_extent",
+                                                "max_width_in": max_width,
+                                                "max_height_in": max_height,
+                                            },
                                         }
                                     )
         return fixes
@@ -145,6 +162,12 @@ class ImageCaptionRule(BaseRule):
                         "rule_id": self.id,
                         "description": f"已为第 {i+1} 段中的图片添加题注 '{caption_text}'",
                         "paragraph_indices": [i],
+                        "before": None,
+                        "after": caption_text,
+                        "location": {
+                            "paragraph_index": i,
+                            "type": "image_caption",
+                        },
                     }
                 )
 

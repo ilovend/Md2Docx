@@ -49,6 +49,14 @@ class TableBorderRule(BaseRule):
                     "rule_id": self.id,
                     "description": desc,
                     "table_indices": [i],
+                    "before": None,
+                    "after": desc,
+                    "location": {
+                        "table_index": i,
+                        "type": "table_borders",
+                        "border_size": border_size,
+                        "border_color": border_color,
+                    },
                 }
             )
         return fixes
@@ -117,6 +125,16 @@ class TableCellSpacingRule(BaseRule):
                     "rule_id": self.id,
                     "description": f"已为表格 {i+1} 应用单元格间距",
                     "table_indices": [i],
+                    "before": None,
+                    "after": str({"top": tm, "left": lm, "bottom": bm, "right": rm}),
+                    "location": {
+                        "table_index": i,
+                        "type": "table_cell_margins",
+                        "top": tm,
+                        "left": lm,
+                        "bottom": bm,
+                        "right": rm,
+                    },
                 }
             )
         return fixes
@@ -150,6 +168,13 @@ class TableColumnWidthRule(BaseRule):
                     "rule_id": self.id,
                     "description": f"已为表格 {i+1} 应用自动列宽",
                     "table_indices": [i],
+                    "before": None,
+                    "after": "autofit",
+                    "location": {
+                        "table_index": i,
+                        "type": "table_layout",
+                        "layout": "autofit",
+                    },
                 }
             )
         return fixes
