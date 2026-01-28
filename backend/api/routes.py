@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 processor = DocumentProcessor()
 
-# 历史记录存储
-HISTORY_FILE = settings.BASE_DIR / "history.json"
+# 历史记录存储 (使用 backend/data 目录)
+HISTORY_FILE = settings.HISTORY_FILE
 
 
 class HistoryItem(BaseModel):

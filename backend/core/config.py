@@ -12,6 +12,8 @@ class Settings:
     PRESETS_PATH = BASE_DIR / "presets.yaml"
     UPLOAD_DIR = BACKEND_DIR / "uploads"
     OUTPUT_DIR = BACKEND_DIR / "outputs"
+    DATA_DIR = BACKEND_DIR / "data"
+    HISTORY_FILE = DATA_DIR / "history.json"
 
     # Server
     HOST = "127.0.0.1"
@@ -27,3 +29,4 @@ settings = Settings()
 # Ensure directories exist
 settings.UPLOAD_DIR.mkdir(exist_ok=True)
 settings.OUTPUT_DIR.mkdir(exist_ok=True)
+settings.DATA_DIR.mkdir(exist_ok=True)
