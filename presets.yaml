@@ -14,6 +14,11 @@ presets:
           font_size_body: 12
           title_font: 黑体
           western_font: Times New Roman
+      font_replacement:
+        enabled: true
+        parameters:
+          default_western_font: Times New Roman
+          default_chinese_font: 宋体
       list_numbering:
         enabled: true
       page_layout:
@@ -171,6 +176,13 @@ presets:
           font_size_body: 12
           title_font: 黑体
           western_font: Arial
+      font_replacement:
+        enabled: true
+        parameters:
+          default_western_font: Arial
+          default_chinese_font: 宋体
+      inline_formula_style:
+        enabled: true
       list_numbering:
         enabled: true
       page_layout:
