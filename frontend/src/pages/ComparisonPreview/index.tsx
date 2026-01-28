@@ -316,7 +316,6 @@ export default function ComparisonPreview() {
             <FileText className="h-4 w-4" />
             {t('comparison.previewAndExport')}
           </button>
-          {/* User avatar placeholder */}
         </div>
       </header>
 

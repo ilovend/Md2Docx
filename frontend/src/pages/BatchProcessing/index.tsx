@@ -314,7 +314,6 @@ export default function BatchProcessing() {
           <button className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600">
             Batch Mode
           </button>
-          {/* User avatar placeholder - can be replaced with actual user profile */}
         </div>
       </header>
 

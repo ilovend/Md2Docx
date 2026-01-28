@@ -464,7 +464,7 @@ export default function Workspace() {
               className={`h-2 w-2 rounded-full ${backendConnected ? 'bg-green-500' : 'bg-red-500'}`}
             ></div>
             <span className="text-gray-400">
-              {t('workspace.backend.connected').split('/')[0]}:{' '}
+              {t('workspace.backend.status')}:{' '}
               {backendConnected
                 ? t('workspace.backend.connected')
                 : t('workspace.backend.disconnected')}

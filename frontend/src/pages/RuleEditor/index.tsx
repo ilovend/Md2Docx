@@ -340,6 +340,21 @@ export default function RuleEditor() {
     }
   };
 
+  // 当选中规则时，自动跳转到编辑器对应行
+  useEffect(() => {
+    if (selectedRule && editorRef.current && yamlContent) {
+      const lines = yamlContent.split('\n');
+      const ruleLineIndex = lines.findIndex((line) => line.trim().startsWith(`${selectedRule}:`));
+
+      if (ruleLineIndex !== -1) {
+        const lineNumber = ruleLineIndex + 1;
+        editorRef.current.revealLineInCenter(lineNumber);
+        editorRef.current.setPosition({ lineNumber, column: 1 });
+        editorRef.current.focus();
+      }
+    }
+  }, [selectedRule, yamlContent]);
+
   return (
     <div className="flex size-full flex-col">
       {/* Header */}
@@ -377,7 +392,6 @@ export default function RuleEditor() {
           >
             {t('rules.saveChanges')}
           </button>
-          {/* User avatar placeholder */}
         </div>
       </header>
 

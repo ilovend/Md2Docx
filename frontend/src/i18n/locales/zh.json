@@ -50,6 +50,7 @@
     "clearAll": "清空全部",
     "removeFile": "移除此文件",
     "backend": {
+      "status": "服务器状态",
       "connected": "已连接",
       "disconnected": "未连接",
       "latency": "延迟"
