@@ -66,19 +66,6 @@ export default function RootLayout() {
         <div className="border-t border-[#2a2d3e] p-4">
           <LanguageSwitcher />
         </div>
-
-        {/* User Profile */}
-        <div className="border-t border-[#2a2d3e] p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm">
-              王
-            </div>
-            <div>
-              <div className="text-sm text-white">王小明</div>
-              <div className="text-xs text-gray-400">个人版</div>
-            </div>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content */}
