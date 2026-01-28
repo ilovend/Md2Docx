@@ -56,6 +56,12 @@ export default function RuleEditor() {
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
+  // New Rule Modal States
+  const [showNewRuleModal, setShowNewRuleModal] = useState(false);
+  const [newRuleName, setNewRuleName] = useState('');
+  const [newRuleCategory, setNewRuleCategory] = useState('other');
+  const [newRuleDescription, setNewRuleDescription] = useState('');
+
   // Validate YAML content in real-time with debounce
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -384,7 +390,10 @@ export default function RuleEditor() {
           </div>
 
           <div className="flex-1 overflow-auto p-2">
-            <button className="mb-4 flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-blue-400 transition-colors hover:bg-[#1a1d2e]">
+            <button
+              onClick={() => setShowNewRuleModal(true)}
+              className="mb-4 flex w-full items-center gap-2 rounded px-3 py-2 text-sm text-blue-400 transition-colors hover:bg-[#1a1d2e]"
+            >
               <Plus className="h-4 w-4" />
               <span>{t('rules.addNewRule')}</span>
             </button>
@@ -634,6 +643,81 @@ export default function RuleEditor() {
           </div>
         </aside>
       </div>
+
+      {/* New Rule Modal */}
+      {showNewRuleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-96 rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-6">
+            <h3 className="mb-4 text-lg font-medium text-white">{t('rules.addNewRule')}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-xs text-gray-400">规则名称</label>
+                <input
+                  type="text"
+                  value={newRuleName}
+                  onChange={(e) => setNewRuleName(e.target.value)}
+                  className="w-full rounded border border-[#2a2d3e] bg-[#151822] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  placeholder="例如: 自定义字体规则"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-gray-400">规则分类</label>
+                <select
+                  value={newRuleCategory}
+                  onChange={(e) => setNewRuleCategory(e.target.value)}
+                  className="w-full rounded border border-[#2a2d3e] bg-[#151822] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="font">🔤 字体规则</option>
+                  <option value="table">📊 表格规则</option>
+                  <option value="paragraph">📝 排版规则</option>
+                  <option value="image">🖼️ 图表规则</option>
+                  <option value="formula">∑ 公式规则</option>
+                  <option value="other">⚙️ 其他规则</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-gray-400">规则描述</label>
+                <textarea
+                  value={newRuleDescription}
+                  onChange={(e) => setNewRuleDescription(e.target.value)}
+                  className="w-full rounded border border-[#2a2d3e] bg-[#151822] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  rows={3}
+                  placeholder="描述规则的作用..."
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowNewRuleModal(false);
+                  setNewRuleName('');
+                  setNewRuleCategory('other');
+                  setNewRuleDescription('');
+                }}
+                className="rounded px-4 py-2 text-sm text-gray-400 hover:text-white"
+              >
+                取消
+              </button>
+              <button
+                onClick={() => {
+                  // 添加新规则到 YAML 内容
+                  const ruleId = `custom_${newRuleName.toLowerCase().replace(/\s+/g, '_')}`;
+                  const newRuleYaml = `\n${ruleId}:\n  enabled: true\n  # ${newRuleDescription}\n  parameters: {}\n`;
+                  setYamlContent(yamlContent + newRuleYaml);
+                  setShowNewRuleModal(false);
+                  setNewRuleName('');
+                  setNewRuleCategory('other');
+                  setNewRuleDescription('');
+                }}
+                disabled={!newRuleName.trim()}
+                className="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-600"
+              >
+                创建规则
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
