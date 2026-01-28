@@ -44,6 +44,15 @@ class FontStandardRule(BaseRule):
                         "rule_id": self.id,
                         "description": f"已应用字体 {western_font}/{chinese_font} 大小 {font_size}pt",
                         "paragraph_indices": [i],
+                        "before": None,
+                        "after": str(
+                            {
+                                "western_font": western_font,
+                                "chinese_font": chinese_font,
+                                "font_size_pt": font_size,
+                            }
+                        ),
+                        "location": {"paragraph_index": i, "type": "font_standard"},
                     }
                 )
         return fixes
@@ -89,6 +98,12 @@ class FontColorRule(BaseRule):
                     "rule_id": self.id,
                     "description": f"已应用字体颜色 #{text_color}",
                     "paragraph_indices": affected_indices,
+                    "before": None,
+                    "after": f"#{text_color}",
+                    "location": {
+                        "type": "font_color",
+                        "affected_count": len(affected_indices),
+                    },
                 }
             )
         return fixes
@@ -170,6 +185,17 @@ class FontReplacementRule(BaseRule):
                     "rule_id": self.id,
                     "description": f"已将非标准字体替换为 {default_western_font}/{default_chinese_font}",
                     "paragraph_indices": affected_indices,
+                    "before": None,
+                    "after": str(
+                        {
+                            "default_western_font": default_western_font,
+                            "default_chinese_font": default_chinese_font,
+                        }
+                    ),
+                    "location": {
+                        "type": "font_replacement",
+                        "affected_count": len(affected_indices),
+                    },
                 }
             )
         return fixes

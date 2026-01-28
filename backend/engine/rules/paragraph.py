@@ -37,6 +37,18 @@ class ParagraphSpacingRule(BaseRule):
                     "rule_id": self.id,
                     "description": f"已应用行间距 {line_spacing}x，段前 {space_before}pt，段后 {space_after}pt",
                     "paragraph_indices": affected_indices,
+                    "before": None,
+                    "after": str(
+                        {
+                            "line_spacing": line_spacing,
+                            "space_before_pt": space_before,
+                            "space_after_pt": space_after,
+                        }
+                    ),
+                    "location": {
+                        "type": "paragraph_spacing",
+                        "affected_count": len(affected_indices),
+                    },
                 }
             )
         return fixes
@@ -77,6 +89,14 @@ class FirstLineIndentRule(BaseRule):
                     "rule_id": self.id,
                     "description": f"已应用 {indent_size} 字符首行缩进",
                     "paragraph_indices": affected_indices,
+                    "before": None,
+                    "after": str(
+                        {"indent_size": indent_size, "indent_pt": int(indent_pt.pt)}
+                    ),
+                    "location": {
+                        "type": "first_line_indent",
+                        "affected_count": len(affected_indices),
+                    },
                 }
             )
         return fixes
@@ -106,6 +126,13 @@ class TitleBoldRule(BaseRule):
                             "rule_id": self.id,
                             "description": f"已将标题 '{para.style.name}' 加粗",
                             "paragraph_indices": [i],
+                            "before": None,
+                            "after": "bold=true",
+                            "location": {
+                                "paragraph_index": i,
+                                "type": "title_bold",
+                                "style": para.style.name,
+                            },
                         }
                     )
         return fixes
@@ -150,6 +177,13 @@ class HeadingStyleRule(BaseRule):
                             "rule_id": self.id,
                             "description": f"已应用 {target_size}pt 到标题 {para.style.name}",
                             "paragraph_indices": [i],
+                            "before": None,
+                            "after": str({"target_size_pt": target_size, "bold": True}),
+                            "location": {
+                                "paragraph_index": i,
+                                "type": "heading_style",
+                                "style": para.style.name,
+                            },
                         }
                     )
         return fixes
