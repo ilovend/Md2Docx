@@ -99,6 +99,11 @@
     "viewDetails": "View Details",
     "ruleId": "Rule ID",
     "description": "Description",
+    "paragraphIndices": "Paragraph Indices",
+    "tableIndices": "Table Indices",
+    "before": "Before",
+    "after": "After",
+    "location": "Location",
     "downloadFixed": "Download Fixed Document"
   },
   "rules": {

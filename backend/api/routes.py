@@ -203,61 +203,6 @@ async def get_rules():
     return {"rules": rule_types}
 
 
-@router.get("/rules/{rule_id}")
-async def get_rule_detail(rule_id: str):
-    """Get detailed rule configuration"""
-    # Get all rules
-    rules = (await get_rules())["rules"]
-    # Find the specific rule
-    rule = next((r for r in rules if r["id"] == rule_id), None)
-    if not rule:
-        raise HTTPException(404, "Rule not found")
-    return rule
-
-
-@router.post("/rules")
-async def create_rule(rule: RuleCreate):
-    """Create a new rule"""
-    # In a real implementation, this would save to a rules database or config
-    # For now, we'll just return the created rule with a generated ID
-    new_rule = {
-        "id": f"custom_{uuid.uuid4().hex[:8]}",
-        "name": rule.name,
-        "description": rule.description,
-        "enabled": rule.enabled,
-        "parameters": rule.parameters,
-    }
-    return {"success": True, "rule": new_rule}
-
-
-@router.put("/rules/{rule_id}")
-async def update_rule(rule_id: str, rule: RuleUpdate):
-    """Update an existing rule"""
-    # Get the existing rule
-    existing_rule = await get_rule_detail(rule_id)
-    # Update the rule with provided data
-    updated_rule = existing_rule.copy()
-    if rule.name is not None:
-        updated_rule["name"] = rule.name
-    if rule.description is not None:
-        updated_rule["description"] = rule.description
-    if rule.enabled is not None:
-        updated_rule["enabled"] = rule.enabled
-    if rule.parameters is not None:
-        updated_rule["parameters"] = rule.parameters
-    # In a real implementation, this would save to a rules database or config
-    return {"success": True, "rule": updated_rule}
-
-
-@router.delete("/rules/{rule_id}")
-async def delete_rule(rule_id: str):
-    """Delete a rule"""
-    # Check if the rule exists
-    await get_rule_detail(rule_id)
-    # In a real implementation, this would delete from a rules database or config
-    return {"success": True, "message": f"Rule {rule_id} deleted successfully"}
-
-
 # ===== Rules Import/Export API =====
 
 
@@ -328,6 +273,61 @@ async def import_rules(request: ImportRulesRequest):
         }
     except yaml.YAMLError as e:
         raise HTTPException(400, f"YAML parse error: {str(e)}")
+
+
+@router.get("/rules/{rule_id}")
+async def get_rule_detail(rule_id: str):
+    """Get detailed rule configuration"""
+    # Get all rules
+    rules = (await get_rules())["rules"]
+    # Find the specific rule
+    rule = next((r for r in rules if r["id"] == rule_id), None)
+    if not rule:
+        raise HTTPException(404, "Rule not found")
+    return rule
+
+
+@router.post("/rules")
+async def create_rule(rule: RuleCreate):
+    """Create a new rule"""
+    # In a real implementation, this would save to a rules database or config
+    # For now, we'll just return the created rule with a generated ID
+    new_rule = {
+        "id": f"custom_{uuid.uuid4().hex[:8]}",
+        "name": rule.name,
+        "description": rule.description,
+        "enabled": rule.enabled,
+        "parameters": rule.parameters,
+    }
+    return {"success": True, "rule": new_rule}
+
+
+@router.put("/rules/{rule_id}")
+async def update_rule(rule_id: str, rule: RuleUpdate):
+    """Update an existing rule"""
+    # Get the existing rule
+    existing_rule = await get_rule_detail(rule_id)
+    # Update the rule with provided data
+    updated_rule = existing_rule.copy()
+    if rule.name is not None:
+        updated_rule["name"] = rule.name
+    if rule.description is not None:
+        updated_rule["description"] = rule.description
+    if rule.enabled is not None:
+        updated_rule["enabled"] = rule.enabled
+    if rule.parameters is not None:
+        updated_rule["parameters"] = rule.parameters
+    # In a real implementation, this would save to a rules database or config
+    return {"success": True, "rule": updated_rule}
+
+
+@router.delete("/rules/{rule_id}")
+async def delete_rule(rule_id: str):
+    """Delete a rule"""
+    # Check if the rule exists
+    await get_rule_detail(rule_id)
+    # In a real implementation, this would delete from a rules database or config
+    return {"success": True, "message": f"Rule {rule_id} deleted successfully"}
 
 
 # ===== Rule Testing API =====

@@ -99,6 +99,11 @@
     "viewDetails": "\u67e5\u770b\u8be6\u60c5",
     "ruleId": "\u89c4\u5219 ID",
     "description": "\u8bf4\u660e",
+    "paragraphIndices": "\u6bb5\u843d\u7d22\u5f15",
+    "tableIndices": "\u8868\u683c\u7d22\u5f15",
+    "before": "\u4fee\u590d\u524d",
+    "after": "\u4fee\u590d\u540e",
+    "location": "\u5b9a\u4f4d\u4fe1\u606f",
     "downloadFixed": "\u4e0b\u8f7d\u4fee\u590d\u540e\u7684\u6587\u6863"
   },
   "rules": {

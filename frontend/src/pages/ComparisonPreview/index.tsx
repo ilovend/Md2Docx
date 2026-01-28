@@ -16,6 +16,11 @@ interface FixItem {
   id: string;
   rule_id: string;
   description: string;
+  paragraph_indices?: number[];
+  table_indices?: number[];
+  before?: string | null;
+  after?: string | null;
+  location?: Record<string, unknown> | null;
 }
 
 interface ProcessResult {
@@ -344,6 +349,53 @@ export default function ComparisonPreview() {
                   {selectedFix.description}
                 </div>
               </div>
+
+              {(selectedFix.paragraph_indices?.length || 0) > 0 && (
+                <div>
+                  <div className="mb-1 text-xs text-gray-400">
+                    {t('comparison.paragraphIndices')}
+                  </div>
+                  <div className="rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 text-sm text-gray-200">
+                    {selectedFix.paragraph_indices?.join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {(selectedFix.table_indices?.length || 0) > 0 && (
+                <div>
+                  <div className="mb-1 text-xs text-gray-400">{t('comparison.tableIndices')}</div>
+                  <div className="rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 text-sm text-gray-200">
+                    {selectedFix.table_indices?.join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {selectedFix.before ? (
+                <div>
+                  <div className="mb-1 text-xs text-gray-400">{t('comparison.before')}</div>
+                  <div className="whitespace-pre-wrap rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 font-mono text-xs text-gray-200">
+                    {selectedFix.before}
+                  </div>
+                </div>
+              ) : null}
+
+              {selectedFix.after ? (
+                <div>
+                  <div className="mb-1 text-xs text-gray-400">{t('comparison.after')}</div>
+                  <div className="whitespace-pre-wrap rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 font-mono text-xs text-gray-200">
+                    {selectedFix.after}
+                  </div>
+                </div>
+              ) : null}
+
+              {selectedFix.location ? (
+                <div>
+                  <div className="mb-1 text-xs text-gray-400">{t('comparison.location')}</div>
+                  <div className="whitespace-pre-wrap rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 font-mono text-xs text-gray-200">
+                    {JSON.stringify(selectedFix.location, null, 2)}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="flex justify-end gap-2 border-t border-[#2a2d3e] p-4">

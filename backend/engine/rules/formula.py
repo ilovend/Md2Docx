@@ -51,7 +51,9 @@ class FormulaNumberingRule(BaseRule):
                 # Add formula numbering
                 formula_number = f"({formula_counter})"
                 # Add numbering to the end of the paragraph
+                before_text = para.text
                 para.add_run(f" {formula_number}")
+                after_text = para.text
                 # Increment counter
                 formula_counter += 1
                 # Add fix to list
@@ -61,6 +63,13 @@ class FormulaNumberingRule(BaseRule):
                         "rule_id": "formula_numbering",
                         "description": f"Added formula numbering ({formula_counter-1})",
                         "paragraph_indices": [i],
+                        "before": before_text,
+                        "after": after_text,
+                        "location": {
+                            "paragraph_index": i,
+                            "type": "display_formula",
+                            "number": formula_counter - 1,
+                        },
                     }
                 )
 

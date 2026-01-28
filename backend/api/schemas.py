@@ -13,6 +13,11 @@ class FixItem(BaseModel):
     id: str
     rule_id: str
     description: str
+    paragraph_indices: Optional[List[int]] = None
+    table_indices: Optional[List[int]] = None
+    before: Optional[str] = None
+    after: Optional[str] = None
+    location: Optional[Dict[str, Any]] = None
 
 
 class ProcessResponse(BaseModel):

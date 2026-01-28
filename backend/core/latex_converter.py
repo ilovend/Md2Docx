@@ -249,6 +249,14 @@ class LaTeXConverter:
                                     "rule_id": "latex_to_omml",
                                     "description": f"Converted LaTeX: {latex_expr[:30]}",
                                     "paragraph_indices": [para_idx],
+                                    "before": match.group(0),
+                                    "after": None,
+                                    "location": {
+                                        "paragraph_index": para_idx,
+                                        "start": start,
+                                        "end": end,
+                                        "math_type": math_type,
+                                    },
                                 }
                             )
 
