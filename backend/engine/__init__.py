@@ -7,5 +7,7 @@ import backend.engine.rules.table  # noqa: F401
 import backend.engine.rules.paragraph  # noqa: F401
 import backend.engine.rules.image  # noqa: F401
 import backend.engine.rules.formula  # noqa: F401
+import backend.engine.rules.layout  # noqa: F401
+import backend.engine.rules.list  # noqa: F401
 
 __all__ = ["registry", "RuleParser"]
