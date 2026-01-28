@@ -413,59 +413,107 @@ export default function ComparisonPreview() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Panel - Original */}
-        <div className="flex flex-1 flex-col border-r border-[#2a2d3e] bg-[#1a1d2e]">
-          <div className="flex items-center justify-between border-b border-[#2a2d3e] px-6 py-3">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-              <span className="text-sm text-gray-400">{t('comparison.original')}</span>
-            </div>
-            <span className="text-xs text-gray-500">{t('comparison.readonly')}</span>
-          </div>
-
-          <div className="flex-1 overflow-auto bg-white p-8">
-            {originalHtml ? (
-              <div
-                className="prose max-w-none text-black selection:bg-blue-200"
-                dangerouslySetInnerHTML={{ __html: originalHtml }}
-                style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
-              />
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center text-gray-400">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+        {viewMode === 'side-by-side' ? (
+          <>
+            {/* Left Panel - Original */}
+            <div className="flex flex-1 flex-col border-r border-[#2a2d3e] bg-[#1a1d2e]">
+              <div className="flex items-center justify-between border-b border-[#2a2d3e] px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+                  <span className="text-sm text-gray-400">{t('comparison.original')}</span>
+                </div>
+                <span className="text-xs text-gray-500">{t('comparison.readonly')}</span>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* Right Panel - Repaired */}
-        <div className="flex flex-1 flex-col bg-[#1a1d2e]">
-          <div className="flex items-center justify-between border-b border-[#2a2d3e] px-6 py-3">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-400">{t('comparison.repaired')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-xs text-green-400">{t('comparison.rulesApplied')}</span>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-auto bg-white p-8">
-            {repairedHtml ? (
-              <div
-                className="prose max-w-none text-black selection:bg-green-200"
-                dangerouslySetInnerHTML={{ __html: repairedHtml }}
-                onClick={handlePreviewClick}
-                style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
-              />
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center text-gray-400">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+              <div className="flex-1 overflow-auto bg-white p-8">
+                {originalHtml ? (
+                  <div
+                    className="prose max-w-none text-black selection:bg-blue-200"
+                    dangerouslySetInnerHTML={{ __html: originalHtml }}
+                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center text-gray-400">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Right Panel - Repaired */}
+            <div className="flex flex-1 flex-col bg-[#1a1d2e]">
+              <div className="flex items-center justify-between border-b border-[#2a2d3e] px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                  <span className="text-sm text-gray-400">{t('comparison.repaired')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                  <span className="text-xs text-green-400">{t('comparison.rulesApplied')}</span>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-auto bg-white p-8">
+                {repairedHtml ? (
+                  <div
+                    className="prose max-w-none text-black selection:bg-green-200"
+                    dangerouslySetInnerHTML={{ __html: repairedHtml }}
+                    onClick={handlePreviewClick}
+                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center text-gray-400">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Overlay Mode - 叠加对比 */
+          <div className="flex flex-1 flex-col bg-[#1a1d2e]">
+            <div className="flex items-center justify-between border-b border-[#2a2d3e] px-6 py-3">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+                  <span className="text-sm text-gray-400">{t('comparison.original')}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                  <span className="text-sm text-gray-400">{t('comparison.repaired')}</span>
+                </div>
+              </div>
+              <span className="text-xs text-gray-500">{t('comparison.readonly')}</span>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-white p-8">
+              <div className="relative">
+                {/* 原始文档（底层，半透明） */}
+                {originalHtml && (
+                  <div
+                    className="prose max-w-none text-black opacity-40"
+                    dangerouslySetInnerHTML={{ __html: originalHtml }}
+                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                  />
+                )}
+                {/* 修复后文档（顶层，可交互） */}
+                {repairedHtml && (
+                  <div
+                    className="prose max-w-none text-black absolute top-0 left-0 right-0"
+                    dangerouslySetInnerHTML={{ __html: repairedHtml }}
+                    onClick={handlePreviewClick}
+                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+                  />
+                )}
+                {!originalHtml && !repairedHtml && (
+                  <div className="flex h-full flex-col items-center justify-center text-gray-400">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Summary Panel */}
         <aside className="flex w-80 flex-col border-l border-[#2a2d3e] bg-[#151822]">

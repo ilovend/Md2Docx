@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FolderOpen, Settings, History, Wrench, GitCompare, Layers } from 'lucide-react';
-import { useAppStore } from '@/stores';
+import { useAppStore, useFileStore } from '@/stores';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const navItemsConfig = [
@@ -11,6 +11,7 @@ const navItemsConfig = [
     labelKey: 'nav.comparison',
     icon: GitCompare,
     view: 'comparison' as const,
+    hideWhenEmpty: true, // 只在有处理结果时显示
   },
   { path: '/batch', labelKey: 'nav.batch', icon: Layers, view: 'batch' as const },
   { path: '/rules', labelKey: 'nav.rules', icon: Wrench, view: 'rules' as const },
@@ -22,6 +23,7 @@ export default function RootLayout() {
   const { t } = useTranslation();
   const location = useLocation();
   const { setCurrentView } = useAppStore();
+  const { processedDocuments } = useFileStore();
 
   return (
     <div className="flex size-full h-screen bg-[#1a1d2e] text-white">
@@ -42,7 +44,16 @@ export default function RootLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 p-4">
-          {navItemsConfig.map(({ path, labelKey, icon: Icon, view }) => {
+          {navItemsConfig.map(({ path, labelKey, icon: Icon, view, hideWhenEmpty }) => {
+            // 隐藏对比预览导航项，除非有处理结果
+            if (hideWhenEmpty && processedDocuments.length === 0) {
+              // 检查是否有 sessionStorage 中的处理结果
+              const hasSessionResult = sessionStorage.getItem('processResult');
+              if (!hasSessionResult) {
+                return null;
+              }
+            }
+
             const isActive = location.pathname.startsWith(path);
             return (
               <Link
