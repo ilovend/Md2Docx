@@ -24,71 +24,78 @@
 ```
 md2docx/
 │
-├── frontend/                     # React 前端应用
+├── frontend/                     # Vite + React + TypeScript 前端
 │   ├── src/
-│   │   ├── app/
-│   │   │   ├── components/       # 业务组件
-│   │   │   │   ├── Workspace.tsx         # 主工作台
-│   │   │   │   ├── RuleEditor.tsx        # 规则编辑器
-│   │   │   │   ├── ComparisonPreview.tsx # 对比预览
-│   │   │   │   ├── BatchProcessing.tsx   # 批量处理
-│   │   │   │   └── ui/                   # 基础UI组件 (48个)
-│   │   │   └── App.tsx           # 应用入口和路由
-│   │   ├── styles/               # 全局样式
+│   │   ├── components/ui/        # 基础UI组件 (48个)
+│   │   ├── pages/                # 页面组件
+│   │   │   ├── Workspace/        # 主工作台
+│   │   │   ├── RuleEditor/       # 规则编辑器
+│   │   │   ├── ComparisonPreview/# 对比预览
+│   │   │   ├── BatchProcessing/  # 批量处理
+│   │   │   ├── History/          # 历史记录
+│   │   │   └── Settings/         # 设置页面
+│   │   ├── stores/               # Zustand 状态管理
+│   │   │   ├── appStore.ts       # 应用状态
+│   │   │   ├── fileStore.ts      # 文件状态
+│   │   │   └── ruleStore.ts      # 规则状态
+│   │   ├── services/api.ts       # API 服务层
+│   │   ├── i18n/                 # 国际化 (zh/en)
+│   │   ├── layouts/              # 布局组件
+│   │   ├── router.tsx            # 路由配置
 │   │   └── main.tsx              # React入口
+│   ├── electron/                 # Electron 主进程
+│   │   ├── main/                 # 主进程代码
+│   │   └── preload/              # 预加载脚本
 │   ├── package.json
 │   └── vite.config.ts
 │
-├── electron/                     # [待创建] Electron主进程
-│   ├── main.ts                   # 主进程入口
-│   ├── preload.ts                # 预加载脚本
-│   └── ipc/                      # IPC处理器
-│
-├── backend/                      # [待创建] Python后端
-│   ├── api/                      # FastAPI路由
-│   │   ├── __init__.py
-│   │   ├── routes.py             # 路由定义
-│   │   └── schemas.py            # Pydantic模型
-│   ├── core/                     # 核心业务逻辑
-│   │   ├── __init__.py
-│   │   ├── document.py           # 文档解析器
-│   │   └── processor.py          # 文档处理器
+├── backend/                      # Python FastAPI 后端
+│   ├── api/                      # API 路由
+│   │   ├── routes.py             # 路由定义 (646行)
+│   │   └── schemas.py            # Pydantic 模型
+│   ├── core/                     # 核心模块
+│   │   ├── config.py             # 配置管理
+│   │   ├── processor.py          # 文档处理器
+│   │   ├── latex_converter.py    # LaTeX 转换
+│   │   ├── markdown_converter.py # Markdown 转换
+│   │   └── preview_converter.py  # 预览转换
 │   ├── engine/                   # 规则引擎
-│   │   ├── __init__.py
-│   │   ├── parser.py             # 规则解析
-│   │   ├── matcher.py            # 规则匹配
-│   │   └── executor.py           # 规则执行
-│   ├── rules/                    # 内置规则
-│   │   ├── tables.yaml           # 表格规则
-│   │   ├── formulas.yaml         # 公式规则
-│   │   └── typography.yaml       # 排版规则
-│   └── main.py                   # FastAPI入口
+│   │   ├── base.py               # BaseRule 抽象类
+│   │   ├── registry.py           # RuleRegistry 注册表
+│   │   ├── parser.py             # 规则解析器
+│   │   └── rules/                # 规则实现
+│   │       ├── font.py           # 字体规则 (3个)
+│   │       ├── table.py          # 表格规则 (3个)
+│   │       ├── paragraph.py      # 段落规则 (4个)
+│   │       ├── formula.py        # 公式规则 (4个)
+│   │       ├── image.py          # 图片规则 (3个)
+│   │       ├── layout.py         # 布局规则 (1个)
+│   │       └── list.py           # 列表规则 (1个)
+│   ├── tests/                    # 后端测试
+│   ├── uploads/                  # 上传目录
+│   ├── outputs/                  # 输出目录
+│   └── main.py                   # FastAPI 入口
 │
-├── docs/                         # 详细文档
+├── docs/                         # 项目文档
 │   ├── adr/                      # 架构决策记录
-│   ├── FRONTEND.md               # 前端架构
+│   ├── FEATURES.md               # 功能清单 (实时更新)
+│   ├── API.md                    # API 接口文档
 │   ├── BACKEND.md                # 后端架构
+│   ├── FRONTEND.md               # 前端架构
 │   ├── RULE_ENGINE.md            # 规则引擎
-│   ├── API.md                    # API接口
 │   ├── DEVELOPMENT.md            # 开发指南
-│   └── FEATURES.md               # 功能清单
+│   └── index.md                  # 文档索引
 │
-├── presets/                      # [待创建] 预设配置
-│   ├── corporate.yaml            # 企业标准
-│   ├── academic.yaml             # 学术论文
-│   └── blog.yaml                 # 技术博客
+├── tests/                        # 集成测试
+│   ├── test_rule_saving.py
+│   ├── verify_batch_zip_api.py
+│   └── verify_latex.py
 │
-├── tests/                        # [待创建] 测试代码
-│   ├── test_api.py
-│   ├── test_engine.py
-│   └── fixtures/                 # 测试文档
-│
-├── main.py                       # Python后端入口 (当前)
+├── presets.yaml                  # 预设配置 (7个内置预设)
 ├── ARCHITECTURE.md               # 本文件
 ├── DESIGN_DOC.md                 # 设计文档
+├── CHANGELOG.md                  # 变更日志
 ├── CONTRIBUTING.md               # 贡献指南
-├── CODE_OF_CONDUCT.md            # 行为准则
-├── LICENSE                       # 许可证
 └── README.md                     # 项目主页
 ```
 
