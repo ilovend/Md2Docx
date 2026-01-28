@@ -10,6 +10,7 @@ import {
   Loader2,
   Play,
   AlertCircle,
+  Trash2,
 } from 'lucide-react';
 import Editor, { type Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
@@ -61,6 +62,66 @@ export default function RuleEditor() {
   const [newRuleName, setNewRuleName] = useState('');
   const [newRuleCategory, setNewRuleCategory] = useState('other');
   const [newRuleDescription, setNewRuleDescription] = useState('');
+
+  // Delete Rule Confirmation States
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [ruleToDelete, setRuleToDelete] = useState<{ id: string; name: string } | null>(null);
+
+  // Category metadata
+  const categoryMeta: Record<string, { name: string; icon: string }> = {
+    font: { name: '字体规则', icon: '🔤' },
+    table: { name: '表格规则', icon: '📊' },
+    paragraph: { name: '排版规则', icon: '📝' },
+    image: { name: '图表规则', icon: '🖼️' },
+    heading: { name: '标题规则', icon: '📑' },
+    formula: { name: '公式规则', icon: '∑' },
+    other: { name: '其他规则', icon: '⚙️' },
+  };
+
+  // Generate categories from preset detail
+  const generateCategories = async (detail: PresetDetail): Promise<RuleCategory[]> => {
+    const ruleEntries = Object.entries(detail.rules || {});
+    const { rules: rulesMetadata } = await rulesApi.getAll();
+    const metadataMap = new Map(rulesMetadata.map((r) => [r.id, r]));
+
+    const ruleCategories: Record<
+      string,
+      { name: string; icon: string; rules: { id: string; name: string; active: boolean }[] }
+    > = {};
+
+    ruleEntries.forEach(([id, config]: [string, any]) => {
+      const meta = metadataMap.get(id);
+      const categoryId = meta?.category || 'other';
+      const categoryInfo = categoryMeta[categoryId] || categoryMeta.other;
+
+      if (!ruleCategories[categoryId]) {
+        ruleCategories[categoryId] = {
+          name: categoryInfo.name,
+          icon: categoryInfo.icon,
+          rules: [],
+        };
+      }
+
+      ruleCategories[categoryId].rules.push({
+        id,
+        name: meta?.name || id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        active: config?.enabled ?? true,
+      });
+    });
+
+    return Object.entries(ruleCategories)
+      .map(([id, category]) => ({
+        id,
+        name: category.name,
+        icon: category.icon,
+        expanded: true,
+        rules: category.rules,
+      }))
+      .sort((a, b) => {
+        const order = Object.keys(categoryMeta);
+        return order.indexOf(a.id) - order.indexOf(b.id);
+      });
+  };
 
   // Validate YAML content in real-time with debounce
   useEffect(() => {
@@ -131,70 +192,13 @@ export default function RuleEditor() {
         const detail = await presetApi.getDetail(selectedPresetId);
         setPresetDetail(detail);
 
-        // 转换规则为分类显示
-        const ruleEntries = Object.entries(detail.rules || {});
-
-        // 获取规则元数据以获取正确的分类标识和名称
-        const { rules: rulesMetadata } = await rulesApi.getAll();
-        const metadataMap = new Map(rulesMetadata.map((r) => [r.id, r]));
-
-        // 预定义分类基本信息
-        const categoryMeta: Record<string, { name: string; icon: string }> = {
-          font: { name: '字体规则', icon: '🔤' },
-          table: { name: '表格规则', icon: '📊' },
-          paragraph: { name: '排版规则', icon: '📝' },
-          image: { name: '图表规则', icon: '🖼️' },
-          heading: { name: '标题规则', icon: '📑' },
-          formula: { name: '公式规则', icon: '∑' },
-          other: { name: '其他规则', icon: '⚙️' },
-        };
-
-        const ruleCategories: Record<
-          string,
-          { name: string; icon: string; rules: { id: string; name: string; active: boolean }[] }
-        > = {};
-
-        // 分配规则到分类
-        ruleEntries.forEach(([id, config]: [string, any]) => {
-          const meta = metadataMap.get(id);
-          const categoryId = meta?.category || 'other';
-          const categoryInfo = categoryMeta[categoryId] || categoryMeta.other;
-
-          if (!ruleCategories[categoryId]) {
-            ruleCategories[categoryId] = {
-              name: categoryInfo.name,
-              icon: categoryInfo.icon,
-              rules: [],
-            };
-          }
-
-          ruleCategories[categoryId].rules.push({
-            id,
-            name: meta?.name || id.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-            active: config?.enabled ?? true,
-          });
-        });
-
-        // 转换为排序后的分类数组
-        const newCategories: RuleCategory[] = Object.entries(ruleCategories)
-          .map(([id, category]) => ({
-            id,
-            name: category.name,
-            icon: category.icon,
-            expanded: true,
-            rules: category.rules,
-          }))
-          .sort((a, b) => {
-            // 可选：按照 categoryMeta 的顺序排序
-            const order = Object.keys(categoryMeta);
-            return order.indexOf(a.id) - order.indexOf(b.id);
-          });
+        const newCategories = await generateCategories(detail);
         setCategories(newCategories);
 
-        // 生成 YAML 内容
         const yaml = generateYaml(detail);
         setYamlContent(yaml);
 
+        const ruleEntries = Object.entries(detail.rules || {});
         if (ruleEntries.length > 0 && !selectedRule) {
           setSelectedRule(ruleEntries[0][0]);
         }
@@ -211,23 +215,6 @@ export default function RuleEditor() {
     let yaml = `# 预设配置: ${detail.name}\n`;
     yaml += `# ${detail.description}\n\n`;
     yaml += `preset_id: "${detail.id}"\n\n`;
-
-    // Ensure 'rules' key exists for clear structure, though backend handles flat too?
-    // Based on backend routes, it seems to expect rules object structure.
-    // Let's verify backend route 'create_preset' uses 'rules' key.
-    // In 'generateYaml', we flatly listed rules? No, we need to correct this structure to match expected import/export if needed.
-    // But for 'test', we need a valid dict.
-
-    // Actually, let's keep it simple: Just dump the whole structure under 'rules'?
-    // The previous implementation loops:
-    /*
-    for (const [ruleId, config] of Object.entries(detail.rules || {})) {
-      yaml += `${ruleId}:\n`; ...
-    }
-    */
-    // This creates a flat YAML where root keys are rule IDs.
-    // Backend processor.process() -> preset_config.get("rules", preset_config) handles this (checks "rules" key or uses root).
-    // So flat structure is fine for backend processor.
 
     for (const [ruleId, config] of Object.entries(detail.rules || {})) {
       yaml += `${ruleId}:\n`;
@@ -327,6 +314,32 @@ export default function RuleEditor() {
     }
   };
 
+  const handleDeleteRule = async () => {
+    if (!ruleToDelete) return;
+
+    try {
+      await rulesApi.delete(ruleToDelete.id);
+      alert(`规则 "${ruleToDelete.name}" 已删除`);
+
+      if (selectedPresetId) {
+        const detail = await presetApi.getDetail(selectedPresetId);
+        setPresetDetail(detail);
+
+        const newCategories = await generateCategories(detail);
+        setCategories(newCategories);
+
+        const yaml = generateYaml(detail);
+        setYamlContent(yaml);
+      }
+    } catch (error: any) {
+      console.error('Delete failed', error);
+      alert(error.response?.data?.detail || '删除失败：只能删除自定义规则');
+    } finally {
+      setShowDeleteConfirm(false);
+      setRuleToDelete(null);
+    }
+  };
+
   return (
     <div className="flex size-full flex-col">
       {/* Header */}
@@ -334,10 +347,11 @@ export default function RuleEditor() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-400" />
-            <span className="text-white">格式修复专业版</span>
+            <span className="text-white">Md2Docx</span>
           </div>
           <span className="text-xs text-gray-400">
-            预设: {presets.find((p) => p.id === selectedPresetId)?.name || selectedPresetId}
+            {t('rules.title')} -{' '}
+            {presets.find((p) => p.id === selectedPresetId)?.name || selectedPresetId}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -363,13 +377,7 @@ export default function RuleEditor() {
           >
             {t('rules.saveChanges')}
           </button>
-          <button className="flex h-8 w-8 items-center justify-center text-gray-400 hover:text-white">
-            <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=user"
-              alt="User"
-              className="h-8 w-8 rounded-full"
-            />
-          </button>
+          {/* User avatar placeholder */}
         </div>
       </header>
 
@@ -398,55 +406,87 @@ export default function RuleEditor() {
               <span>{t('rules.addNewRule')}</span>
             </button>
 
-            {categories.map((category) => (
-              <div key={category.id} className="mb-2">
-                <button
-                  onClick={() => toggleCategory(category.id)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-xs text-gray-400 transition-colors hover:text-white"
-                >
-                  {category.expanded ? (
-                    <ChevronDown className="h-3 w-3" />
-                  ) : (
-                    <ChevronRight className="h-3 w-3" />
-                  )}
-                  <span>{category.icon}</span>
-                  <span>{category.name}</span>
-                </button>
+            {categories.map((category) => {
+              // Filter rules based on search term
+              const filteredRules = category.rules.filter((rule) => {
+                if (!searchTerm.trim()) return true;
+                const term = searchTerm.toLowerCase();
+                return (
+                  rule.name.toLowerCase().includes(term) || rule.id.toLowerCase().includes(term)
+                );
+              });
 
-                {category.expanded && (
-                  <div className="ml-2 space-y-1">
-                    {category.rules.map((rule) => (
-                      <div
-                        key={rule.id}
-                        onClick={() => setSelectedRule(rule.id)}
-                        className={`flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${
-                          selectedRule === rule.id
-                            ? 'bg-blue-500/20 text-blue-400'
-                            : 'text-gray-300 hover:bg-[#1a1d2e]'
-                        }`}
-                      >
-                        <div className="flex flex-1 items-center gap-2">
-                          <span className="text-xs">{rule.name}</span>
+              // Hide category if no rules match
+              if (filteredRules.length === 0) return null;
+
+              return (
+                <div key={category.id} className="mb-2">
+                  <button
+                    onClick={() => toggleCategory(category.id)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-xs text-gray-400 transition-colors hover:text-white"
+                  >
+                    {category.expanded ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                    <span>{category.icon}</span>
+                    <span>{category.name}</span>
+                    {searchTerm.trim() && (
+                      <span className="ml-auto text-xs text-blue-400">{filteredRules.length}</span>
+                    )}
+                  </button>
+
+                  {category.expanded && (
+                    <div className="ml-2 space-y-1">
+                      {filteredRules.map((rule) => (
+                        <div
+                          key={rule.id}
+                          onClick={() => setSelectedRule(rule.id)}
+                          className={`group flex cursor-pointer items-center gap-2 rounded px-3 py-2 transition-colors ${
+                            selectedRule === rule.id
+                              ? 'bg-blue-500/20 text-blue-400'
+                              : 'text-gray-300 hover:bg-[#1a1d2e]'
+                          }`}
+                        >
+                          <div className="flex flex-1 items-center gap-2">
+                            <span className="text-xs">{rule.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {rule.id.startsWith('custom_') && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRuleToDelete({ id: rule.id, name: rule.name });
+                                  setShowDeleteConfirm(true);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-opacity"
+                                title="删除规则"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
+                            <div className="relative">
+                              <input
+                                type="checkbox"
+                                checked={rule.active}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  toggleRule(rule.id);
+                                }}
+                                className="peer sr-only"
+                              />
+                              <div className="h-4 w-8 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
+                              <div className="absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white transition-transform peer-checked:translate-x-4"></div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            checked={rule.active}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              toggleRule(rule.id);
-                            }}
-                            className="peer sr-only"
-                          />
-                          <div className="h-4 w-8 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
-                          <div className="absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white transition-transform peer-checked:translate-x-4"></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <div className="border-t border-[#2a2d3e] p-4 text-xs text-gray-400">
@@ -713,6 +753,38 @@ export default function RuleEditor() {
                 className="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-600"
               >
                 创建规则
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && ruleToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-96 rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-6">
+            <h3 className="mb-4 text-lg font-medium text-white">确认删除规则</h3>
+            <p className="mb-6 text-sm text-gray-300">
+              确定要删除规则{' '}
+              <span className="font-semibold text-blue-400">"{ruleToDelete.name}"</span> 吗？
+              <br />
+              <span className="text-xs text-gray-400">此操作无法撤销。</span>
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setRuleToDelete(null);
+                }}
+                className="rounded px-4 py-2 text-sm text-gray-400 hover:text-white"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleDeleteRule}
+                className="rounded bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
+              >
+                删除
               </button>
             </div>
           </div>

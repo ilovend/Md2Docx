@@ -23,7 +23,6 @@ export default function History() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
   }, []);
 

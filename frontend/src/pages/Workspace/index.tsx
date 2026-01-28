@@ -5,6 +5,15 @@ import { Upload, Wrench, Loader2, X, Trash2 } from 'lucide-react';
 import { useFileStore, useRuleStore, useAppStore } from '@/stores';
 import { documentApi, healthApi, historyApi } from '@/services/api';
 
+// 支持的文件类型
+const SUPPORTED_FILE_TYPES = ['.md', '.docx', '.txt'];
+
+// 检查文件类型是否支持
+const isSupportedFile = (filename: string): boolean => {
+  const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+  return SUPPORTED_FILE_TYPES.includes(extension);
+};
+
 export default function Workspace() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -85,12 +94,7 @@ export default function Workspace() {
               await new Promise<void>((resolve) => {
                 const fileEntry = entry as FileSystemFileEntry;
                 fileEntry.file((file: File) => {
-                  // 只添加支持的文件类型
-                  const supportedTypes = ['.md', '.docx', '.txt'];
-                  const fileExtension = entry.name
-                    .toLowerCase()
-                    .substring(entry.name.lastIndexOf('.'));
-                  if (supportedTypes.includes(fileExtension)) {
+                  if (isSupportedFile(entry.name)) {
                     files.push(file);
                   }
                   resolve();
@@ -132,21 +136,8 @@ export default function Workspace() {
 
         // 处理文件和文件夹
         for (const file of files) {
-          // 检查是否是文件夹（通过webkitRelativePath判断）
-          if (file.webkitRelativePath) {
-            // 这是文件夹中的文件，直接添加
-            const supportedTypes = ['.md', '.docx', '.txt'];
-            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-            if (supportedTypes.includes(fileExtension)) {
-              supportedFiles.push(file);
-            }
-          } else {
-            // 单个文件
-            const supportedTypes = ['.md', '.docx', '.txt'];
-            const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-            if (supportedTypes.includes(fileExtension)) {
-              supportedFiles.push(file);
-            }
+          if (isSupportedFile(file.name)) {
+            supportedFiles.push(file);
           }
         }
 
@@ -157,6 +148,24 @@ export default function Workspace() {
     },
     [addFiles],
   );
+
+  // 添加历史记录的辅助函数
+  const addHistoryRecord = async (file: File, documentId: string, fixes: number) => {
+    try {
+      await historyApi.add({
+        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        filename: file.name,
+        processed_time: new Date().toLocaleString('zh-CN'),
+        size: `${(file.size / 1024).toFixed(1)} KB`,
+        preset: selectedPresetId,
+        fixes,
+        status: 'completed',
+        document_id: documentId,
+      });
+    } catch (err) {
+      console.error('Failed to add history:', err);
+    }
+  };
 
   const handleStartRepair = async () => {
     if (selectedFiles.length === 0) return;
@@ -181,21 +190,7 @@ export default function Workspace() {
 
         // 如果成功，跳转到对比预览
         if (processRes.status === 'completed') {
-          // 添加历史记录
-          try {
-            await historyApi.add({
-              id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              filename: file.name,
-              processed_time: new Date().toLocaleString('zh-CN'),
-              size: `${(file.size / 1024).toFixed(1)} KB`,
-              preset: selectedPresetId,
-              fixes: processRes.total_fixes,
-              status: 'completed',
-              document_id: uploadRes.document_id,
-            });
-          } catch (historyErr) {
-            console.error('Failed to add history:', historyErr);
-          }
+          await addHistoryRecord(file, uploadRes.document_id, processRes.total_fixes);
 
           // 存储结果供对比页面使用
           sessionStorage.setItem('processResult', JSON.stringify(processRes));
@@ -230,21 +225,7 @@ export default function Workspace() {
               fixes: processRes.fixes || [],
             });
 
-            // 添加历史记录
-            try {
-              await historyApi.add({
-                id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                filename: file.name,
-                processed_time: new Date().toLocaleString('zh-CN'),
-                size: `${(file.size / 1024).toFixed(1)} KB`,
-                preset: selectedPresetId,
-                fixes: processRes.total_fixes,
-                status: 'completed',
-                document_id: uploadRes.document_id,
-              });
-            } catch (historyErr) {
-              console.error('Failed to add history:', historyErr);
-            }
+            await addHistoryRecord(file, uploadRes.document_id, processRes.total_fixes);
           } catch (fileErr) {
             console.error('Error processing file', file.name, ':', fileErr);
           }
@@ -265,7 +246,7 @@ export default function Workspace() {
       }
     } catch (err: any) {
       console.error('Processing error:', err);
-      setError(err.message || '处理失败，请检查后端服务是否运行');
+      setError(err.message || t('workspace.error.processingFailed'));
     } finally {
       setIsProcessing(false);
     }
@@ -378,10 +359,17 @@ export default function Workspace() {
                 </div>
               </div>
             )}
-            {error && <div className="mt-4 text-sm text-red-400">错误: {error}</div>}
+            {error && (
+              <div className="mt-4 text-sm text-red-400">
+                {t('workspace.error.label')}: {error}
+              </div>
+            )}
             {processResult && (
               <div className="mt-4 text-sm text-blue-400">
-                处理完成: {processResult.total_fixes} 个修复，耗时 {processResult.duration_ms}ms
+                {t('workspace.processComplete', {
+                  fixes: processResult.total_fixes,
+                  duration: processResult.duration_ms,
+                })}
               </div>
             )}
           </div>
@@ -415,7 +403,9 @@ export default function Workspace() {
 
             {/* Options */}
             <div>
-              <label className="mb-3 block text-sm text-gray-400">选项</label>
+              <label className="mb-3 block text-sm text-gray-400">
+                {t('workspace.config.options')}
+              </label>
               <div className="space-y-3">
                 <label className="flex cursor-pointer items-center gap-3">
                   <div className="relative">
@@ -485,7 +475,7 @@ export default function Workspace() {
           </span>
         </div>
         <div className="flex items-center gap-4 text-gray-400">
-          <span>内存：124MB</span>
+          <span>{t('workspace.status.memory')}: 124MB</span>
           <span>v1.0.2</span>
         </div>
       </footer>

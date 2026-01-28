@@ -304,25 +304,19 @@ export default function ComparisonPreview() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-400" />
-            <span className="text-white">格式修复专业版</span>
+            <span className="text-white">Md2Docx</span>
           </div>
           <span className="text-xs text-gray-400">{t('comparison.title')}</span>
         </div>
         <div className="flex items-center gap-2">
           <button className="px-4 py-2 text-sm text-gray-300 transition-colors hover:text-white">
-            规则
+            {t('rules.title')}
           </button>
           <button className="flex items-center gap-2 rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600">
             <FileText className="h-4 w-4" />
-            预览和导出
+            {t('comparison.previewAndExport')}
           </button>
-          <button className="flex h-8 w-8 items-center justify-center text-gray-400 hover:text-white">
-            <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=user2"
-              alt="User"
-              className="h-8 w-8 rounded-full"
-            />
-          </button>
+          {/* User avatar placeholder */}
         </div>
       </header>
 
@@ -427,7 +421,7 @@ export default function ComparisonPreview() {
               <div className="h-2 w-2 rounded-full bg-gray-500"></div>
               <span className="text-sm text-gray-400">{t('comparison.original')}</span>
             </div>
-            <span className="text-xs text-gray-500">只读</span>
+            <span className="text-xs text-gray-500">{t('comparison.readonly')}</span>
           </div>
 
           <div className="flex-1 overflow-auto bg-white p-8">
@@ -454,7 +448,7 @@ export default function ComparisonPreview() {
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-xs text-green-400">已应用规则</span>
+              <span className="text-xs text-green-400">{t('comparison.rulesApplied')}</span>
             </div>
           </div>
 
@@ -625,13 +619,13 @@ export default function ComparisonPreview() {
                 {getFixStatus(selectedFix.id) === 'applied' && (
                   <span className="flex items-center gap-1 rounded bg-green-500/20 px-2 py-1 text-xs text-green-400">
                     <Check className="h-3 w-3" />
-                    已应用
+                    {t('comparison.applied')}
                   </span>
                 )}
                 {getFixStatus(selectedFix.id) === 'discarded' && (
                   <span className="flex items-center gap-1 rounded bg-red-500/20 px-2 py-1 text-xs text-red-400">
                     <X className="h-3 w-3" />
-                    已放弃
+                    {t('comparison.discarded')}
                   </span>
                 )}
               </div>
@@ -642,14 +636,14 @@ export default function ComparisonPreview() {
                   className="flex items-center gap-1 rounded bg-red-600/20 px-4 py-2 text-sm text-red-400 transition-colors hover:bg-red-600/30"
                 >
                   <X className="h-4 w-4" />
-                  放弃修复
+                  {t('comparison.discardFix')}
                 </button>
                 <button
                   onClick={() => handleApplyFix(selectedFix.id)}
                   className="flex items-center gap-1 rounded bg-green-600 px-4 py-2 text-sm text-white transition-colors hover:bg-green-700"
                 >
                   <Check className="h-4 w-4" />
-                  应用修复
+                  {t('comparison.applyFix')}
                 </button>
               </div>
             </div>
@@ -706,7 +700,7 @@ export default function ComparisonPreview() {
           <div className="flex items-center justify-between border-b border-[#2a2d3e] p-4">
             <div className="flex items-center gap-2">
               <SettingsIcon className="h-4 w-4 text-blue-400" />
-              <span className="text-white">手动调整</span>
+              <span className="text-white">{t('comparison.manualAdjustment')}</span>
             </div>
             <button
               onClick={() => setShowAdjustment(false)}
@@ -721,23 +715,21 @@ export default function ComparisonPreview() {
               <>
                 <div className="mb-4 rounded border border-blue-500/30 bg-blue-500/10 p-3">
                   <div className="mb-1 text-sm text-blue-400">
-                    激活规则：{selectedElement.split('_')[0]}
+                    {t('comparison.activeRule')}: {selectedElement.split('_')[0]}
                   </div>
-                  <div className="text-xs text-gray-400">
-                    检测到规则应用。您可以在此调整规则参数。
-                  </div>
+                  <div className="text-xs text-gray-400">{t('comparison.adjustmentHint')}</div>
                 </div>
 
                 {/* 表格相关规则调整选项 */}
                 {selectedElement.includes('table') && (
                   <div>
                     <label className="mb-2 block text-sm text-gray-400">
-                      表格设置
-                      <span className="ml-2 text-xs text-gray-500">可选</span>
+                      {t('comparison.tableSettings')}
+                      <span className="ml-2 text-xs text-gray-500">{t('common.optional')}</span>
                     </label>
                     <div className="space-y-3">
                       <label className="flex cursor-pointer items-center justify-between">
-                        <span className="text-sm text-gray-300">显示边框</span>
+                        <span className="text-sm text-gray-300">{t('comparison.showBorders')}</span>
                         <div className="relative">
                           <input
                             type="checkbox"
@@ -751,7 +743,9 @@ export default function ComparisonPreview() {
                       </label>
 
                       <label className="flex cursor-pointer items-center justify-between">
-                        <span className="text-sm text-gray-300">斑马纹</span>
+                        <span className="text-sm text-gray-300">
+                          {t('comparison.zebraStriping')}
+                        </span>
                         <div className="relative">
                           <input
                             type="checkbox"
@@ -765,7 +759,9 @@ export default function ComparisonPreview() {
                       </label>
 
                       <label className="flex cursor-pointer items-center justify-between">
-                        <span className="text-sm text-gray-300">标题高亮</span>
+                        <span className="text-sm text-gray-300">
+                          {t('comparison.headerHighlight')}
+                        </span>
                         <div className="relative">
                           <input
                             type="checkbox"
@@ -907,14 +903,14 @@ export default function ComparisonPreview() {
               onClick={handleDiscardAdjustment}
               className="flex-1 rounded bg-[#1a1d2e] px-4 py-2 text-gray-300 transition-colors hover:bg-[#252938]"
             >
-              放弃
+              {t('common.discard')}
             </button>
             <button
               onClick={handleApplyAdjustment}
               className="flex flex-1 items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600"
             >
               <Check className="h-4 w-4" />
-              应用
+              {t('common.apply')}
             </button>
           </div>
         </div>
@@ -937,7 +933,11 @@ export default function ComparisonPreview() {
         </div>
         <div className="flex items-center gap-4 text-gray-500">
           <span>{t('comparison.rulesApplied', { count: fixes.length })}</span>
-          {documentId && <span>文档: {documentId.substring(0, 20)}...</span>}
+          {documentId && (
+            <span>
+              {t('comparison.document')}: {documentId.substring(0, 20)}...
+            </span>
+          )}
         </div>
       </footer>
     </div>

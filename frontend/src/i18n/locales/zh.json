@@ -14,7 +14,11 @@
     "pending": "等待中",
     "processing": "处理中",
     "completed": "已完成",
-    "failed": "失败"
+    "failed": "失败",
+    "optional": "可选",
+    "apply": "应用",
+    "discard": "放弃",
+    "ready": "就绪"
   },
   "nav": {
     "workspace": "我的文件",
@@ -36,6 +40,7 @@
     "config": {
       "title": "处理配置",
       "preset": "格式预设",
+      "options": "选项",
       "strictMode": "严格模式",
       "verboseLogs": "详细日志"
     },
@@ -48,7 +53,15 @@
       "connected": "已连接",
       "disconnected": "未连接",
       "latency": "延迟"
-    }
+    },
+    "error": {
+      "label": "错误",
+      "processingFailed": "处理失败，请检查后端服务是否运行"
+    },
+    "status": {
+      "memory": "内存"
+    },
+    "processComplete": "处理完成：{{fixes}} 个修复，耗时 {{duration}}ms"
   },
   "history": {
     "title": "任务历史",
@@ -108,7 +121,21 @@
     "location": "\u5b9a\u4f4d\u4fe1\u606f",
     "downloadFixed": "\u4e0b\u8f7d\u4fee\u590d\u540e\u7684\u6587\u6863",
     "batchMode": "\u6279\u91cf\u6a21\u5f0f",
-    "documentSwitcher": "\u6587\u6863\u5207\u6362"
+    "documentSwitcher": "\u6587\u6863\u5207\u6362",
+    "readonly": "只读",
+    "previewAndExport": "预览和导出",
+    "applied": "已应用",
+    "discarded": "已放弃",
+    "applyFix": "应用修复",
+    "discardFix": "放弃修复",
+    "manualAdjustment": "手动调整",
+    "activeRule": "激活规则",
+    "adjustmentHint": "检测到规则应用。您可以在此调整规则参数。",
+    "tableSettings": "表格设置",
+    "showBorders": "显示边框",
+    "zebraStriping": "斑马纹",
+    "headerHighlight": "标题高亮",
+    "document": "文档"
   },
   "rules": {
     "title": "规则编辑器",
@@ -153,7 +180,9 @@
       "overwriteFiles": "覆盖文件",
       "overwriteHint": "替换已存在的文件",
       "preview": "预览"
-    }
+    },
+    "filesInQueue": "个文件在队列中",
+    "completed": "已完成"
   },
   "settings": {
     "title": "\u8bbe\u7f6e",

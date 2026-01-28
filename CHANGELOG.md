@@ -24,6 +24,25 @@
   - 保存按钮在 YAML 无效时禁用
   - 跳转到错误位置按钮
   - 新建规则模态框
+  - 规则搜索功能（按名称/ID 过滤）
+  - 删除自定义规则功能（带确认对话框）
+- **BatchProcessing 增强**
+  - 拖拽排序功能（调整文件处理顺序）
+  - 并发控制（1-4 并发数量可选）
+  - 真正的并行处理队列管理
+- **Electron 集成**
+  - 完善主进程架构（后端进程管理）
+  - 文件对话框 IPC 处理（打开/保存文件）
+  - 后端健康检查机制
+  - TypeScript 类型定义
+- **测试覆盖率提升**
+  - 表格规则单元测试（test_rules_table.py）
+  - 字体规则单元测试（test_rules_font.py）
+  - 规则引擎核心测试（test_engine.py）
+- **性能优化**
+  - 规则引擎缓存机制（backend/core/cache.py）
+  - 文档哈希计算优化
+  - LRU 缓存策略
 - **规则引擎**
   - `display_formula_center` 公式居中规则
   - `font_replacement` 字体替换规则

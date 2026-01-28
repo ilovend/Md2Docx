@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Loader2,
   Download,
+  GripVertical,
 } from 'lucide-react';
 import { useRuleStore, useFileStore } from '@/stores';
 import { documentApi, batchApi } from '@/services/api';
@@ -38,6 +39,9 @@ export default function BatchProcessing() {
   const [namingTemplate, setNamingTemplate] = useState('{original_name}_fixed_{date}');
   const [outputDir, setOutputDir] = useState('~/Documents/Repaired');
   const [overwriteFiles, setOverwriteFiles] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [concurrency, setConcurrency] = useState(2);
 
   // 加载预设列表
   useEffect(() => {
@@ -90,10 +94,11 @@ export default function BatchProcessing() {
 
     setIsProcessing(true);
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.status !== 'pending') continue;
+    const pendingFiles = files.filter((f) => f.status === 'pending');
+    const processingQueue = [...pendingFiles];
+    const activeProcesses: Promise<void>[] = [];
 
+    const processFile = async (file: BatchFile) => {
       // 更新状态为处理中
       setFiles((prev) =>
         prev.map((f) =>
@@ -142,6 +147,27 @@ export default function BatchProcessing() {
           ),
         );
       }
+    };
+
+    // 并发处理文件
+    while (processingQueue.length > 0 || activeProcesses.length > 0) {
+      // 启动新的处理任务直到达到并发限制
+      while (activeProcesses.length < concurrency && processingQueue.length > 0) {
+        const file = processingQueue.shift()!;
+        const promise = processFile(file).then(() => {
+          // 从活动进程列表中移除
+          const index = activeProcesses.indexOf(promise);
+          if (index > -1) {
+            activeProcesses.splice(index, 1);
+          }
+        });
+        activeProcesses.push(promise);
+      }
+
+      // 等待至少一个任务完成
+      if (activeProcesses.length > 0) {
+        await Promise.race(activeProcesses);
+      }
     }
 
     setIsProcessing(false);
@@ -160,6 +186,41 @@ export default function BatchProcessing() {
     if (globalPreset) {
       setFiles(files.map((f) => ({ ...f, preset: globalPreset })));
     }
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const newFiles = [...files];
+    const [draggedFile] = newFiles.splice(draggedIndex, 1);
+    newFiles.splice(dropIndex, 0, draggedFile);
+
+    setFiles(newFiles);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   const handleDownload = async (file: BatchFile) => {
@@ -241,9 +302,9 @@ export default function BatchProcessing() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-400" />
-            <span className="text-white">FormatFixer Pro</span>
+            <span className="text-white">Md2Docx</span>
           </div>
-          <span className="text-xs text-gray-400">Project Alpha • Batch Processor</span>
+          <span className="text-xs text-gray-400">{t('batch.title')}</span>
         </div>
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 transition-colors hover:text-white">
@@ -253,13 +314,7 @@ export default function BatchProcessing() {
           <button className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600">
             Batch Mode
           </button>
-          <button className="flex h-8 w-8 items-center justify-center text-gray-400 hover:text-white">
-            <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=user3"
-              alt="User"
-              className="h-8 w-8 rounded-full"
-            />
-          </button>
+          {/* User avatar placeholder - can be replaced with actual user profile */}
         </div>
       </header>
 
@@ -297,7 +352,7 @@ export default function BatchProcessing() {
 
           {/* Global Settings */}
           <div className="border-b border-[#2a2d3e] bg-[#151822] px-8 py-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400 uppercase">{t('batch.globalSettings')}</span>
               </div>
@@ -324,6 +379,21 @@ export default function BatchProcessing() {
                   {t('batch.apply')}
                 </button>
               </div>
+              <div className="flex items-center gap-2 border-l border-[#2a2d3e] pl-6">
+                <span className="text-sm text-gray-400">并发数量:</span>
+                <select
+                  value={concurrency}
+                  onChange={(e) => setConcurrency(Number(e.target.value))}
+                  disabled={isProcessing}
+                  className="rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-1.5 text-sm text-white focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value={1}>1 (顺序)</option>
+                  <option value={2}>2 (推荐)</option>
+                  <option value={3}>3</option>
+                  <option value={4}>4</option>
+                </select>
+                <span className="text-xs text-gray-500">同时处理 {concurrency} 个文件</span>
+              </div>
             </div>
           </div>
 
@@ -332,6 +402,7 @@ export default function BatchProcessing() {
             <table className="w-full">
               <thead className="sticky top-0 border-b border-[#2a2d3e] bg-[#151822]">
                 <tr>
+                  <th className="w-8 px-2 py-3"></th>
                   <th className="px-8 py-3 text-left text-xs text-gray-400 uppercase">
                     {t('batch.table.fileName')}
                   </th>
@@ -350,11 +421,30 @@ export default function BatchProcessing() {
                 </tr>
               </thead>
               <tbody>
-                {files.map((file) => (
+                {files.map((file, index) => (
                   <tr
                     key={file.id}
-                    className="border-b border-[#2a2d3e] transition-colors hover:bg-[#1f2333]"
+                    draggable={file.status === 'pending'}
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
+                    className={`border-b border-[#2a2d3e] transition-colors hover:bg-[#1f2333] ${
+                      draggedIndex === index ? 'opacity-50' : ''
+                    } ${
+                      dragOverIndex === index && draggedIndex !== index
+                        ? 'border-t-2 border-t-blue-500'
+                        : ''
+                    }`}
                   >
+                    <td className="px-2 py-4">
+                      {file.status === 'pending' && (
+                        <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-white">
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+                      )}
+                    </td>
                     <td className="px-8 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded bg-blue-500/20">
@@ -597,13 +687,16 @@ export default function BatchProcessing() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-green-500"></div>
-            <span className="text-gray-400">System Ready</span>
+            <span className="text-gray-400">{t('common.ready')}</span>
           </div>
-          <span className="text-gray-500">🔧 Batch Engine v2.1</span>
+          <span className="text-gray-500">
+            {totalFiles} {t('batch.filesInQueue')}
+          </span>
         </div>
         <div className="flex items-center gap-4 text-gray-500">
-          <span>Queue ID: #88216-X</span>
-          <span>Global Preset: Mixed</span>
+          <span>
+            {completedCount}/{totalFiles} {t('batch.completed')}
+          </span>
         </div>
       </footer>
     </div>
