@@ -96,6 +96,9 @@
     "processComplete": "Processing Complete",
     "fixesApplied": "{count} fixes applied successfully",
     "fixDetails": "Fix Details",
+    "viewDetails": "View Details",
+    "ruleId": "Rule ID",
+    "description": "Description",
     "downloadFixed": "Download Fixed Document"
   },
   "rules": {

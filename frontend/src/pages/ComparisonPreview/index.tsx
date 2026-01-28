@@ -33,6 +33,8 @@ export default function ComparisonPreview() {
   const [zoom, setZoom] = useState(100);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [showAdjustment, setShowAdjustment] = useState(false);
+  const [selectedFix, setSelectedFix] = useState<FixItem | null>(null);
+  const [showFixDetail, setShowFixDetail] = useState(false);
   const [processResult, setProcessResult] = useState<ProcessResult | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [originalHtml, setOriginalHtml] = useState<string>('');
@@ -87,6 +89,27 @@ export default function ComparisonPreview() {
     setShowAdjustment(false);
     setSelectedElement(null);
   };
+
+  const openFixDetail = (fix: FixItem) => {
+    setSelectedFix(fix);
+    setShowFixDetail(true);
+  };
+
+  const closeFixDetail = () => {
+    setShowFixDetail(false);
+    setSelectedFix(null);
+  };
+
+  useEffect(() => {
+    if (!showFixDetail) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeFixDetail();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showFixDetail]);
 
   return (
     <div className="flex size-full flex-col">
@@ -253,9 +276,7 @@ export default function ComparisonPreview() {
                   key={fix.id}
                   className="cursor-pointer rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-3 transition-colors hover:border-blue-500"
                   onClick={() => {
-                    // 模拟点击查看详情功能
-                    setSelectedElement(fix.id);
-                    setShowAdjustment(true);
+                    openFixDetail(fix);
                   }}
                 >
                   <div className="mb-1 flex items-start gap-2">
@@ -272,11 +293,10 @@ export default function ComparisonPreview() {
                       className="text-xs text-blue-400 hover:text-blue-300"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedElement(fix.id);
-                        setShowAdjustment(true);
+                        openFixDetail(fix);
                       }}
                     >
-                      查看详情
+                      {t('comparison.viewDetails')}
                     </button>
                   </div>
                 </div>
@@ -291,6 +311,52 @@ export default function ComparisonPreview() {
           </div>
         </aside>
       </div>
+
+      {showFixDetail && selectedFix && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          onClick={closeFixDetail}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-lg overflow-hidden rounded-lg border border-[#2a2d3e] bg-[#151822] shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#2a2d3e] p-4">
+              <div className="text-sm text-white">{t('comparison.fixDetails')}</div>
+              <button onClick={closeFixDetail} className="text-gray-400 hover:text-white">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 p-4">
+              <div>
+                <div className="mb-1 text-xs text-gray-400">{t('comparison.ruleId')}</div>
+                <div className="rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 text-sm text-white">
+                  {selectedFix.rule_id}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-1 text-xs text-gray-400">{t('comparison.description')}</div>
+                <div className="rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 text-sm text-gray-200">
+                  {selectedFix.description}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-[#2a2d3e] p-4">
+              <button
+                onClick={closeFixDetail}
+                className="rounded bg-[#1a1d2e] px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-[#252938]"
+              >
+                {t('common.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Manual Adjustment Panel */}
       {showAdjustment && (
