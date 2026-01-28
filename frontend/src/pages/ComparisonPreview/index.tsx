@@ -50,6 +50,8 @@ export default function ComparisonPreview() {
   const [showFixPicker, setShowFixPicker] = useState(false);
   const [fixPickerItems, setFixPickerItems] = useState<FixItem[]>([]);
   const [processResult, setProcessResult] = useState<ProcessResult | null>(null);
+  const [appliedFixes, setAppliedFixes] = useState<Set<string>>(new Set());
+  const [discardedFixes, setDiscardedFixes] = useState<Set<string>>(new Set());
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [originalHtml, setOriginalHtml] = useState<string>('');
   const [repairedHtml, setRepairedHtml] = useState<string>('');
@@ -193,6 +195,35 @@ export default function ComparisonPreview() {
   const closeFixDetail = () => {
     setShowFixDetail(false);
     setSelectedFix(null);
+  };
+
+  // 应用单项修复
+  const handleApplyFix = (fixId: string) => {
+    setAppliedFixes((prev) => new Set([...prev, fixId]));
+    setDiscardedFixes((prev) => {
+      const next = new Set(prev);
+      next.delete(fixId);
+      return next;
+    });
+    closeFixDetail();
+  };
+
+  // 放弃单项修复
+  const handleDiscardFix = (fixId: string) => {
+    setDiscardedFixes((prev) => new Set([...prev, fixId]));
+    setAppliedFixes((prev) => {
+      const next = new Set(prev);
+      next.delete(fixId);
+      return next;
+    });
+    closeFixDetail();
+  };
+
+  // 获取修复项状态
+  const getFixStatus = (fixId: string): 'applied' | 'discarded' | 'pending' => {
+    if (appliedFixes.has(fixId)) return 'applied';
+    if (discardedFixes.has(fixId)) return 'discarded';
+    return 'pending';
   };
 
   const closeFixPicker = () => {
@@ -538,13 +569,39 @@ export default function ComparisonPreview() {
               ) : null}
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-[#2a2d3e] p-4">
-              <button
-                onClick={closeFixDetail}
-                className="rounded bg-[#1a1d2e] px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-[#252938]"
-              >
-                {t('common.cancel')}
-              </button>
+            <div className="flex items-center justify-between border-t border-[#2a2d3e] p-4">
+              {/* 状态指示 */}
+              <div className="flex items-center gap-2">
+                {getFixStatus(selectedFix.id) === 'applied' && (
+                  <span className="flex items-center gap-1 rounded bg-green-500/20 px-2 py-1 text-xs text-green-400">
+                    <Check className="h-3 w-3" />
+                    已应用
+                  </span>
+                )}
+                {getFixStatus(selectedFix.id) === 'discarded' && (
+                  <span className="flex items-center gap-1 rounded bg-red-500/20 px-2 py-1 text-xs text-red-400">
+                    <X className="h-3 w-3" />
+                    已放弃
+                  </span>
+                )}
+              </div>
+              {/* 操作按钮 */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDiscardFix(selectedFix.id)}
+                  className="flex items-center gap-1 rounded bg-red-600/20 px-4 py-2 text-sm text-red-400 transition-colors hover:bg-red-600/30"
+                >
+                  <X className="h-4 w-4" />
+                  放弃修复
+                </button>
+                <button
+                  onClick={() => handleApplyFix(selectedFix.id)}
+                  className="flex items-center gap-1 rounded bg-green-600 px-4 py-2 text-sm text-white transition-colors hover:bg-green-700"
+                >
+                  <Check className="h-4 w-4" />
+                  应用修复
+                </button>
+              </div>
             </div>
           </div>
         </div>
