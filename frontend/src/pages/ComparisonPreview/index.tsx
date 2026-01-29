@@ -11,6 +11,8 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Undo2,
+  Redo2,
 } from 'lucide-react';
 import { documentApi } from '@/services/api';
 import { useFileStore } from '@/stores';
@@ -56,6 +58,14 @@ export default function ComparisonPreview() {
   const [originalHtml, setOriginalHtml] = useState<string>('');
   const [repairedHtml, setRepairedHtml] = useState<string>('');
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+  // 撤销/重做历史记录
+  interface HistoryState {
+    appliedFixes: Set<string>;
+    discardedFixes: Set<string>;
+  }
+  const [history, setHistory] = useState<HistoryState[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   // 加载文档预览的函数
   const loadDocumentPreview = async (docId: string, result: ProcessResult) => {
@@ -247,27 +257,76 @@ export default function ComparisonPreview() {
     setSelectedFix(null);
   };
 
+  // 保存历史记录
+  const saveHistory = (newApplied: Set<string>, newDiscarded: Set<string>) => {
+    const newState: HistoryState = {
+      appliedFixes: new Set(newApplied),
+      discardedFixes: new Set(newDiscarded),
+    };
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newState);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
   // 应用单项修复
   const handleApplyFix = (fixId: string) => {
-    setAppliedFixes((prev) => new Set([...prev, fixId]));
-    setDiscardedFixes((prev) => {
-      const next = new Set(prev);
-      next.delete(fixId);
-      return next;
-    });
+    const newApplied = new Set([...appliedFixes, fixId]);
+    const newDiscarded = new Set(discardedFixes);
+    newDiscarded.delete(fixId);
+
+    setAppliedFixes(newApplied);
+    setDiscardedFixes(newDiscarded);
+    saveHistory(newApplied, newDiscarded);
     closeFixDetail();
   };
 
   // 放弃单项修复
   const handleDiscardFix = (fixId: string) => {
-    setDiscardedFixes((prev) => new Set([...prev, fixId]));
-    setAppliedFixes((prev) => {
-      const next = new Set(prev);
-      next.delete(fixId);
-      return next;
-    });
+    const newDiscarded = new Set([...discardedFixes, fixId]);
+    const newApplied = new Set(appliedFixes);
+    newApplied.delete(fixId);
+
+    setDiscardedFixes(newDiscarded);
+    setAppliedFixes(newApplied);
+    saveHistory(newApplied, newDiscarded);
     closeFixDetail();
   };
+
+  // 撤销操作
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      const prevState = history[historyIndex - 1];
+      setAppliedFixes(new Set(prevState.appliedFixes));
+      setDiscardedFixes(new Set(prevState.discardedFixes));
+      setHistoryIndex(historyIndex - 1);
+    }
+  };
+
+  // 重做操作
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const nextState = history[historyIndex + 1];
+      setAppliedFixes(new Set(nextState.appliedFixes));
+      setDiscardedFixes(new Set(nextState.discardedFixes));
+      setHistoryIndex(historyIndex + 1);
+    }
+  };
+
+  // 快捷键支持
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [historyIndex, history]);
 
   // 获取修复项状态
   const getFixStatus = (fixId: string): 'applied' | 'discarded' | 'pending' => {
@@ -356,6 +415,25 @@ export default function ComparisonPreview() {
               </span>
             </div>
           )}
+
+          <div className="flex items-center gap-2 border-r border-[#2a2d3e] pr-4">
+            <button
+              onClick={handleUndo}
+              disabled={historyIndex <= 0}
+              className="flex h-7 w-7 items-center justify-center rounded bg-[#151822] text-gray-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+              title="撤销 (Ctrl+Z)"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={handleRedo}
+              disabled={historyIndex >= history.length - 1}
+              className="flex h-7 w-7 items-center justify-center rounded bg-[#151822] text-gray-400 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+              title="重做 (Ctrl+Y)"
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+          </div>
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-400 uppercase">{t('comparison.viewMode')}</span>

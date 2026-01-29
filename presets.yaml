@@ -29,7 +29,7 @@ presets:
           page_margin_left_cm: 3.18
           page_margin_right_cm: 2.54
           page_margin_top_cm: 2.54
-          page_width_cm: 21.0
+          page_width_cm: 21
       paragraph_spacing:
         enabled: true
         parameters:
@@ -65,12 +65,12 @@ presets:
       image_resize:
         enabled: true
         parameters:
-          max_width: 6.0
-          max_height: 8.0
+          max_width: 6
+          max_height: 8
       image_caption:
         enabled: true
         parameters:
-          caption_format: "图 {number}"
+          caption_format: 图 {number}
           caption_font_size: 10
       latex_to_omml:
         enabled: true
@@ -193,7 +193,7 @@ presets:
           page_margin_left_cm: 2.54
           page_margin_right_cm: 2.54
           page_margin_top_cm: 2.54
-          page_width_cm: 21.0
+          page_width_cm: 21
       paragraph_spacing:
         enabled: true
         parameters:
@@ -219,12 +219,12 @@ presets:
       image_resize:
         enabled: true
         parameters:
-          max_width: 6.0
-          max_height: 8.0
+          max_width: 6
+          max_height: 8
       image_caption:
         enabled: true
         parameters:
-          caption_format: "图 {number}"
+          caption_format: 图 {number}
           caption_font_size: 10
       latex_to_omml:
         enabled: true
@@ -504,43 +504,3 @@ presets:
     rules:
       font_standard:
         enabled: true
-rule_defaults:
-  font_color:
-    enabled: true
-    text_color: "000000"
-  font_standard:
-    chinese_font: 宋体
-    enabled: true
-    font_size_body: 12
-    font_size_title1: 22
-    font_size_title2: 18
-    font_size_title3: 16
-    title_font: 黑体
-    western_font: Arial
-  list_numbering:
-    enabled: true
-  page_layout:
-    enabled: true
-    page_height_cm: 29.7
-    page_margin_bottom_cm: 2.54
-    page_margin_left_cm: 2.54
-    page_margin_right_cm: 2.54
-    page_margin_top_cm: 2.54
-    page_width_cm: 21.0
-  paragraph_spacing:
-    enabled: true
-    line_spacing: 1.5
-    space_after: 6
-    space_before: 0
-  table_border:
-    add_table_header_format: true
-    border_color: "000000"
-    border_size: 4
-    enabled: true
-    table_header_bg_color: E3E3E3
-  table_width:
-    auto_adjust_columns: true
-    enabled: true
-    table_width_percent: 95
-  title_bold:
-    enabled: true

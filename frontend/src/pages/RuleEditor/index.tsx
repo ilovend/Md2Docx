@@ -238,14 +238,33 @@ export default function RuleEditor() {
   };
 
   const toggleRule = (ruleId: string) => {
-    setCategories(
-      categories.map((cat) => ({
-        ...cat,
-        rules: cat.rules.map((rule) =>
-          rule.id === ruleId ? { ...rule, active: !rule.active } : rule,
-        ),
-      })),
-    );
+    // 更新 categories 状态
+    const updatedCategories = categories.map((cat) => ({
+      ...cat,
+      rules: cat.rules.map((rule) =>
+        rule.id === ruleId ? { ...rule, active: !rule.active } : rule,
+      ),
+    }));
+    setCategories(updatedCategories);
+
+    // 同步更新 presetDetail
+    if (presetDetail && presetDetail.rules && presetDetail.rules[ruleId]) {
+      const updatedPresetDetail = {
+        ...presetDetail,
+        rules: {
+          ...presetDetail.rules,
+          [ruleId]: {
+            ...presetDetail.rules[ruleId],
+            enabled: !presetDetail.rules[ruleId].enabled,
+          },
+        },
+      };
+      setPresetDetail(updatedPresetDetail);
+
+      // 重新生成 YAML
+      const newYaml = generateYaml(updatedPresetDetail);
+      setYamlContent(newYaml);
+    }
   };
 
   const activeRulesCount = categories.reduce(

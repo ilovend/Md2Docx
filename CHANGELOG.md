@@ -18,6 +18,8 @@
   - 详细日志开关（verbose 参数）
 - **ComparisonPreview 增强**
   - 批量模式文档切换器（左右箭头 + 下拉选择）
+  - 撤销/重做功能（Ctrl+Z / Ctrl+Y）
+  - 历史记录管理
 - **RuleEditor 增强**
   - YAML 实时验证（300ms 防抖）
   - Monaco markers 标注错误行
@@ -49,6 +51,7 @@
   - `inline_formula_style` 行内公式样式规则
   - `image_resize` 图片尺寸调整规则
   - `image_caption` 图片标题规则
+  - `mermaid_render` Mermaid图表渲染规则（需要mermaid-cli）
 - **后端 API**
   - ProcessRequest 添加 strict/verbose 参数
   - processor 支持严格模式参数调整
