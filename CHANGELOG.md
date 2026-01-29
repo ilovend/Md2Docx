@@ -20,6 +20,7 @@
   - 批量模式文档切换器（左右箭头 + 下拉选择）
   - 撤销/重做功能（Ctrl+Z / Ctrl+Y）
   - 历史记录管理
+  - 文件重命名功能（自定义下载文件名）
 - **RuleEditor 增强**
   - YAML 实时验证（300ms 防抖）
   - Monaco markers 标注错误行
@@ -52,6 +53,7 @@
   - `image_resize` 图片尺寸调整规则
   - `image_caption` 图片标题规则
   - `mermaid_render` Mermaid图表渲染规则（需要mermaid-cli）
+  - `table_repeat_header` 表格跨页表头重复规则
 - **后端 API**
   - ProcessRequest 添加 strict/verbose 参数
   - processor 支持严格模式参数调整

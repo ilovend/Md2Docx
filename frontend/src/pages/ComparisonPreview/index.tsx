@@ -58,6 +58,8 @@ export default function ComparisonPreview() {
   const [originalHtml, setOriginalHtml] = useState<string>('');
   const [repairedHtml, setRepairedHtml] = useState<string>('');
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const [customFilename, setCustomFilename] = useState('');
 
   // 撤销/重做历史记录
   interface HistoryState {
@@ -131,11 +133,46 @@ export default function ComparisonPreview() {
     setCurrentDocumentIndex(index);
   };
 
-  const handleDownload = () => {
-    if (documentId) {
-      const downloadUrl = documentApi.getDownloadUrl(documentId);
+  const handleDownload = async () => {
+    if (!documentId) return;
+
+    const downloadUrl = documentApi.getDownloadUrl(documentId);
+
+    if (customFilename) {
+      // 使用自定义文件名下载
+      try {
+        const response = await fetch(downloadUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = customFilename.endsWith('.docx') ? customFilename : `${customFilename}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Download failed:', error);
+        // 降级到直接打开链接
+        window.open(downloadUrl, '_blank');
+      }
+    } else {
       window.open(downloadUrl, '_blank');
     }
+  };
+
+  const handleRenameClick = () => {
+    setShowRenameDialog(true);
+  };
+
+  const handleRenameConfirm = () => {
+    setShowRenameDialog(false);
+    handleDownload();
+  };
+
+  const handleRenameCancel = () => {
+    setShowRenameDialog(false);
+    setCustomFilename('');
   };
 
   const handleBackToWorkspace = () => {
@@ -1058,15 +1095,68 @@ export default function ComparisonPreview() {
             {t('comparison.generatedIn', { ms: processResult?.duration_ms || 0 })}
           </span>
         </div>
-        <div className="flex items-center gap-4 text-gray-500">
-          <span>{t('comparison.rulesApplied', { count: fixes.length })}</span>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-500">
+            {t('comparison.rulesApplied', { count: fixes.length })}
+          </span>
           {documentId && (
-            <span>
-              {t('comparison.document')}: {documentId.substring(0, 20)}...
-            </span>
+            <>
+              <button
+                onClick={handleRenameClick}
+                className="rounded bg-[#252938] px-3 py-1.5 text-xs text-gray-300 transition-colors hover:bg-[#2a2d3e] hover:text-white"
+              >
+                重命名
+              </button>
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-1.5 rounded bg-blue-500 px-3 py-1.5 text-xs text-white transition-colors hover:bg-blue-600"
+              >
+                <Download className="h-3 w-3" />
+                下载
+              </button>
+            </>
           )}
         </div>
       </footer>
+
+      {/* Rename Dialog */}
+      {showRenameDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-[#1a1d2e] p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-semibold text-white">自定义文件名</h3>
+            <input
+              type="text"
+              value={customFilename}
+              onChange={(e) => setCustomFilename(e.target.value)}
+              placeholder="输入文件名（不含扩展名）"
+              className="w-full rounded border border-[#2a2d3e] bg-[#151822] px-4 py-2 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleRenameConfirm();
+                } else if (e.key === 'Escape') {
+                  handleRenameCancel();
+                }
+              }}
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={handleRenameCancel}
+                className="rounded bg-[#252938] px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-[#2a2d3e]"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleRenameConfirm}
+                disabled={!customFilename.trim()}
+                className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                确认下载
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
