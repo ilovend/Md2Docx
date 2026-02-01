@@ -55,7 +55,15 @@
       "connected": "Connected",
       "disconnected": "Disconnected",
       "latency": "Latency"
-    }
+    },
+    "error": {
+      "label": "Error",
+      "processingFailed": "Processing failed, please check if backend is running"
+    },
+    "status": {
+      "memory": "Memory"
+    },
+    "processComplete": "Processing complete: {{fixes}} fixes in {{duration}}ms"
   },
   "history": {
     "title": "Task History",
@@ -75,6 +83,12 @@
     "noRecords": "No history records",
     "noRecordsHint": "Records will appear here after processing documents",
     "retention": "History retained for 30 days",
+    "dateFrom": "Start Date",
+    "dateTo": "End Date",
+    "clearFilters": "Clear Filters",
+    "filter": {
+      "all": "All Status"
+    },
     "stats": {
       "completed": "Completed",
       "failed": "Failed"
@@ -115,7 +129,24 @@
     "location": "Location",
     "downloadFixed": "Download Fixed Document",
     "batchMode": "Batch Mode",
-    "documentSwitcher": "Document Switcher"
+    "documentSwitcher": "Document Switcher",
+    "syncScroll": "Sync Scroll",
+    "syncScrollOn": "Sync scroll enabled",
+    "syncScrollOff": "Sync scroll disabled",
+    "readonly": "Read Only",
+    "previewAndExport": "Preview and Export",
+    "applied": "Applied",
+    "discarded": "Discarded",
+    "applyFix": "Apply Fix",
+    "discardFix": "Discard Fix",
+    "manualAdjustment": "Manual Adjustment",
+    "activeRule": "Active Rule",
+    "adjustmentHint": "Rule application detected. You can adjust rule parameters here.",
+    "tableSettings": "Table Settings",
+    "showBorders": "Show Borders",
+    "zebraStriping": "Zebra Striping",
+    "headerHighlight": "Header Highlight",
+    "document": "Document"
   },
   "rules": {
     "title": "Rule Editor",
@@ -125,13 +156,44 @@
     "editor": "Editor",
     "properties": "Properties",
     "syntaxValid": "Syntax Valid",
+    "syntaxError": "Syntax Error",
     "noSchemaErrors": "YAML validation passed, no schema errors detected.",
     "saveChanges": "Save Changes",
     "testWorkbench": "Test Workbench",
     "run": "Run",
     "input": "Input (Markdown)",
     "outputPreview": "Output Preview (Word Simulation)",
-    "engineReady": "Engine Ready"
+    "engineReady": "Engine Ready",
+    "testComplete": "Test Complete",
+    "clickToRun": "Click Run to see results",
+    "jumpToError": "Jump to Error",
+    "selectRuleToView": "Select a rule to view properties",
+    "saved": "Rule saved!",
+    "saveFailed": "Save failed",
+    "deleteFailed": "Delete failed: can only delete custom rules",
+    "ruleDeleted": "Rule \"{{name}}\" deleted",
+    "confirmDelete": "Confirm Delete Rule",
+    "confirmDeleteMessage": "Are you sure you want to delete rule",
+    "cannotUndo": "This action cannot be undone.",
+    "ruleName": "Rule Name",
+    "ruleCategory": "Rule Category",
+    "ruleDescription": "Rule Description",
+    "createRule": "Create Rule",
+    "deleteRule": "Delete Rule",
+    "categories": {
+      "font": "Font Rules",
+      "table": "Table Rules",
+      "paragraph": "Paragraph Rules",
+      "image": "Image Rules",
+      "heading": "Heading Rules",
+      "formula": "Formula Rules",
+      "other": "Other Rules"
+    },
+    "validation": {
+      "mustBeObject": "Rule \"{{key}}\" must be an object, current value is invalid",
+      "enabledMustBeBool": "Rule \"{{key}}\" enabled field must be true or false",
+      "paramsMustBeObject": "Rule \"{{key}}\" parameters must be an object"
+    }
   },
   "batch": {
     "title": "Batch Processing",
@@ -160,7 +222,9 @@
       "overwriteFiles": "Overwrite Files",
       "overwriteHint": "Replace existing files",
       "preview": "Preview"
-    }
+    },
+    "filesInQueue": "files in queue",
+    "completed": "Completed"
   },
   "settings": {
     "title": "Settings",
@@ -179,6 +243,8 @@
       "title": "Processing",
       "outputDir": "Output Directory",
       "outputDirDesc": "Default folder for processed files",
+      "selectDir": "Select Directory",
+      "outputDirElectronOnly": "Directory selection is only available in desktop app",
       "parallel": "Parallel Processing",
       "parallelDesc": "Number of files to process simultaneously",
       "autoSave": "Auto Save",
@@ -203,7 +269,8 @@
       "days": "days",
       "clearCache": "Clear Cache",
       "clearCacheDesc": "Remove temporary files and cache",
-      "clearCacheBtn": "Clear Cache"
+      "clearCacheBtn": "Clear Cache",
+      "cacheCleared": "Cleared"
     },
     "about": {
       "title": "About",
