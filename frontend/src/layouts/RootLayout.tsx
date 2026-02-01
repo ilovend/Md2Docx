@@ -58,7 +58,7 @@ export default function RootLayout() {
             </div>
             <div>
               <div className="font-medium">Md2Docx</div>
-              <div className="text-xs text-gray-400">工作台 v1.0.2</div>
+              <div className="text-xs text-gray-400">{t('workspace.title')} v1.0.2</div>
             </div>
           </div>
         </div>
