@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, File, Download, Trash2, Search, Calendar, Filter, X } from 'lucide-react';
+import { FileText, File, Download, Trash2, Search, Calendar, Filter, X, History as HistoryIcon } from 'lucide-react';
 import { historyApi, documentApi, type HistoryItem } from '@/services/api';
 
 type StatusFilter = 'all' | 'completed' | 'error';
@@ -102,8 +102,13 @@ export default function History() {
     <div className="flex size-full flex-col">
       {/* 页头 */}
       <header className="border-b border-[#2a2d3e] px-8 py-6">
-        <h1 className="mb-1 text-2xl text-white">{t('history.title')}</h1>
-        <p className="text-sm text-gray-400">{t('history.subtitle')}</p>
+        <div className="flex items-center gap-3">
+          <HistoryIcon className="h-6 w-6 text-blue-400" />
+          <div>
+            <h1 className="text-2xl text-white">{t('history.title')}</h1>
+            <p className="text-sm text-gray-400">{t('history.subtitle')}</p>
+          </div>
+        </div>
       </header>
 
       {/* 工具栏 */}
