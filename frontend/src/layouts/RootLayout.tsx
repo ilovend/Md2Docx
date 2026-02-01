@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, Settings, History, Wrench, GitCompare, Layers, Sun, Moon } from 'lucide-react';
+import { FolderOpen, Settings, History, FileText, GitCompare, Layers, Sun, Moon } from 'lucide-react';
 import { useAppStore, useFileStore } from '@/stores';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { applyTheme, getSavedTheme, type ThemeType } from '@/utils/theme';
@@ -16,7 +16,7 @@ const navItemsConfig = [
     hideWhenEmpty: true, // 只在有处理结果时显示
   },
   { path: '/batch', labelKey: 'nav.batch', icon: Layers, view: 'batch' as const },
-  { path: '/rules', labelKey: 'nav.rules', icon: Wrench, view: 'rules' as const },
+  { path: '/rules', labelKey: 'nav.rules', icon: FileText, view: 'rules' as const },
   { path: '/history', labelKey: 'nav.history', icon: History, view: 'history' as const },
   { path: '/settings', labelKey: 'nav.settings', icon: Settings, view: 'settings' as const },
 ];
