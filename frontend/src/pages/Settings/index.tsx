@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Settings as SettingsIcon,
@@ -56,9 +56,14 @@ export default function Settings() {
     'Notification' in window ? Notification.permission : 'denied',
   );
 
-  // 应用主题
+  // 应用主题（仅当主题设置改变时）
+  const prevThemeRef = useRef(settings.theme);
   useEffect(() => {
-    applyTheme(settings.theme);
+    // 只有当用户实际更改主题时才应用，避免组件挂载时覆盖已有主题
+    if (prevThemeRef.current !== settings.theme) {
+      applyTheme(settings.theme);
+      prevThemeRef.current = settings.theme;
+    }
 
     // 监听系统主题变化
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

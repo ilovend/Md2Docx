@@ -49,3 +49,35 @@ html.light .text-gray-500 { color: var(--text-muted) !important; }
 html.light .hover\:bg-\[\#1a1d2e\]:hover { background-color: var(--bg-hover) !important; }
 html.light .hover\:bg-\[\#2a2d3e\]:hover { background-color: #cbd5e1 !important; }
 html.light .hover\:text-white:hover { color: var(--text-primary) !important; }
+
+/* 浅色主题下的按钮 */
+html.light .bg-blue-500 { background-color: #3b82f6 !important; }
+html.light .bg-blue-600 { background-color: #2563eb !important; }
+html.light .hover\:bg-blue-600:hover { background-color: #2563eb !important; }
+html.light .bg-gray-600 { background-color: #e2e8f0 !important; }
+html.light .bg-gray-700 { background-color: #cbd5e1 !important; }
+
+/* 浅色主题下的图标和文本颜色 */
+html.light .text-blue-400 { color: #3b82f6 !important; }
+html.light .text-blue-500 { color: #2563eb !important; }
+html.light .text-green-400 { color: #22c55e !important; }
+html.light .text-red-400 { color: #ef4444 !important; }
+html.light .text-purple-400 { color: #a855f7 !important; }
+html.light .text-gray-300 { color: #475569 !important; }
+
+/* 浅色主题下的输入框 */
+html.light input, html.light select, html.light textarea {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 浅色主题下的下拉菜单和弹出框 */
+html.light .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 浅色主题下的分割线 */
+html.light .border-t, html.light .border-b, html.light .border-l, html.light .border-r {
+  border-color: var(--border-color) !important;
+}
