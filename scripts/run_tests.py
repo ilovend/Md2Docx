@@ -278,9 +278,19 @@ def main():
 
     if not backend_only:
         print_header("Frontend Tests")
-        print_warning("Frontend tests require vitest to be installed")
-        print_warning("Run: cd frontend && npm install vitest --save-dev && npm test")
-        results["Frontend Tests"] = True  # Assume passed since we can't run them here
+        # Run vitest directly
+        result = subprocess.run(
+            ["npm", "test"],
+            cwd=FRONTEND_DIR,
+            capture_output=False,
+            shell=True,
+        )
+        if result.returncode == 0:
+            print_success("Frontend tests passed")
+            results["Frontend Tests"] = True
+        else:
+            print_error("Frontend tests failed")
+            results["Frontend Tests"] = False
 
     success = print_summary(results)
     sys.exit(0 if success else 1)
