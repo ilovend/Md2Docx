@@ -470,7 +470,7 @@ export default function Workspace() {
         </div>
         <div className="flex items-center gap-4 text-gray-400">
           <span>{t('workspace.status.memory')}: 124MB</span>
-          <span>v1.0.2</span>
+          <span>v1.0.3</span>
         </div>
       </footer>
     </div>
