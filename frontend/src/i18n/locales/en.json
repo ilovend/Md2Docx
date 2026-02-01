@@ -45,6 +45,7 @@
     "clearAll": "Clear All",
     "removeFile": "Remove this file",
     "backend": {
+      "status": "Server Status",
       "connected": "Connected",
       "disconnected": "Disconnected",
       "latency": "Latency"
@@ -180,7 +181,14 @@
     "notifications": {
       "title": "Notifications",
       "enable": "Enable Notifications",
-      "enableDesc": "Show notifications when processing completes"
+      "enableDesc": "Show notifications when processing completes",
+      "permission": "Notification Permission",
+      "permissionGranted": "Granted, you will receive desktop notifications",
+      "permissionDenied": "Denied, please enable in browser settings",
+      "permissionDefault": "Not yet authorized",
+      "requestPermission": "Request Permission",
+      "notSupported": "Your browser does not support notifications",
+      "testMessage": "Notifications are enabled!"
     },
     "data": {
       "title": "Data Management",
