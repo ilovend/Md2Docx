@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, Settings, History, Wrench, GitCompare, Layers } from 'lucide-react';
+import { FolderOpen, Settings, History, Wrench, GitCompare, Layers, Sun, Moon } from 'lucide-react';
 import { useAppStore, useFileStore } from '@/stores';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { applyTheme, getSavedTheme, type ThemeType } from '@/utils/theme';
 
 const navItemsConfig = [
   { path: '/workspace', labelKey: 'nav.workspace', icon: FolderOpen, view: 'workspace' as const },
@@ -24,6 +26,25 @@ export default function RootLayout() {
   const location = useLocation();
   const { setCurrentView } = useAppStore();
   const { processedDocuments } = useFileStore();
+  const [theme, setTheme] = useState<ThemeType>(getSavedTheme());
+
+  // 切换主题
+  const toggleTheme = () => {
+    const newTheme: ThemeType = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    // 保存到localStorage
+    const saved = localStorage.getItem('md2docx_settings');
+    const settings = saved ? JSON.parse(saved) : {};
+    settings.theme = newTheme;
+    localStorage.setItem('md2docx_settings', JSON.stringify(settings));
+    // 触发Monaco Editor主题更新
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: newTheme }));
+  };
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, []);
 
   return (
     <div className="flex size-full h-screen bg-[#1a1d2e] text-white">
@@ -73,9 +94,16 @@ export default function RootLayout() {
           })}
         </nav>
 
-        {/* Language Switcher */}
-        <div className="border-t border-[#2a2d3e] p-4">
+        {/* Theme & Language */}
+        <div className="flex items-center justify-between border-t border-[#2a2d3e] p-4">
           <LanguageSwitcher />
+          <button
+            onClick={toggleTheme}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-[#1f2333] hover:text-white"
+            title={theme === 'dark' ? t('settings.appearance.themeLight') : t('settings.appearance.themeDark')}
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         </div>
       </aside>
 
