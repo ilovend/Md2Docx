@@ -506,7 +506,6 @@ export default function RuleEditor() {
         editorRef.current.focus();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRule]);
 
   return (
