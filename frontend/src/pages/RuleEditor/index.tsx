@@ -26,6 +26,11 @@ interface RuleCategory {
   rules: { id: string; name: string; active: boolean }[];
 }
 
+interface RuleConfig {
+  enabled?: boolean;
+  parameters?: Record<string, unknown>;
+}
+
 export default function RuleEditor() {
   const { t } = useTranslation();
   const { presets, loadPresets, selectedPresetId, selectPreset } = useRuleStore();
@@ -136,7 +141,7 @@ export default function RuleEditor() {
       { name: string; icon: string; rules: { id: string; name: string; active: boolean }[] }
     > = {};
 
-    ruleEntries.forEach(([id, config]: [string, any]) => {
+    ruleEntries.forEach(([id, config]: [string, RuleConfig]) => {
       const meta = metadataMap.get(id);
       const categoryId = meta?.category || 'other';
       const categoryInfo = categoryMeta[categoryId] || categoryMeta.other;
@@ -172,7 +177,7 @@ export default function RuleEditor() {
 
   // 验证规则配置的schema
   const validateRuleSchema = (
-    parsed: any,
+    parsed: Record<string, unknown> | null,
     lines: string[],
   ): { valid: boolean; error: string; line?: number } => {
     if (!parsed || typeof parsed !== 'object') {
@@ -188,12 +193,12 @@ export default function RuleEditor() {
         const lineIndex = lines.findIndex((l) => l.trim().startsWith(`${key}:`));
         return {
           valid: false,
-          error: `规则 "${key}" 必须是对象，当前值无效`,
+          error: t('rules.validation.mustBeObject', { key }),
           line: lineIndex !== -1 ? lineIndex + 1 : undefined,
         };
       }
 
-      const ruleConfig = value as Record<string, any>;
+      const ruleConfig = value as Record<string, unknown>;
 
       // enabled 必须是布尔值
       if ('enabled' in ruleConfig && typeof ruleConfig.enabled !== 'boolean') {
@@ -204,7 +209,7 @@ export default function RuleEditor() {
         );
         return {
           valid: false,
-          error: `规则 "${key}" 的 enabled 字段必须是 true 或 false`,
+          error: t('rules.validation.enabledMustBeBool', { key }),
           line: lineIndex !== -1 ? lineIndex + 1 : undefined,
         };
       }
@@ -214,7 +219,7 @@ export default function RuleEditor() {
         const lineIndex = lines.findIndex((l) => l.trim().startsWith('parameters:'));
         return {
           valid: false,
-          error: `规则 "${key}" 的 parameters 必须是对象`,
+          error: t('rules.validation.paramsMustBeObject', { key }),
           line: lineIndex !== -1 ? lineIndex + 1 : undefined,
         };
       }
@@ -227,7 +232,7 @@ export default function RuleEditor() {
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
-        const parsed = yaml.load(yamlContent);
+        const parsed = yaml.load(yamlContent) as Record<string, unknown> | null;
         const lines = yamlContent.split('\n');
 
         // Schema 验证
