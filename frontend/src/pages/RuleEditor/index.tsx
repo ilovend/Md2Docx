@@ -360,10 +360,14 @@ export default function RuleEditor() {
     }
   };
 
-  // 当选中规则时，自动跳转到编辑器对应行
+  // 当选中规则时，自动跳转到编辑器对应行（仅在规则变化时触发）
   useEffect(() => {
-    if (selectedRule && editorRef.current && yamlContent) {
-      const lines = yamlContent.split('\n');
+    if (selectedRule && editorRef.current) {
+      const model = editorRef.current.getModel();
+      if (!model) return;
+
+      const content = model.getValue();
+      const lines = content.split('\n');
       const ruleLineIndex = lines.findIndex((line) => line.trim().startsWith(`${selectedRule}:`));
 
       if (ruleLineIndex !== -1) {
@@ -373,7 +377,8 @@ export default function RuleEditor() {
         editorRef.current.focus();
       }
     }
-  }, [selectedRule, yamlContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRule]);
 
   return (
     <div className="flex size-full flex-col">
