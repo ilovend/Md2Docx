@@ -85,11 +85,17 @@ python -m uvicorn backend.main:app --reload
 ### 运行测试
 
 ```sh
-# 运行完整自动化测试套件
+# 运行完整自动化测试套件 (Backend + E2E + Frontend)
 python scripts/run_tests.py
 
 # 仅运行后端测试
 python -m pytest backend/tests/test_api.py -v
+
+# 仅运行前端测试
+cd frontend && npm test
+
+# 前端测试监听模式
+cd frontend && npm run test:watch
 ```
 
 ## 📚 文档
