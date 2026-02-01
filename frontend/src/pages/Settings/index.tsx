@@ -156,8 +156,8 @@ export default function Settings() {
       localStorage.setItem('language', settings.language);
     }
 
-    // 触发 storage 事件通知其他组件
-    window.dispatchEvent(new Event('storage'));
+    // 触发自定义事件通知其他组件主题变化
+    window.dispatchEvent(new CustomEvent('themeChange', { detail: settings.theme }));
 
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);

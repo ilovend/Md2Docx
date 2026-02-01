@@ -96,8 +96,21 @@ export default function RuleEditor() {
       }
     };
 
-    // 监听 localStorage 变化
-    window.addEventListener('storage', checkTheme);
+    // 监听自定义主题变化事件
+    const handleThemeChange = (e: Event) => {
+      const theme = (e as CustomEvent).detail;
+      if (theme === 'light') {
+        setEditorTheme('light');
+      } else if (theme === 'system') {
+        setEditorTheme(
+          window.matchMedia('(prefers-color-scheme: dark)').matches ? 'vs-dark' : 'light',
+        );
+      } else {
+        setEditorTheme('vs-dark');
+      }
+    };
+    window.addEventListener('themeChange', handleThemeChange);
+
     // 监听 html class 变化（主题切换时）
     const observer = new MutationObserver(() => {
       const isLight = document.documentElement.classList.contains('light');
@@ -106,7 +119,7 @@ export default function RuleEditor() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
     return () => {
-      window.removeEventListener('storage', checkTheme);
+      window.removeEventListener('themeChange', handleThemeChange);
       observer.disconnect();
     };
   }, []);
