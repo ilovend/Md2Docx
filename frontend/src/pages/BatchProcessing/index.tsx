@@ -519,7 +519,7 @@ export default function BatchProcessing() {
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
                 <span className="text-white">
-                  Processing {processingCount} of {totalFiles} files...
+                  {t('batch.processing', { current: processingCount, total: totalFiles })}
                 </span>
               </div>
               <span className="text-blue-400">{Math.round(progress)}%</span>
