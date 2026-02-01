@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, File, Download, Trash2, Search, Calendar, Filter } from 'lucide-react';
+import { FileText, File, Download, Trash2, Search, Calendar, Filter, X } from 'lucide-react';
 import { historyApi, documentApi, type HistoryItem } from '@/services/api';
+
+type StatusFilter = 'all' | 'completed' | 'error';
 
 export default function History() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const loadHistory = async () => {
     try {
@@ -26,9 +33,54 @@ export default function History() {
     loadHistory();
   }, []);
 
-  const filteredHistory = history.filter((item) =>
-    item.filename.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // 解析日期字符串（格式：YYYY-MM-DD HH:mm:ss 或 YYYY/MM/DD HH:mm）
+  const parseDate = (dateStr: string): Date | null => {
+    try {
+      const parsed = new Date(dateStr.replace(/\//g, '-'));
+      return isNaN(parsed.getTime()) ? null : parsed;
+    } catch {
+      return null;
+    }
+  };
+
+  const filteredHistory = history.filter((item) => {
+    // 文件名搜索
+    if (searchTerm && !item.filename.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
+
+    // 状态筛选
+    if (statusFilter !== 'all' && item.status !== statusFilter) {
+      return false;
+    }
+
+    // 日期范围筛选
+    if (dateFrom || dateTo) {
+      const itemDate = parseDate(item.processed_time);
+      if (itemDate) {
+        if (dateFrom) {
+          const fromDate = new Date(dateFrom);
+          fromDate.setHours(0, 0, 0, 0);
+          if (itemDate < fromDate) return false;
+        }
+        if (dateTo) {
+          const toDate = new Date(dateTo);
+          toDate.setHours(23, 59, 59, 999);
+          if (itemDate > toDate) return false;
+        }
+      }
+    }
+
+    return true;
+  });
+
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setDateFrom('');
+    setDateTo('');
+  };
+
+  const hasActiveFilters = statusFilter !== 'all' || dateFrom || dateTo;
 
   const handleDownload = (item: HistoryItem) => {
     if (item.document_id) {
@@ -70,15 +122,129 @@ export default function History() {
           </div>
 
           {/* 筛选按钮 */}
-          <button className="flex items-center gap-2 rounded border border-[#2a2d3e] px-3 py-2 text-sm text-gray-400 hover:text-white">
-            <Filter className="h-4 w-4" />
-            {t('common.filter')}
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowFilterMenu(!showFilterMenu)}
+              className={`flex items-center gap-2 rounded border px-3 py-2 text-sm transition-colors ${
+                statusFilter !== 'all'
+                  ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                  : 'border-[#2a2d3e] text-gray-400 hover:text-white'
+              }`}
+            >
+              <Filter className="h-4 w-4" />
+              {statusFilter === 'all'
+                ? t('common.filter')
+                : statusFilter === 'completed'
+                  ? t('common.completed')
+                  : t('common.failed')}
+            </button>
+            {showFilterMenu && (
+              <div className="absolute top-full left-0 z-10 mt-1 w-40 rounded border border-[#2a2d3e] bg-[#1a1d2e] py-1 shadow-lg">
+                <button
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setShowFilterMenu(false);
+                  }}
+                  className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[#2a2d3e] ${
+                    statusFilter === 'all' ? 'text-blue-400' : 'text-gray-300'
+                  }`}
+                >
+                  {t('history.filter.all')}
+                </button>
+                <button
+                  onClick={() => {
+                    setStatusFilter('completed');
+                    setShowFilterMenu(false);
+                  }}
+                  className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[#2a2d3e] ${
+                    statusFilter === 'completed' ? 'text-blue-400' : 'text-gray-300'
+                  }`}
+                >
+                  {t('common.completed')}
+                </button>
+                <button
+                  onClick={() => {
+                    setStatusFilter('error');
+                    setShowFilterMenu(false);
+                  }}
+                  className={`w-full px-4 py-2 text-left text-sm transition-colors hover:bg-[#2a2d3e] ${
+                    statusFilter === 'error' ? 'text-blue-400' : 'text-gray-300'
+                  }`}
+                >
+                  {t('common.failed')}
+                </button>
+              </div>
+            )}
+          </div>
 
-          <button className="flex items-center gap-2 rounded border border-[#2a2d3e] px-3 py-2 text-sm text-gray-400 hover:text-white">
-            <Calendar className="h-4 w-4" />
-            {t('history.dateRange')}
-          </button>
+          {/* 日期范围 */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className={`flex items-center gap-2 rounded border px-3 py-2 text-sm transition-colors ${
+                dateFrom || dateTo
+                  ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                  : 'border-[#2a2d3e] text-gray-400 hover:text-white'
+              }`}
+            >
+              <Calendar className="h-4 w-4" />
+              {dateFrom || dateTo
+                ? `${dateFrom || '...'} ~ ${dateTo || '...'}`
+                : t('history.dateRange')}
+            </button>
+            {showDatePicker && (
+              <div className="absolute top-full left-0 z-10 mt-1 w-64 rounded border border-[#2a2d3e] bg-[#1a1d2e] p-4 shadow-lg">
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs text-gray-400">
+                    {t('history.dateFrom')}
+                  </label>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-full rounded border border-[#2a2d3e] bg-[#151822] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="mb-1 block text-xs text-gray-400">{t('history.dateTo')}</label>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-full rounded border border-[#2a2d3e] bg-[#151822] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => {
+                      setDateFrom('');
+                      setDateTo('');
+                    }}
+                    className="px-3 py-1.5 text-xs text-gray-400 hover:text-white"
+                  >
+                    {t('common.clear')}
+                  </button>
+                  <button
+                    onClick={() => setShowDatePicker(false)}
+                    className="rounded bg-blue-500 px-3 py-1.5 text-xs text-white hover:bg-blue-600"
+                  >
+                    {t('common.confirm')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 清除筛选 */}
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1 rounded px-2 py-1.5 text-xs text-gray-400 hover:text-white"
+            >
+              <X className="h-3 w-3" />
+              {t('history.clearFilters')}
+            </button>
+          )}
         </div>
 
         <div className="text-sm text-gray-400">

@@ -80,6 +80,12 @@
     "noRecords": "暂无历史记录",
     "noRecordsHint": "处理文档后，记录将显示在这里",
     "retention": "历史记录保留 30 天",
+    "dateFrom": "开始日期",
+    "dateTo": "结束日期",
+    "clearFilters": "清除筛选",
+    "filter": {
+      "all": "全部状态"
+    },
     "stats": {
       "completed": "已完成",
       "failed": "失败"
