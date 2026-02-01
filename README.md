@@ -92,10 +92,12 @@ python scripts/run_tests.py
 python -m pytest backend/tests/test_api.py -v
 
 # 仅运行前端测试
-cd frontend && npm test
+cd frontend
+npm test
 
 # 前端测试监听模式
-cd frontend && npm run test:watch
+cd frontend
+npm run test:watch
 ```
 
 ## 📚 文档
