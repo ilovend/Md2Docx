@@ -129,6 +129,12 @@ export default function Settings() {
   const handleChange = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
     setSaved(false);
+
+    // 语言更改立即生效
+    if (key === 'language') {
+      i18n.changeLanguage(value as string);
+      localStorage.setItem('language', value as string);
+    }
   };
 
   const handleSave = () => {
