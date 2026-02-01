@@ -16,7 +16,11 @@
     "optional": "可选",
     "apply": "应用",
     "discard": "放弃",
-    "ready": "就绪"
+    "ready": "就绪",
+    "clear": "清除",
+    "confirm": "确定",
+    "download": "下载",
+    "export": "导出"
   },
   "nav": {
     "workspace": "仪表盘",
