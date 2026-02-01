@@ -147,11 +147,17 @@ export default function Settings() {
   const handleSave = () => {
     localStorage.setItem('md2docx_settings', JSON.stringify(settings));
 
+    // Apply theme change immediately
+    applyTheme(settings.theme);
+
     // Apply language change
     if (settings.language !== (i18n.language.startsWith('zh') ? 'zh' : 'en')) {
       i18n.changeLanguage(settings.language);
       localStorage.setItem('language', settings.language);
     }
+
+    // 触发 storage 事件通知其他组件
+    window.dispatchEvent(new Event('storage'));
 
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
