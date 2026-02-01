@@ -18,10 +18,16 @@ class Settings:
     # Server
     HOST = "127.0.0.1"
     PORT = 8000
-    DEBUG = True
+    DEBUG = False  # 生产环境应为False，开发时可通过环境变量覆盖
 
-    # CORS
-    CORS_ORIGINS = ["*"]
+    # CORS - 开发环境允许本地访问，生产环境应限制为具体域名
+    CORS_ORIGINS = [
+        "http://localhost:5173",  # Vite dev server
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",  # Alternative dev port
+        "http://127.0.0.1:3000",
+        "app://.",  # Electron app
+    ]
 
 
 settings = Settings()

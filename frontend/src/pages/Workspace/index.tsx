@@ -153,7 +153,7 @@ export default function Workspace() {
   const addHistoryRecord = async (file: File, documentId: string, fixes: number) => {
     try {
       await historyApi.add({
-        id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         filename: file.name,
         processed_time: new Date().toLocaleString('zh-CN'),
         size: `${(file.size / 1024).toFixed(1)} KB`,

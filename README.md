@@ -57,11 +57,10 @@ Md2Docx 是一个桌面应用程序，专门用于解决从Markdown等格式通�
 
 2. 安装前端依赖
 
-   ````sh
    ```sh
    cd frontend
    npm install
-   ````
+   ```
 
 3. 安装后端依赖
    ```sh
@@ -80,7 +79,7 @@ npm run dev
 **启动后端服务**：
 
 ```sh
-python -m uvicorn backend.main:app --reload8
+python -m uvicorn backend.main:app --reload
 ```
 
 ### 运行测试

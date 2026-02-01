@@ -9,6 +9,7 @@ import {
   Info,
   Check,
 } from 'lucide-react';
+import { applyTheme } from '@/utils/theme';
 
 interface SettingsState {
   theme: 'dark' | 'light' | 'system';
@@ -28,20 +29,6 @@ const defaultSettings: SettingsState = {
   notifications: true,
   parallelProcessing: 2,
   keepHistory: 30,
-};
-
-// 应用主题到文档
-const applyTheme = (theme: 'dark' | 'light' | 'system') => {
-  const root = document.documentElement;
-  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  if (theme === 'system') {
-    root.classList.toggle('dark', systemDark);
-    root.classList.toggle('light', !systemDark);
-  } else {
-    root.classList.toggle('dark', theme === 'dark');
-    root.classList.toggle('light', theme === 'light');
-  }
 };
 
 export default function Settings() {

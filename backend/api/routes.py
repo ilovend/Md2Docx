@@ -53,10 +53,23 @@ def save_history(history: List[dict]):
     )
 
 
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+
+
 @router.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
     if not file.filename.endswith((".docx", ".md", ".txt")):
         raise HTTPException(400, "Invalid file format")
+
+    # 检查文件大小
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            413, f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB"
+        )
+
+    # 重置文件指针以便后续读取
+    await file.seek(0)
 
     doc_id = await processor.save_upload(file)
     return {"document_id": doc_id, "filename": file.filename}
@@ -114,8 +127,22 @@ async def get_preset_detail(preset_id: str):
 
 @router.get("/download/{document_id}")
 async def download_document(document_id: str):
+    # 验证document_id格式，防止路径遍历攻击
+    import re
+
+    if not re.match(r"^[a-zA-Z0-9_-]+$", document_id):
+        raise HTTPException(400, "Invalid document ID format")
+
     fixed_filename = f"{document_id}_fixed.docx"
     file_path = settings.OUTPUT_DIR / fixed_filename
+
+    # 确保文件路径在允许的目录内
+    try:
+        file_path = file_path.resolve()
+        if not str(file_path).startswith(str(settings.OUTPUT_DIR.resolve())):
+            raise HTTPException(403, "Access denied")
+    except Exception:
+        raise HTTPException(400, "Invalid path")
 
     if not file_path.exists():
         raise HTTPException(404, "Processed file not found")

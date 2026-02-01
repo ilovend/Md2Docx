@@ -76,26 +76,6 @@ export default function RuleEditor() {
 
   // 监听主题变化
   useEffect(() => {
-    const checkTheme = () => {
-      const saved = localStorage.getItem('md2docx_settings');
-      if (saved) {
-        try {
-          const settings = JSON.parse(saved);
-          if (settings.theme === 'light') {
-            setEditorTheme('light');
-          } else if (settings.theme === 'system') {
-            setEditorTheme(
-              window.matchMedia('(prefers-color-scheme: dark)').matches ? 'vs-dark' : 'light',
-            );
-          } else {
-            setEditorTheme('vs-dark');
-          }
-        } catch {
-          // 忽略解析错误
-        }
-      }
-    };
-
     // 监听自定义主题变化事件
     const handleThemeChange = (e: Event) => {
       const theme = (e as CustomEvent).detail;
@@ -134,15 +114,15 @@ export default function RuleEditor() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [ruleToDelete, setRuleToDelete] = useState<{ id: string; name: string } | null>(null);
 
-  // Category metadata
-  const categoryMeta: Record<string, { name: string; icon: string }> = {
-    font: { name: '字体规则', icon: '🔤' },
-    table: { name: '表格规则', icon: '📊' },
-    paragraph: { name: '排版规则', icon: '📝' },
-    image: { name: '图表规则', icon: '🖼️' },
-    heading: { name: '标题规则', icon: '📑' },
-    formula: { name: '公式规则', icon: '∑' },
-    other: { name: '其他规则', icon: '⚙️' },
+  // Category metadata - use i18n for names
+  const categoryMeta: Record<string, { nameKey: string; icon: string }> = {
+    font: { nameKey: 'rules.categories.font', icon: '🔤' },
+    table: { nameKey: 'rules.categories.table', icon: '📊' },
+    paragraph: { nameKey: 'rules.categories.paragraph', icon: '📝' },
+    image: { nameKey: 'rules.categories.image', icon: '🖼️' },
+    heading: { nameKey: 'rules.categories.heading', icon: '📑' },
+    formula: { nameKey: 'rules.categories.formula', icon: '∑' },
+    other: { nameKey: 'rules.categories.other', icon: '⚙️' },
   };
 
   // Generate categories from preset detail
@@ -163,7 +143,7 @@ export default function RuleEditor() {
 
       if (!ruleCategories[categoryId]) {
         ruleCategories[categoryId] = {
-          name: categoryInfo.name,
+          name: t(categoryInfo.nameKey),
           icon: categoryInfo.icon,
           rules: [],
         };
@@ -455,10 +435,10 @@ export default function RuleEditor() {
         description: presetDetail.description,
         rules: updatedRules,
       });
-      alert('规则已保存！');
+      alert(t('rules.saved'));
     } catch (error) {
       console.error('Save failed', error);
-      alert('保存失败');
+      alert(t('rules.saveFailed'));
     }
   };
 
@@ -488,7 +468,7 @@ export default function RuleEditor() {
 
     try {
       await rulesApi.delete(ruleToDelete.id);
-      alert(`规则 "${ruleToDelete.name}" 已删除`);
+      alert(t('rules.ruleDeleted', { name: ruleToDelete.name }));
 
       if (selectedPresetId) {
         const detail = await presetApi.getDetail(selectedPresetId);
@@ -502,7 +482,7 @@ export default function RuleEditor() {
       }
     } catch (error: any) {
       console.error('Delete failed', error);
-      alert(error.response?.data?.detail || '删除失败：只能删除自定义规则');
+      alert(error.response?.data?.detail || t('rules.deleteFailed'));
     } finally {
       setShowDeleteConfirm(false);
       setRuleToDelete(null);

@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+// Backend base URL from environment variable
+const BACKEND_BASE =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/api$/, '') || 'http://127.0.0.1:8000';
+const API_BASE = `${BACKEND_BASE}/api`;
 
 export interface UploadResponse {
   document_id: string;
@@ -75,7 +78,7 @@ export const documentApi = {
   },
 };
 
-const BACKEND_BASE = 'http://127.0.0.1:8000';
+// BACKEND_BASE is now defined at the top of the file
 
 export interface PresetInfo {
   id: string;

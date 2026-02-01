@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -87,13 +87,11 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@types/js-yaml": "^4.0.9",
     "axios": "^1.13.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
-    "electron-builder": "^26.4.0",
     "embla-carousel-react": "^8.6.0",
     "i18next": "^25.8.0",
     "input-otp": "^1.4.2",
@@ -116,6 +114,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@eslint/js": "^9.39.1",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^24.10.9",
@@ -125,6 +124,7 @@
     "@typescript-eslint/parser": "^8.53.1",
     "@vitejs/plugin-react": "^5.1.1",
     "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
