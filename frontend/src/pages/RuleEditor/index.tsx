@@ -57,6 +57,60 @@ export default function RuleEditor() {
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
+  // Monaco编辑器主题，根据全局主题设置
+  const [editorTheme, setEditorTheme] = useState<'vs-dark' | 'light'>(() => {
+    const saved = localStorage.getItem('md2docx_settings');
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved);
+        if (settings.theme === 'light') return 'light';
+        if (settings.theme === 'system') {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'vs-dark' : 'light';
+        }
+      } catch {
+        // 忽略解析错误
+      }
+    }
+    return 'vs-dark';
+  });
+
+  // 监听主题变化
+  useEffect(() => {
+    const checkTheme = () => {
+      const saved = localStorage.getItem('md2docx_settings');
+      if (saved) {
+        try {
+          const settings = JSON.parse(saved);
+          if (settings.theme === 'light') {
+            setEditorTheme('light');
+          } else if (settings.theme === 'system') {
+            setEditorTheme(
+              window.matchMedia('(prefers-color-scheme: dark)').matches ? 'vs-dark' : 'light',
+            );
+          } else {
+            setEditorTheme('vs-dark');
+          }
+        } catch {
+          // 忽略解析错误
+        }
+      }
+    };
+
+    // 监听 localStorage 变化
+    window.addEventListener('storage', checkTheme);
+    // 监听 html class 变化（主题切换时）
+    const observer = new MutationObserver(() => {
+      const isLight = document.documentElement.classList.contains('light');
+      setEditorTheme(isLight ? 'light' : 'vs-dark');
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      window.removeEventListener('storage', checkTheme);
+      observer.disconnect();
+    };
+  }, []);
+
   // New Rule Modal States
   const [showNewRuleModal, setShowNewRuleModal] = useState(false);
   const [newRuleName, setNewRuleName] = useState('');
@@ -663,7 +717,7 @@ export default function RuleEditor() {
               <Editor
                 height="100%"
                 defaultLanguage="yaml"
-                theme="vs-dark"
+                theme={editorTheme}
                 value={yamlContent}
                 onChange={(value) => setYamlContent(value || '')}
                 onMount={handleEditorDidMount}
