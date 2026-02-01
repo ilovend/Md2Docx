@@ -123,11 +123,93 @@ export default function RuleEditor() {
       });
   };
 
+  // 验证规则配置的schema
+  const validateRuleSchema = (
+    parsed: any,
+    lines: string[],
+  ): { valid: boolean; error: string; line?: number } => {
+    if (!parsed || typeof parsed !== 'object') {
+      return { valid: true, error: '' };
+    }
+
+    for (const [key, value] of Object.entries(parsed)) {
+      // 跳过注释和元数据
+      if (key === 'preset_id') continue;
+
+      // 规则必须是对象
+      if (typeof value !== 'object' || value === null) {
+        const lineIndex = lines.findIndex((l) => l.trim().startsWith(`${key}:`));
+        return {
+          valid: false,
+          error: `规则 "${key}" 必须是对象，当前值无效`,
+          line: lineIndex !== -1 ? lineIndex + 1 : undefined,
+        };
+      }
+
+      const ruleConfig = value as Record<string, any>;
+
+      // enabled 必须是布尔值
+      if ('enabled' in ruleConfig && typeof ruleConfig.enabled !== 'boolean') {
+        const lineIndex = lines.findIndex(
+          (l) =>
+            l.trim().startsWith('enabled:') &&
+            lines.indexOf(l) > lines.findIndex((r) => r.trim().startsWith(`${key}:`)),
+        );
+        return {
+          valid: false,
+          error: `规则 "${key}" 的 enabled 字段必须是 true 或 false`,
+          line: lineIndex !== -1 ? lineIndex + 1 : undefined,
+        };
+      }
+
+      // parameters 必须是对象（如果存在）
+      if ('parameters' in ruleConfig && typeof ruleConfig.parameters !== 'object') {
+        const lineIndex = lines.findIndex((l) => l.trim().startsWith('parameters:'));
+        return {
+          valid: false,
+          error: `规则 "${key}" 的 parameters 必须是对象`,
+          line: lineIndex !== -1 ? lineIndex + 1 : undefined,
+        };
+      }
+    }
+
+    return { valid: true, error: '' };
+  };
+
   // Validate YAML content in real-time with debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
-        yaml.load(yamlContent);
+        const parsed = yaml.load(yamlContent);
+        const lines = yamlContent.split('\n');
+
+        // Schema 验证
+        const schemaResult = validateRuleSchema(parsed, lines);
+        if (!schemaResult.valid) {
+          setYamlValidation({
+            valid: false,
+            error: schemaResult.error,
+            line: schemaResult.line,
+          });
+          // Set Monaco markers for schema error
+          if (monacoRef.current && editorRef.current && schemaResult.line) {
+            const model = editorRef.current.getModel();
+            if (model) {
+              monacoRef.current.editor.setModelMarkers(model, 'yaml', [
+                {
+                  startLineNumber: schemaResult.line,
+                  startColumn: 1,
+                  endLineNumber: schemaResult.line,
+                  endColumn: model.getLineMaxColumn(schemaResult.line),
+                  message: schemaResult.error,
+                  severity: monacoRef.current.MarkerSeverity.Warning,
+                },
+              ]);
+            }
+          }
+          return;
+        }
+
         setYamlValidation({
           valid: true,
           error: '',

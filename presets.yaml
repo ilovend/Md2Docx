@@ -253,7 +253,7 @@ presets:
       FontSizeRule:
         enabled: true
       HorizontalRuleRemovalRule:
-        enabled: true
+        enabled: false
       ListNumberingRule:
         enabled: true
       PageLayoutRule:
