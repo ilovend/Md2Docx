@@ -80,7 +80,7 @@ npm run dev
 **启动后端服务**：
 
 ```sh
-python -m uvicorn backend.main:app --reload
+python -m uvicorn backend.main:app --reload8
 ```
 
 ### 运行测试

@@ -298,81 +298,75 @@ export default function Workspace() {
             isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-gray-600 bg-[#1f2333]'
           }`}
         >
-          <div className="text-center">
-            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20">
+          <label className="block cursor-pointer text-center">
+            <input
+              type="file"
+              multiple
+              accept=".md,.docx,.txt"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20 transition-colors hover:bg-blue-500/30">
               <Upload className="h-8 w-8 text-blue-400" />
             </div>
             <h3 className="mb-2 text-lg text-white">{t('workspace.dropzone.title')}</h3>
-            <p className="mb-6 text-sm text-gray-400">{t('workspace.dropzone.description')}</p>
-            <label className="inline-block">
-              <input
-                type="file"
-                multiple
-                accept=".md,.docx,.txt"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <span className="inline-block cursor-pointer rounded-lg bg-blue-500 px-6 py-2.5 text-white transition-colors hover:bg-blue-600">
-                {t('workspace.dropzone.selectFiles')}
-              </span>
-            </label>
-            <p className="mt-2 text-xs text-gray-400">
-              {t('workspace.dropzone.fileSelectionHint')}
+            <p className="text-sm text-gray-400">
+              {t('workspace.dropzone.description')} {t('workspace.dropzone.fileSelectionHint')}
             </p>
-            {selectedFiles.length > 0 && (
-              <div className="mt-4 text-sm text-green-400">
-                <div className="flex items-center justify-center gap-2">
-                  {t('workspace.filesSelected', { count: selectedFiles.length })}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearFiles();
-                    }}
-                    className="ml-2 flex items-center gap-1 rounded bg-red-500/20 px-2 py-0.5 text-xs text-red-400 hover:bg-red-500/30"
-                    title={t('workspace.clearAll')}
+          </label>
+          {selectedFiles.length > 0 && (
+            <div className="mt-4 text-sm text-green-400 text-center">
+              <div className="flex items-center justify-center gap-2">
+                {t('workspace.filesSelected', { count: selectedFiles.length })}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearFiles();
+                  }}
+                  className="ml-2 flex items-center gap-1 rounded bg-red-500/20 px-2 py-0.5 text-xs text-red-400 hover:bg-red-500/30"
+                  title={t('workspace.clearAll')}
+                >
+                  <Trash2 className="h-3 w-3" />
+                  {t('workspace.clearAll')}
+                </button>
+              </div>
+              <div className="mt-2 max-h-32 overflow-y-auto text-xs text-gray-400">
+                {selectedFiles.map((f, i) => (
+                  <div
+                    key={i}
+                    className="group flex items-center justify-center gap-2 py-0.5 hover:bg-white/5 rounded"
                   >
-                    <Trash2 className="h-3 w-3" />
-                    {t('workspace.clearAll')}
-                  </button>
-                </div>
-                <div className="mt-2 max-h-32 overflow-y-auto text-xs text-gray-400">
-                  {selectedFiles.map((f, i) => (
-                    <div
-                      key={i}
-                      className="group flex items-center justify-center gap-2 py-0.5 hover:bg-white/5 rounded"
+                    <span>
+                      {f.name} ({(f.size / 1024).toFixed(1)} KB)
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(i);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-opacity"
+                      title={t('workspace.removeFile')}
                     >
-                      <span>
-                        {f.name} ({(f.size / 1024).toFixed(1)} KB)
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFile(i);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-opacity"
-                        title={t('workspace.removeFile')}
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
-            )}
-            {error && (
-              <div className="mt-4 text-sm text-red-400">
-                {t('workspace.error.label')}: {error}
-              </div>
-            )}
-            {processResult && (
-              <div className="mt-4 text-sm text-blue-400">
-                {t('workspace.processComplete', {
-                  fixes: processResult.total_fixes,
-                  duration: processResult.duration_ms,
-                })}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+          {error && (
+            <div className="mt-4 text-sm text-red-400 text-center">
+              {t('workspace.error.label')}: {error}
+            </div>
+          )}
+          {processResult && (
+            <div className="mt-4 text-sm text-blue-400 text-center">
+              {t('workspace.processComplete', {
+                fixes: processResult.total_fixes,
+                duration: processResult.duration_ms,
+              })}
+            </div>
+          )}
         </div>
 
         {/* Process Configuration */}

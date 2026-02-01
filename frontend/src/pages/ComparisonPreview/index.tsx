@@ -1,4 +1,4 @@
-import { useState, useEffect, type MouseEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, type MouseEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,6 +13,8 @@ import {
   ChevronRight,
   Undo2,
   Redo2,
+  Link2,
+  Link2Off,
 } from 'lucide-react';
 import { documentApi } from '@/services/api';
 import { useFileStore } from '@/stores';
@@ -60,6 +62,12 @@ export default function ComparisonPreview() {
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [customFilename, setCustomFilename] = useState('');
+
+  // 同步滚动
+  const [syncScroll, setSyncScroll] = useState(true);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const isScrolling = useRef(false);
 
   // 撤销/重做历史记录
   interface HistoryState {
@@ -132,6 +140,35 @@ export default function ComparisonPreview() {
   const handleSelectDocument = (index: number) => {
     setCurrentDocumentIndex(index);
   };
+
+  // 同步滚动处理
+  const handleScroll = useCallback(
+    (source: 'left' | 'right') => {
+      if (!syncScroll || isScrolling.current) return;
+
+      const sourceRef = source === 'left' ? leftPanelRef : rightPanelRef;
+      const targetRef = source === 'left' ? rightPanelRef : leftPanelRef;
+
+      if (!sourceRef.current || !targetRef.current) return;
+
+      isScrolling.current = true;
+
+      const sourceEl = sourceRef.current;
+      const targetEl = targetRef.current;
+
+      // 计算滚动百分比
+      const scrollPercent = sourceEl.scrollTop / (sourceEl.scrollHeight - sourceEl.clientHeight);
+
+      // 应用到目标面板
+      targetEl.scrollTop = scrollPercent * (targetEl.scrollHeight - targetEl.clientHeight);
+
+      // 防止循环触发
+      requestAnimationFrame(() => {
+        isScrolling.current = false;
+      });
+    },
+    [syncScroll],
+  );
 
   const handleDownload = async () => {
     if (!documentId) return;
@@ -500,6 +537,20 @@ export default function ComparisonPreview() {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* 同步滚动开关 */}
+          {viewMode === 'side-by-side' && (
+            <button
+              onClick={() => setSyncScroll(!syncScroll)}
+              className={`flex items-center gap-1 rounded px-3 py-1.5 text-xs transition-colors ${
+                syncScroll ? 'bg-blue-500/20 text-blue-400' : 'text-gray-400 hover:text-white'
+              }`}
+              title={syncScroll ? t('comparison.syncScrollOn') : t('comparison.syncScrollOff')}
+            >
+              {syncScroll ? <Link2 className="h-4 w-4" /> : <Link2Off className="h-4 w-4" />}
+              {t('comparison.syncScroll')}
+            </button>
+          )}
+
           <div className="flex items-center gap-2">
             <button
               onClick={() => setZoom(Math.max(50, zoom - 10))}
@@ -540,7 +591,11 @@ export default function ComparisonPreview() {
                 <span className="text-xs text-gray-500">{t('comparison.readonly')}</span>
               </div>
 
-              <div className="flex-1 overflow-auto bg-white p-8">
+              <div
+                ref={leftPanelRef}
+                onScroll={() => handleScroll('left')}
+                className="flex-1 overflow-auto bg-white p-8"
+              >
                 {originalHtml ? (
                   <div
                     className="prose max-w-none text-black selection:bg-blue-200"
@@ -570,7 +625,11 @@ export default function ComparisonPreview() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-auto bg-white p-8">
+              <div
+                ref={rightPanelRef}
+                onScroll={() => handleScroll('right')}
+                className="flex-1 overflow-auto bg-white p-8"
+              >
                 {repairedHtml ? (
                   <div
                     className="prose max-w-none text-black selection:bg-green-200"
