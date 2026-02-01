@@ -14,7 +14,13 @@
     "pending": "Pending",
     "processing": "Processing",
     "completed": "Completed",
-    "failed": "Failed"
+    "failed": "Failed",
+    "optional": "Optional",
+    "apply": "Apply",
+    "discard": "Discard",
+    "ready": "Ready",
+    "clear": "Clear",
+    "confirm": "Confirm"
   },
   "nav": {
     "workspace": "My Files",
