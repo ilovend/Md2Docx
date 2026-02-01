@@ -14,17 +14,18 @@
   --text-muted: #64748b;
 }
 
-/* 浅色主题 */
+/* 浅色主题 - 基于Material Design配色 */
 html.light {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
-  --bg-tertiary: #e2e8f0;
+  --bg-primary: #fafafa;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #eeeeee;
   --bg-card: #ffffff;
-  --bg-hover: #e2e8f0;
-  --border-color: #cbd5e1;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --bg-hover: #e3f2fd;
+  --bg-active: #bbdefb;
+  --border-color: #e0e0e0;
+  --text-primary: #212121;
+  --text-secondary: #616161;
+  --text-muted: #9e9e9e;
 }
 
 /* 应用主题变量到body */
@@ -45,39 +46,57 @@ html.light .text-white { color: var(--text-primary) !important; }
 html.light .text-gray-400 { color: var(--text-secondary) !important; }
 html.light .text-gray-500 { color: var(--text-muted) !important; }
 
-/* 浅色主题hover效果 */
-html.light .hover\:bg-\[\#1a1d2e\]:hover { background-color: var(--bg-hover) !important; }
-html.light .hover\:bg-\[\#2a2d3e\]:hover { background-color: #cbd5e1 !important; }
-html.light .hover\:text-white:hover { color: var(--text-primary) !important; }
+/* 浅色主题hover效果 - 使用蓝色高亮 */
+html.light .hover\:bg-\[\#1a1d2e\]:hover { background-color: #e3f2fd !important; }
+html.light .hover\:bg-\[\#2a2d3e\]:hover { background-color: #e3f2fd !important; }
+html.light .hover\:bg-\[\#1f2333\]:hover { background-color: #e3f2fd !important; }
+html.light .hover\:text-white:hover { color: #1976d2 !important; }
+
+/* 浅色主题下侧边栏选中状态 */
+html.light .bg-blue-500\/20 { background-color: #bbdefb !important; }
+html.light .bg-blue-500\/10 { background-color: #e3f2fd !important; }
 
 /* 浅色主题下的按钮 */
-html.light .bg-blue-500 { background-color: #3b82f6 !important; }
-html.light .bg-blue-600 { background-color: #2563eb !important; }
-html.light .hover\:bg-blue-600:hover { background-color: #2563eb !important; }
-html.light .bg-gray-600 { background-color: #e2e8f0 !important; }
-html.light .bg-gray-700 { background-color: #cbd5e1 !important; }
+html.light .bg-blue-500 { background-color: #1976d2 !important; }
+html.light .bg-blue-600 { background-color: #1565c0 !important; }
+html.light .hover\:bg-blue-600:hover { background-color: #1565c0 !important; }
+html.light .bg-gray-600 { background-color: #eeeeee !important; }
+html.light .bg-gray-700 { background-color: #e0e0e0 !important; }
 
-/* 浅色主题下的图标和文本颜色 */
-html.light .text-blue-400 { color: #3b82f6 !important; }
-html.light .text-blue-500 { color: #2563eb !important; }
-html.light .text-green-400 { color: #22c55e !important; }
-html.light .text-red-400 { color: #ef4444 !important; }
-html.light .text-purple-400 { color: #a855f7 !important; }
-html.light .text-gray-300 { color: #475569 !important; }
+/* 浅色主题下的图标和文本颜色 - 使用更饱和的颜色 */
+html.light .text-blue-400 { color: #1976d2 !important; }
+html.light .text-blue-500 { color: #1565c0 !important; }
+html.light .text-green-400 { color: #388e3c !important; }
+html.light .text-red-400 { color: #d32f2f !important; }
+html.light .text-purple-400 { color: #7b1fa2 !important; }
+html.light .text-gray-300 { color: #424242 !important; }
 
 /* 浅色主题下的输入框 */
 html.light input, html.light select, html.light textarea {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-primary) !important;
+  background-color: #ffffff !important;
+  border-color: #bdbdbd !important;
+  color: #212121 !important;
 }
 
 /* 浅色主题下的下拉菜单和弹出框 */
 html.light .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* 浅色主题下的分割线 */
 html.light .border-t, html.light .border-b, html.light .border-l, html.light .border-r {
-  border-color: var(--border-color) !important;
+  border-color: #e0e0e0 !important;
 }
+
+/* 浅色主题下的导航项悬浮 */
+html.light nav a:hover, html.light nav button:hover {
+  background-color: #e3f2fd !important;
+}
+
+/* 浅色主题下的表格行悬浮 */
+html.light tr:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* 浅色主题下的开关按钮 */
+html.light .peer-checked\:bg-blue-500 { background-color: #1976d2 !important; }
