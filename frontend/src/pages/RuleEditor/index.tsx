@@ -452,7 +452,7 @@ export default function RuleEditor() {
     setTestResult(null);
     try {
       // Parse YAML
-      const config = yaml.load(yamlContent);
+      const config = yaml.load(yamlContent) as Record<string, unknown>;
 
       const html = await rulesApi.testRule(testContent, config);
       setTestResult(html);
