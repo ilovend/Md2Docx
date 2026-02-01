@@ -36,16 +36,38 @@ body {
 }
 
 /* 覆盖硬编码的颜色 */
-.light .bg-\[\#0f1219\] { background-color: var(--bg-primary) !important; }
-.light .bg-\[\#151822\] { background-color: var(--bg-secondary) !important; }
-.light .bg-\[\#1a1d2e\] { background-color: var(--bg-tertiary) !important; }
-.light .bg-\[\#1f2333\] { background-color: var(--bg-card) !important; }
-.light .bg-\[\#2a2d3e\] { background-color: var(--bg-hover) !important; }
-.light .border-\[\#2a2d3e\] { border-color: var(--border-color) !important; }
-.light .text-white { color: var(--text-primary) !important; }
-.light .text-gray-400 { color: var(--text-secondary) !important; }
-.light .text-gray-500 { color: var(--text-muted) !important; }
+.light .bg-\[\#0f1219\] {
+  background-color: var(--bg-primary) !important;
+}
+.light .bg-\[\#151822\] {
+  background-color: var(--bg-secondary) !important;
+}
+.light .bg-\[\#1a1d2e\] {
+  background-color: var(--bg-tertiary) !important;
+}
+.light .bg-\[\#1f2333\] {
+  background-color: var(--bg-card) !important;
+}
+.light .bg-\[\#2a2d3e\] {
+  background-color: var(--bg-hover) !important;
+}
+.light .border-\[\#2a2d3e\] {
+  border-color: var(--border-color) !important;
+}
+.light .text-white {
+  color: var(--text-primary) !important;
+}
+.light .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+.light .text-gray-500 {
+  color: var(--text-muted) !important;
+}
 
 /* 浅色主题下的特殊处理 */
-.light .hover\:bg-\[\#1a1d2e\]:hover { background-color: var(--bg-hover) !important; }
-.light .hover\:bg-\[\#2a2d3e\]:hover { background-color: #cbd5e1 !important; }
+.light .hover\:bg-\[\#1a1d2e\]:hover {
+  background-color: var(--bg-hover) !important;
+}
+.light .hover\:bg-\[\#2a2d3e\]:hover {
+  background-color: #cbd5e1 !important;
+}

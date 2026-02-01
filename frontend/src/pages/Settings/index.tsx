@@ -332,8 +332,8 @@ export default function Settings() {
                     {notificationPermission === 'granted'
                       ? t('settings.notifications.permissionGranted')
                       : notificationPermission === 'denied'
-                        ? t('settings.notifications.permissionDenied')
-                        : t('settings.notifications.permissionDefault')}
+                      ? t('settings.notifications.permissionDenied')
+                      : t('settings.notifications.permissionDefault')}
                   </div>
                 </div>
                 {notificationPermission !== 'granted' && (

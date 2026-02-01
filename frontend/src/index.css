@@ -32,47 +32,103 @@ html.light {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 /* 覆盖硬编码的颜色 - 浅色模式 */
-html.light .bg-\[\#0f1219\] { background-color: var(--bg-primary) !important; }
-html.light .bg-\[\#151822\] { background-color: var(--bg-secondary) !important; }
-html.light .bg-\[\#1a1d2e\] { background-color: var(--bg-tertiary) !important; }
-html.light .bg-\[\#1f2333\] { background-color: var(--bg-card) !important; }
-html.light .bg-\[\#2a2d3e\] { background-color: var(--bg-hover) !important; }
-html.light .border-\[\#2a2d3e\] { border-color: var(--border-color) !important; }
-html.light .text-white { color: var(--text-primary) !important; }
-html.light .text-gray-400 { color: var(--text-secondary) !important; }
-html.light .text-gray-500 { color: var(--text-muted) !important; }
+html.light .bg-\[\#0f1219\] {
+  background-color: var(--bg-primary) !important;
+}
+html.light .bg-\[\#151822\] {
+  background-color: var(--bg-secondary) !important;
+}
+html.light .bg-\[\#1a1d2e\] {
+  background-color: var(--bg-tertiary) !important;
+}
+html.light .bg-\[\#1f2333\] {
+  background-color: var(--bg-card) !important;
+}
+html.light .bg-\[\#2a2d3e\] {
+  background-color: var(--bg-hover) !important;
+}
+html.light .border-\[\#2a2d3e\] {
+  border-color: var(--border-color) !important;
+}
+html.light .text-white {
+  color: var(--text-primary) !important;
+}
+html.light .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+html.light .text-gray-500 {
+  color: var(--text-muted) !important;
+}
 
 /* 浅色主题hover效果 - 使用蓝色高亮 */
-html.light .hover\:bg-\[\#1a1d2e\]:hover { background-color: #e3f2fd !important; }
-html.light .hover\:bg-\[\#2a2d3e\]:hover { background-color: #e3f2fd !important; }
-html.light .hover\:bg-\[\#1f2333\]:hover { background-color: #e3f2fd !important; }
-html.light .hover\:text-white:hover { color: #1976d2 !important; }
+html.light .hover\:bg-\[\#1a1d2e\]:hover {
+  background-color: #e3f2fd !important;
+}
+html.light .hover\:bg-\[\#2a2d3e\]:hover {
+  background-color: #e3f2fd !important;
+}
+html.light .hover\:bg-\[\#1f2333\]:hover {
+  background-color: #e3f2fd !important;
+}
+html.light .hover\:text-white:hover {
+  color: #1976d2 !important;
+}
 
 /* 浅色主题下侧边栏选中状态 */
-html.light .bg-blue-500\/20 { background-color: #bbdefb !important; }
-html.light .bg-blue-500\/10 { background-color: #e3f2fd !important; }
+html.light .bg-blue-500\/20 {
+  background-color: #bbdefb !important;
+}
+html.light .bg-blue-500\/10 {
+  background-color: #e3f2fd !important;
+}
 
 /* 浅色主题下的按钮 */
-html.light .bg-blue-500 { background-color: #1976d2 !important; }
-html.light .bg-blue-600 { background-color: #1565c0 !important; }
-html.light .hover\:bg-blue-600:hover { background-color: #1565c0 !important; }
-html.light .bg-gray-600 { background-color: #eeeeee !important; }
-html.light .bg-gray-700 { background-color: #e0e0e0 !important; }
+html.light .bg-blue-500 {
+  background-color: #1976d2 !important;
+}
+html.light .bg-blue-600 {
+  background-color: #1565c0 !important;
+}
+html.light .hover\:bg-blue-600:hover {
+  background-color: #1565c0 !important;
+}
+html.light .bg-gray-600 {
+  background-color: #eeeeee !important;
+}
+html.light .bg-gray-700 {
+  background-color: #e0e0e0 !important;
+}
 
 /* 浅色主题下的图标和文本颜色 - 使用更饱和的颜色 */
-html.light .text-blue-400 { color: #1976d2 !important; }
-html.light .text-blue-500 { color: #1565c0 !important; }
-html.light .text-green-400 { color: #388e3c !important; }
-html.light .text-red-400 { color: #d32f2f !important; }
-html.light .text-purple-400 { color: #7b1fa2 !important; }
-html.light .text-gray-300 { color: #424242 !important; }
+html.light .text-blue-400 {
+  color: #1976d2 !important;
+}
+html.light .text-blue-500 {
+  color: #1565c0 !important;
+}
+html.light .text-green-400 {
+  color: #388e3c !important;
+}
+html.light .text-red-400 {
+  color: #d32f2f !important;
+}
+html.light .text-purple-400 {
+  color: #7b1fa2 !important;
+}
+html.light .text-gray-300 {
+  color: #424242 !important;
+}
 
 /* 浅色主题下的输入框 */
-html.light input, html.light select, html.light textarea {
+html.light input,
+html.light select,
+html.light textarea {
   background-color: #ffffff !important;
   border-color: #bdbdbd !important;
   color: #212121 !important;
@@ -84,12 +140,16 @@ html.light .shadow-lg {
 }
 
 /* 浅色主题下的分割线 */
-html.light .border-t, html.light .border-b, html.light .border-l, html.light .border-r {
+html.light .border-t,
+html.light .border-b,
+html.light .border-l,
+html.light .border-r {
   border-color: #e0e0e0 !important;
 }
 
 /* 浅色主题下的导航项悬浮 */
-html.light nav a:hover, html.light nav button:hover {
+html.light nav a:hover,
+html.light nav button:hover {
   background-color: #e3f2fd !important;
 }
 
@@ -99,4 +159,6 @@ html.light tr:hover {
 }
 
 /* 浅色主题下的开关按钮 */
-html.light .peer-checked\:bg-blue-500 { background-color: #1976d2 !important; }
+html.light .peer-checked\:bg-blue-500 {
+  background-color: #1976d2 !important;
+}

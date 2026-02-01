@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, File, Download, Trash2, Search, Calendar, Filter, X, History as HistoryIcon } from 'lucide-react';
+import {
+  FileText,
+  File,
+  Download,
+  Trash2,
+  Search,
+  Calendar,
+  Filter,
+  X,
+  History as HistoryIcon,
+} from 'lucide-react';
 import { historyApi, documentApi, type HistoryItem } from '@/services/api';
 
 type StatusFilter = 'all' | 'completed' | 'error';
@@ -140,8 +150,8 @@ export default function History() {
               {statusFilter === 'all'
                 ? t('common.filter')
                 : statusFilter === 'completed'
-                ? t('common.completed')
-                : t('common.failed')}
+                  ? t('common.completed')
+                  : t('common.failed')}
             </button>
             {showFilterMenu && (
               <div className="absolute top-full left-0 z-10 mt-1 w-40 rounded border border-[#2a2d3e] bg-[#1a1d2e] py-1 shadow-lg">

@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, Settings, History, FileText, GitCompare, Layers, Sun, Moon } from 'lucide-react';
+import {
+  FolderOpen,
+  Settings,
+  History,
+  FileText,
+  GitCompare,
+  Layers,
+  Sun,
+  Moon,
+} from 'lucide-react';
 import { useAppStore, useFileStore } from '@/stores';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { applyTheme, getSavedTheme, type ThemeType } from '@/utils/theme';
