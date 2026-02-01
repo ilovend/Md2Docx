@@ -603,10 +603,7 @@ export default function BatchProcessing() {
                   className="w-full rounded border border-[#2a2d3e] bg-[#1a1d2e] px-3 py-2 font-mono text-sm text-white focus:border-blue-500 focus:outline-none"
                 />
                 <div className="mt-2 text-xs text-gray-500">
-                  Use <code className="rounded bg-[#1a1d2e] px-1">{'{date}'}</code>,{' '}
-                  <code className="rounded bg-[#1a1d2e] px-1">{'{preset}'}</code>,{' '}
-                  <code className="rounded bg-[#1a1d2e] px-1">{'{original_name}'}</code>{' '}
-                  placeholders.
+                  {t('batch.exportSettings.namingHint')}
                 </div>
               </div>
 
