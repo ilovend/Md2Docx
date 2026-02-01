@@ -95,15 +95,41 @@ export default function RootLayout() {
         </nav>
 
         {/* Theme & Language */}
-        <div className="flex items-center justify-between border-t border-[#2a2d3e] p-4">
+        <div className="flex flex-col gap-2 border-t border-[#2a2d3e] p-4">
           <LanguageSwitcher />
-          <button
-            onClick={toggleTheme}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-[#1f2333] hover:text-white"
-            title={theme === 'dark' ? t('settings.appearance.themeLight') : t('settings.appearance.themeDark')}
-          >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
+          <div className="flex items-center gap-2">
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4 text-gray-400" />
+            ) : (
+              <Moon className="h-4 w-4 text-gray-400" />
+            )}
+            <div className="flex gap-1">
+              <button
+                onClick={() => {
+                  if (theme !== 'dark') toggleTheme();
+                }}
+                className={`rounded px-2 py-1 text-xs transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'text-gray-400 hover:bg-[#1f2333] hover:text-white'
+                }`}
+              >
+                🌙 {t('settings.appearance.themeDark')}
+              </button>
+              <button
+                onClick={() => {
+                  if (theme !== 'light') toggleTheme();
+                }}
+                className={`rounded px-2 py-1 text-xs transition-colors ${
+                  theme === 'light'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'text-gray-400 hover:bg-[#1f2333] hover:text-white'
+                }`}
+              >
+                ☀️ {t('settings.appearance.themeLight')}
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
 
