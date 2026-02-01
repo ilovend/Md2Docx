@@ -183,7 +183,7 @@ export default function RuleEditor() {
     }
   }, [presets.length, loadPresets]);
 
-  // 加载选中预设的详情
+  // 加载选中预设的详情（仅当预设ID变化时）
   useEffect(() => {
     const loadDetail = async () => {
       if (!selectedPresetId) return;
@@ -199,7 +199,7 @@ export default function RuleEditor() {
         setYamlContent(yaml);
 
         const ruleEntries = Object.entries(detail.rules || {});
-        if (ruleEntries.length > 0 && !selectedRule) {
+        if (ruleEntries.length > 0) {
           setSelectedRule(ruleEntries[0][0]);
         }
       } catch (error) {
@@ -209,7 +209,8 @@ export default function RuleEditor() {
       }
     };
     loadDetail();
-  }, [selectedPresetId, selectedRule]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPresetId]);
 
   const generateYaml = (detail: PresetDetail): string => {
     let yaml = `# 预设配置: ${detail.name}\n`;
