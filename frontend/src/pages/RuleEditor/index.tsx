@@ -516,16 +516,15 @@ export default function RuleEditor() {
   return (
     <div className="flex size-full flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-[#2a2d3e] bg-[#1a1d2e] px-8 py-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-400" />
-            <span className="text-white">Md2Docx</span>
+      <header className="flex items-center justify-between border-b border-[#2a2d3e] px-8 py-6">
+        <div className="flex items-center gap-3">
+          <FileText className="h-6 w-6 text-blue-400" />
+          <div>
+            <h1 className="text-2xl text-white">{t('rules.title')}</h1>
+            <p className="text-sm text-gray-400">
+              {presets.find((p) => p.id === selectedPresetId)?.name || selectedPresetId}
+            </p>
           </div>
-          <span className="text-xs text-gray-400">
-            {t('rules.title')} -{' '}
-            {presets.find((p) => p.id === selectedPresetId)?.name || selectedPresetId}
-          </span>
         </div>
         <div className="flex items-center gap-2">
           <select
