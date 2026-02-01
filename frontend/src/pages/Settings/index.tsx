@@ -1,6 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings as SettingsIcon, Moon, FolderOpen, Bell, Database, Info } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  Moon,
+  FolderOpen,
+  Bell,
+  Database,
+  Info,
+  Check,
+} from 'lucide-react';
 
 interface SettingsState {
   theme: 'dark' | 'light' | 'system';
@@ -22,6 +30,20 @@ const defaultSettings: SettingsState = {
   keepHistory: 30,
 };
 
+// 应用主题到文档
+const applyTheme = (theme: 'dark' | 'light' | 'system') => {
+  const root = document.documentElement;
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  if (theme === 'system') {
+    root.classList.toggle('dark', systemDark);
+    root.classList.toggle('light', !systemDark);
+  } else {
+    root.classList.toggle('dark', theme === 'dark');
+    root.classList.toggle('light', theme === 'light');
+  }
+};
+
 export default function Settings() {
   const { t, i18n } = useTranslation();
   const [settings, setSettings] = useState<SettingsState>(() => {
@@ -29,6 +51,25 @@ export default function Settings() {
     return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
   });
   const [saved, setSaved] = useState(false);
+  const [cacheCleared, setCacheCleared] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    'Notification' in window ? Notification.permission : 'denied',
+  );
+
+  // 应用主题
+  useEffect(() => {
+    applyTheme(settings.theme);
+
+    // 监听系统主题变化
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (settings.theme === 'system') {
+        applyTheme('system');
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [settings.theme]);
 
   useEffect(() => {
     // Sync language with i18n
@@ -37,6 +78,61 @@ export default function Settings() {
       setSettings((prev) => ({ ...prev, language: currentLang as 'zh' | 'en' }));
     }
   }, [i18n.language, settings.language]);
+
+  // 清除缓存
+  const handleClearCache = useCallback(() => {
+    // 清除 localStorage 中的临时数据（保留设置）
+    const settingsBackup = localStorage.getItem('md2docx_settings');
+    const langBackup = localStorage.getItem('language');
+
+    // 清除所有 localStorage
+    localStorage.clear();
+
+    // 恢复设置
+    if (settingsBackup) localStorage.setItem('md2docx_settings', settingsBackup);
+    if (langBackup) localStorage.setItem('language', langBackup);
+
+    // 清除 sessionStorage
+    sessionStorage.clear();
+
+    setCacheCleared(true);
+    setTimeout(() => setCacheCleared(false), 2000);
+  }, []);
+
+  // 请求通知权限
+  const handleRequestNotificationPermission = useCallback(async () => {
+    if (!('Notification' in window)) {
+      alert(t('settings.notifications.notSupported'));
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+
+    if (permission === 'granted') {
+      // 显示测试通知
+      new Notification('Md2Docx', {
+        body: t('settings.notifications.testMessage'),
+        icon: '/favicon.ico',
+      });
+    }
+  }, [t]);
+
+  // 选择输出目录（Electron 环境）
+  const handleSelectOutputDir = useCallback(async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const electron = (window as any).electron;
+    if (electron?.openDirectoryDialog) {
+      const result = await electron.openDirectoryDialog();
+      if (result && result.length > 0) {
+        setSettings((prev) => ({ ...prev, outputDir: result[0] }));
+        setSaved(false);
+      }
+    } else {
+      // 非 Electron 环境，显示提示
+      alert(t('settings.processing.outputDirElectronOnly'));
+    }
+  }, [t]);
 
   const handleChange = <K extends keyof SettingsState>(key: K, value: SettingsState[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
@@ -145,7 +241,11 @@ export default function Settings() {
                     onChange={(e) => handleChange('outputDir', e.target.value)}
                     className="w-48 rounded border border-[#2a2d3e] bg-[#151822] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
                   />
-                  <button className="rounded border border-[#2a2d3e] bg-[#151822] p-2 text-gray-400 hover:text-white">
+                  <button
+                    onClick={handleSelectOutputDir}
+                    className="rounded border border-[#2a2d3e] bg-[#151822] p-2 text-gray-400 hover:text-white"
+                    title={t('settings.processing.selectDir')}
+                  >
                     <FolderOpen className="h-4 w-4" />
                   </button>
                 </div>
@@ -219,6 +319,28 @@ export default function Settings() {
                   <div className="absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></div>
                 </label>
               </div>
+
+              {/* 通知权限状态 */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-white">{t('settings.notifications.permission')}</div>
+                  <div className="text-xs text-gray-400">
+                    {notificationPermission === 'granted'
+                      ? t('settings.notifications.permissionGranted')
+                      : notificationPermission === 'denied'
+                        ? t('settings.notifications.permissionDenied')
+                        : t('settings.notifications.permissionDefault')}
+                  </div>
+                </div>
+                {notificationPermission !== 'granted' && (
+                  <button
+                    onClick={handleRequestNotificationPermission}
+                    className="rounded border border-blue-500/50 px-4 py-2 text-sm text-blue-400 transition-colors hover:bg-blue-500/10"
+                  >
+                    {t('settings.notifications.requestPermission')}
+                  </button>
+                )}
+              </div>
             </div>
           </section>
 
@@ -252,8 +374,22 @@ export default function Settings() {
                   <div className="text-sm text-white">{t('settings.data.clearCache')}</div>
                   <div className="text-xs text-gray-400">{t('settings.data.clearCacheDesc')}</div>
                 </div>
-                <button className="rounded border border-red-500/50 px-4 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10">
-                  {t('settings.data.clearCacheBtn')}
+                <button
+                  onClick={handleClearCache}
+                  className={`flex items-center gap-2 rounded border px-4 py-2 text-sm transition-colors ${
+                    cacheCleared
+                      ? 'border-green-500/50 text-green-400'
+                      : 'border-red-500/50 text-red-400 hover:bg-red-500/10'
+                  }`}
+                >
+                  {cacheCleared ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      {t('settings.data.cacheCleared')}
+                    </>
+                  ) : (
+                    t('settings.data.clearCacheBtn')
+                  )}
                 </button>
               </div>
             </div>
