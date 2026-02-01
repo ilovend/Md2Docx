@@ -61,19 +61,16 @@ export default function RuleCategoryList({
                   <div className="flex flex-1 items-center gap-2">
                     <span className="text-xs">{rule.name}</span>
                   </div>
-                  <div className="relative">
+                  <label className="relative cursor-pointer" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={rule.active}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        onToggleRule(rule.id);
-                      }}
+                      onChange={() => onToggleRule(rule.id)}
                       className="peer sr-only"
                     />
                     <div className="h-4 w-8 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
                     <div className="absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white transition-transform peer-checked:translate-x-4"></div>
-                  </div>
+                  </label>
                 </div>
               ))}
             </div>

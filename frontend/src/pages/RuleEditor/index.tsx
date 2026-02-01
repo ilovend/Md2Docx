@@ -499,19 +499,19 @@ export default function RuleEditor() {
                                 <Trash2 className="h-3 w-3" />
                               </button>
                             )}
-                            <div className="relative">
+                            <label
+                              className="relative cursor-pointer"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <input
                                 type="checkbox"
                                 checked={rule.active}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  toggleRule(rule.id);
-                                }}
+                                onChange={() => toggleRule(rule.id)}
                                 className="peer sr-only"
                               />
                               <div className="h-4 w-8 rounded-full bg-gray-600 transition-colors peer-checked:bg-blue-500"></div>
                               <div className="absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white transition-transform peer-checked:translate-x-4"></div>
-                            </div>
+                            </label>
                           </div>
                         </div>
                       ))}
@@ -719,8 +719,14 @@ export default function RuleEditor() {
 
       {/* New Rule Modal */}
       {showNewRuleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-96 rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setShowNewRuleModal(false)}
+        >
+          <div
+            className="w-96 rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="mb-4 text-lg font-medium text-white">{t('rules.addNewRule')}</h3>
             <div className="space-y-4">
               <div>
@@ -729,6 +735,7 @@ export default function RuleEditor() {
                   type="text"
                   value={newRuleName}
                   onChange={(e) => setNewRuleName(e.target.value)}
+                  autoFocus
                   className="w-full rounded border border-[#2a2d3e] bg-[#151822] px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
                   placeholder="例如: 自定义字体规则"
                 />
@@ -794,8 +801,17 @@ export default function RuleEditor() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && ruleToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-96 rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-6">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => {
+            setShowDeleteConfirm(false);
+            setRuleToDelete(null);
+          }}
+        >
+          <div
+            className="w-96 rounded-lg border border-[#2a2d3e] bg-[#1a1d2e] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="mb-4 text-lg font-medium text-white">确认删除规则</h3>
             <p className="mb-6 text-sm text-gray-300">
               确定要删除规则{' '}
