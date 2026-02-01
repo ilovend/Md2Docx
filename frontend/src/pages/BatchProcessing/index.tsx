@@ -306,15 +306,6 @@ export default function BatchProcessing() {
           </div>
           <span className="text-xs text-gray-400">{t('batch.title')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 transition-colors hover:text-white">
-            <File className="h-4 w-4" />
-            Single File
-          </button>
-          <button className="rounded bg-blue-500 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-600">
-            Batch Mode
-          </button>
-        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
