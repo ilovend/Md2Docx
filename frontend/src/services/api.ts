@@ -87,11 +87,16 @@ export interface PresetInfo {
   rules: string[];
 }
 
+export interface RuleSettings {
+  enabled?: boolean;
+  parameters?: Record<string, unknown>;
+}
+
 export interface PresetDetail {
   id: string;
   name: string;
   description: string;
-  rules: Record<string, any>;
+  rules: Record<string, RuleSettings>;
 }
 
 export const presetApi = {
@@ -229,21 +234,21 @@ export interface RuleMetadata {
   category: string;
   description: string;
   priority: number;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface RuleCreateRequest {
   name: string;
   description?: string;
   enabled?: boolean;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 }
 
 export interface RuleUpdateRequest {
   name?: string;
   description?: string;
   enabled?: boolean;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 }
 
 export const rulesApi = {
@@ -305,7 +310,7 @@ export const rulesApi = {
     return response.data;
   },
 
-  testRule: async (markdown: string, config: any): Promise<string> => {
+  testRule: async (markdown: string, config: Record<string, unknown>): Promise<string> => {
     const response = await axios.post(
       `${API_BASE}/rules/test`,
       { markdown, config },

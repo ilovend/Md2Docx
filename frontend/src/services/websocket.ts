@@ -1,4 +1,11 @@
-type MessageHandler = (data: any) => void;
+type MessageHandler = (data: unknown) => void;
+
+// 从环境变量获取WebSocket URL
+const getWsUrl = (): string => {
+  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+  // 将 http(s) 转换为 ws(s)，并替换 /api 为 /ws/progress
+  return apiBase.replace(/^http/, 'ws').replace(/\/api$/, '/ws/progress');
+};
 
 class WebSocketService {
   private ws: WebSocket | null = null;
@@ -9,7 +16,7 @@ class WebSocketService {
   private handlers: Map<string, MessageHandler[]> = new Map();
   private isConnecting = false;
 
-  constructor(url: string = 'ws://127.0.0.1:8000/ws/progress') {
+  constructor(url: string = getWsUrl()) {
     this.url = url;
   }
 
